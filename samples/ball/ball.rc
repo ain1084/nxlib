@@ -1,0 +1,301 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// 日本語 resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
+#ifdef _WIN32
+LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
+#pragma code_page(932)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 17, 1\r\n"
+    "#pragma code_page(932)\r\n"
+    "#endif\r\n"
+    "#include ""res\\ball.rc2""  // Microsoft Visual C++ 以外のツールで編集されたリソース\r\n"
+    "#include ""l.jpn\\afxres.rc""          // 標準のコンポーネント\r\n"
+    "#endif\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\ball.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINFRAME MENU PRELOAD DISCARDABLE 
+BEGIN
+    POPUP "ﾌｧｲﾙ(&F)"
+    BEGIN
+        MENUITEM "ｱﾌﾟﾘｹｰｼｮﾝの終了(&X)",         ID_APP_EXIT
+    END
+    POPUP "編集(&E)"
+    BEGIN
+        MENUITEM "ｺﾋﾟｰ(&C)\tCtrl+C",            ID_EDIT_COPY
+    END
+    POPUP "表示(&V)"
+    BEGIN
+        POPUP "ﾌﾞﾚﾝﾄﾞ方法(&B)"
+        BEGIN
+            MENUITEM "なし(&O)\tCtrl+0",            ID_VIEW_BLEND_NONE
+            MENUITEM "通常(&N)\tCtrl+1",            ID_VIEW_BLEND_NORMAL
+            MENUITEM "加算(&A)\tCtrl+2",            ID_VIEW_BLEND_ADD
+            MENUITEM "減算(&S)\tCtrl+3",            ID_VIEW_BLEND_SUB
+            MENUITEM "乗算(&M)\tCtrl+4",            ID_VIEW_BLEND_MULTI
+            MENUITEM "ｽｸﾘｰﾝ(&C)\tCtrl+5",           ID_VIEW_BLEND_SCREEN
+            MENUITEM "&Brighten\tCtrl+6",           ID_VIEW_BLEND_BRIGHTEN
+            MENUITEM "&Darken\tCtrl+7",             ID_VIEW_BLEND_DARKEN
+        END
+        POPUP "背景(&B)"
+        BEGIN
+            MENUITEM "非表示(&D)\tAlt+0",           ID_VIEW_BACKGROUND_DISABLE
+
+            MENUITEM "通常(&N)\tAlt+1",             ID_VIEW_BACKGROUND_NORMAL
+
+            MENUITEM "ラスター(&R)\tAlt+2",         ID_VIEW_BACKGROUND_RASTER
+
+            MENUITEM "拡大(&S)\tAlt+3",             ID_VIEW_BACKGROUND_STRETCH
+
+            MENUITEM "補完付き拡大(&L)\tAlt+4",     ID_VIEW_BACKGROUND_STRETCH_LINEAR_FILTER
+
+            MENUITEM "ぼかし(&F)\tAtl+5",           ID_VIEW_BACKGROUND_BLUR
+            MENUITEM "ﾀｲﾙｽｸﾛｰﾙ(&T)\tAlt+6",         ID_VIEW_BACKGROUND_TILE
+        END
+        POPUP "ﾌｨﾙﾀ(&F)"
+        BEGIN
+            MENUITEM "なし(&N)\tShift+0",           ID_VIEW_FILTER_NONE
+            MENUITEM "ｸﾞﾚｲｽｹｰﾙ(&G)\tShift+1",       ID_VIEW_FILTER_GRAYSCALE
+            MENUITEM "ｾﾋﾟｱ調(&S)\tShift+2",         ID_VIEW_FILTER_SEPIA
+            MENUITEM "色調変換[Hue+180°](&H)\tShift+3", 
+                                                    ID_VIEW_FILTER_HUETRANSFORM
+
+            MENUITEM "ネガ反転(&N)\tShift+4",       ID_VIEW_FILTER_NEGATIVE
+        END
+        POPUP "ﾌﾞﾗｲﾄﾈｽ(&R)"
+        BEGIN
+            MENUITEM "明るく(&L)\tCtrl+[+]",        ID_VIEW_BRIGHTNESS_LIGHT
+            MENUITEM "暗く(&D)\tCtrl+[-]",          ID_VIEW_BRIGHTNESS_DARK
+            MENUITEM "ﾘｾｯﾄ(&R)\tCtrl+R",            ID_VIEW_BRIGHTNESS_RESET
+        END
+        POPUP "FPS 表示(&S)"
+        BEGIN
+            MENUITEM "ﾃｷｽﾄのｽﾑｰｼﾞﾝｸﾞ(&T)\tCtrl+T",  ID_VIEW_FPS_SMOOTH
+        END
+        MENUITEM "一時停止(&P)\tF1",            ID_VIEW_PAUSE
+        MENUITEM "MMX 有効(&E)\tF2",            ID_VIEW_MMX_ENABLE
+        MENUITEM "3DNow! 有効(D)\tF3",          ID_VIEW_3DNOW_ENABLE
+        MENUITEM "差分追跡(&F)\tF4",            ID_VIEW_TRACKING
+    END
+    POPUP "ﾍﾙﾌﾟ(&H)"
+    BEGIN
+        MENUITEM "ﾊﾞｰｼﾞｮﾝ情報(ball) (&A)...",   ID_APP_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_MAINFRAME ACCELERATORS PRELOAD MOVEABLE PURE 
+BEGIN
+    "0",            ID_VIEW_BLEND_NONE,     VIRTKEY, CONTROL, NOINVERT
+    "0",            ID_VIEW_BACKGROUND_DISABLE, VIRTKEY, ALT, NOINVERT
+    "0",            ID_VIEW_FILTER_NONE,    VIRTKEY, SHIFT, NOINVERT
+    "1",            ID_VIEW_BLEND_NORMAL,   VIRTKEY, CONTROL, NOINVERT
+    "1",            ID_VIEW_BACKGROUND_NORMAL, VIRTKEY, ALT, NOINVERT
+    "1",            ID_VIEW_FILTER_GRAYSCALE, VIRTKEY, SHIFT, NOINVERT
+    "2",            ID_VIEW_BLEND_ADD,      VIRTKEY, CONTROL, NOINVERT
+    "2",            ID_VIEW_BACKGROUND_RASTER, VIRTKEY, ALT, NOINVERT
+    "2",            ID_VIEW_FILTER_SEPIA,   VIRTKEY, SHIFT, NOINVERT
+    "3",            ID_VIEW_BLEND_SUB,      VIRTKEY, CONTROL, NOINVERT
+    "3",            ID_VIEW_BACKGROUND_STRETCH, VIRTKEY, ALT, NOINVERT
+    "3",            ID_VIEW_FILTER_HUETRANSFORM, VIRTKEY, SHIFT, NOINVERT
+    "4",            ID_VIEW_BLEND_MULTI,    VIRTKEY, CONTROL, NOINVERT
+    "4",            ID_VIEW_BACKGROUND_STRETCH_LINEAR_FILTER, VIRTKEY, ALT, 
+                                                    NOINVERT
+    "4",            ID_VIEW_FILTER_NEGATIVE, VIRTKEY, SHIFT, NOINVERT
+    "5",            ID_VIEW_BLEND_SCREEN,   VIRTKEY, CONTROL, NOINVERT
+    "5",            ID_VIEW_BACKGROUND_BLUR, VIRTKEY, ALT, NOINVERT
+    "6",            ID_VIEW_BLEND_BRIGHTEN, VIRTKEY, CONTROL, NOINVERT
+    "6",            ID_VIEW_BACKGROUND_TILE, VIRTKEY, ALT, NOINVERT
+    "7",            ID_VIEW_BLEND_DARKEN,   VIRTKEY, CONTROL, NOINVERT
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    "R",            ID_VIEW_BRIGHTNESS_RESET, VIRTKEY, CONTROL, NOINVERT
+    "T",            ID_VIEW_FPS_SMOOTH,     VIRTKEY, CONTROL, NOINVERT
+    VK_ADD,         ID_VIEW_BRIGHTNESS_LIGHT, VIRTKEY, CONTROL, NOINVERT
+    VK_F1,          ID_VIEW_PAUSE,          VIRTKEY, NOINVERT
+    VK_F2,          ID_VIEW_MMX_ENABLE,     VIRTKEY, NOINVERT
+    VK_F3,          ID_VIEW_3DNOW_ENABLE,   VIRTKEY, NOINVERT
+    VK_F4,          ID_VIEW_TRACKING,       VIRTKEY, NOINVERT
+    VK_F9,          ID_VIEW_BALL,           VIRTKEY, NOINVERT
+    VK_RETURN,      ID_SCREEN,              VIRTKEY, ALT, NOINVERT
+    VK_SUBTRACT,    ID_VIEW_BRIGHTNESS_DARK, VIRTKEY, CONTROL, NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOG DISCARDABLE  0, 0, 217, 55
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "ﾊﾞｰｼﾞｮﾝ情報(ball)"
+FONT 9, "ＭＳ Ｐゴシック"
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
+    LTEXT           "nxlib sample - ball Version 1.01",IDC_STATIC,40,10,119,
+                    8,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2000 S.Ainoguchi",IDC_STATIC,40,25,119,8
+    DEFPUSHBUTTON   "OK",IDOK,178,7,32,14,WS_GROUP
+END
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,1,1
+ PRODUCTVERSION 2001,4,21,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "041104b0"
+        BEGIN
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "NxLib sample - ball\0"
+            VALUE "FileVersion", "1, 0, 1, 1\0"
+            VALUE "InternalName", "ball\0"
+            VALUE "LegalCopyright", "Copyright (C) 2000, 2001 S.Ainoguchi\0"
+            VALUE "OriginalFilename", "ball.EXE\0"
+            VALUE "ProductName", "NxLib\0"
+            VALUE "ProductVersion", "2001, 4, 21, 1\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x411, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 210
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 48
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDR_MAINFRAME           "ball"
+END
+
+#endif    // 日本語 resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
+#ifdef _WIN32
+LANGUAGE 17, 1
+#pragma code_page(932)
+#endif
+#include "res\ball.rc2"  // Microsoft Visual C++ 以外のツールで編集されたリソース
+#include "l.jpn\afxres.rc"          // 標準のコンポーネント
+#endif
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

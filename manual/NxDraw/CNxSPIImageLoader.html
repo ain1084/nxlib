@@ -1,0 +1,54 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+	<LINK REV="Made" HREF="mailto:ain@da.airnet.ne.jp">
+	<LINK REL="Contents" HREF="./index.html">
+	<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-2022-jp">
+	<META NAME="Author" CONTENT="Seiji Ainoguchi">
+	<META NAME="Subject" CONTENT="CNxSPIImageLoader">
+	<TITLE>CNxSPIImageLoader クラス</TITLE>
+</HEAD>
+<BODY>
+<A NAME="top"><H1>CNxSPIImageLoader クラス</H1></A>
+
+<PRE>
+<A HREF="CNxDIBImageLoader.html">CNxDIBImageLoader</A>
+  |
+  +--<STRONG>CNxSPIImageLoader</STRONG>
+</PRE>
+
+<A HREF="#summary">概要</A><BR>
+<A HREF="#member">クラスメンバ</A><BR>
+<BR>
+<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+<A NAME="summary"><H2>概要</H2></A>
+<P>　CNxSPIImageLoader クラスは、susie 32bit plug-in を通して画像を読み込む為の <A HREF="CNxDIBImageLoader.html">CNxDIBImageLoader</A> 派生クラスです。NxDraw では susie 本体と plug-in の使い方が異なる為、全ての plug-in が利用できる訳でありません。具体的には、plug-in がメモリからの展開をサポートしている必要があります。</P>
+
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+<A NAME="member"><H2>CNxSPIImageLoader クラスメンバ</H2></A>
+<TABLE CELLPADDING=4>
+<TR><TD><A HREF="#member.CNxSPIImageLoader">CNxSPIImageLoader</A></TD><TD>CNxSPIImageLoader のコンストラクタ</TD></TR>
+</TABLE>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+<!-- CNxSPIImageLoader::CNxSPIImageLoader -->
+<A NAME="member.CNxSPIImageLoader"><H3>CNxSPIImageLoader::CNxSPIImageLoader()</H3></A>
+<H4>概要</H4>
+<P>　CNxSPIImageLoader クラスのコンストラクタ</P>
+<H4>書式</H4>
+CNxSPIImageLoader::CNxSPIImageLoader(HINSTANCE <EM>hInstance</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD>HINSTANCE <EM>hInstance</EM></TD><TD>　plug-in DLL のインスタンスハンドル</TD></TR>
+</TABLE>
+<H4>解説</H4>
+<P>　<EM>hInstance</EM> 引数へは、利用する plug-in DLL のハンドルを渡します。</P>
+
+</BODY>
+</HTML>

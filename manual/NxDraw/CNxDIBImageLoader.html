@@ -1,0 +1,78 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+	<LINK REV="Made" HREF="mailto:ain@da.airnet.ne.jp">
+	<LINK REL="Contents" HREF="./index.html">
+	<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-2022-jp">
+	<META NAME="Author" CONTENT="Seiji Ainoguchi">
+	<META NAME="Subject" CONTENT="CNxDIBImageLoader">
+	<TITLE>CNxDIBImageLoader クラス</TITLE>
+</HEAD>
+<BODY>
+<A NAME="top"><H1>CNxDIBImageLoader クラス</H1></A>
+
+<A HREF="#summary">概要</A><BR>
+<A HREF="#member">クラスメンバ</A><BR>
+<BR>
+<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+<A NAME="summary"><H2>概要</H2></A>
+<P>　CNxDIBImageLoader クラスは、画像を読み込んで <A HREF="CNxDIBImage.html">CNxDIBImage</A> オブジェクトを生成するクラスです。CNxDIBImageLoader 自体は抽象クラスである為、このクラスのオブジェクトを生成する事はできません。CNxDIBImageLoader の派生クラスには、<A HREF="CNxBMPImageLoader.html">CNxBMPImageLoader</A>, <A HREF="CNxPNGImageLoader.html">CNxPNGImageLoader</A>, <A HREF="CNxJPEGImageLoader.html">CNxJPEGImageLoader</A>, <A HREF="CNxMAGImageLoader.html">CNxMAGImageLoader</A>, <A HREF="CNxSPIImageLoader.html">CNxSPIImageLoader</A> があります。</P>
+
+<P>　<A HREF="CNxDraw.html#member.LoadImage">CNxDraw::LoadImage()</A> 関数は、入力 CNxFile オブジェクトから、上記の CNxDIBImageLoader 派生クラスより対応クラスを自動的に検索して、作成された CNxDIBImage オブジェクトを返します。CNxDraw::LoadImage() 関数を使用すれば、個々の CNxDIBImageLoader 派生クラスを直接使用する必要はありません。しかし、必要とされる画像フォーマットが予め決まっている場合は、個々の CNxDIBImageLoader 派生クラスを直接使用した方が効率的です。</P>
+
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+<A NAME="member"><H2>CNxDIBImageLoader クラスメンバ</H2></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.IsSupported">IsSupported()</A></TD><TD>　サポートされている形式であるかを調べる</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.CreateDIBImage">CreateDIBImage()</A></TD><TD>　画像を展開して CNxDIBImage オブジェクトを返す</TD></TR>
+</TABLE>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxDIBImageLoader::IsSupported -->
+<A NAME="member.IsSupported"><H3>CNxDIBImageLoader::IsSupported()</H3></A>
+<H4>概要</H4>
+<P>　サポートされている形式であるかを調べます。</P>
+<H4>書式</H4>
+virtual BOOL CNxDIBImageLoader::IsSupported(LPCVOID <EM>lpvBuf</EM>, LONG <EM>lLength</EM>) const = 0<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP">LPCVOID <EM>lpvBuf</EM></TD><TD>　画像データの最初から 2048 byte を読み込んだバッファへのポインタ</TD></TR>
+<TR><TD VALIGN="TOP">LONG <EM>lLength</EM></TD><TD>　画像データの長さ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　展開可能(サポートされている)形式らば TRUE</P>
+<H4>解説</H4>
+<P>　<EM>lpvBuf</EM> 引数で示されるデータを調べて、展開可能な形式であれば、TRUE を返します。</P>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+<!-- CNxDIBImageLoader::CreateDIBImage() -->
+<A NAME="member.CreateDIBImage"><H3>CNxDIBImageLoader::CreateDIBImage()</H3></A>
+<H4>概要</H4>
+<P>　画像を展開して、CNxDIBImage オブジェクトを返します。</P>
+<H4>書式</H4>
+virtual CNxDIBImage* CNxDIBImageLoader::CreateDIBImage(CNxFile&amp; <EM>nxfile</EM>) = 0<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP">CNxFile&amp; <EM>nxfile</EM></TD><TD>　読み込み元 CNxFile オブジェクトへの参照</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　CNxDIBImage オブジェクトへのポインタ。失敗ならば NULL。</P>
+<H4>解説</H4>
+<P>　返された CNxDIBImage オブジェクトが不要になったら、必ず delete 演算子で削除して下さい。</P>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+
+</BODY>
+</HTML>

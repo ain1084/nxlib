@@ -1,0 +1,59 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+	<LINK REV="Made" HREF="mailto:ain@da.airnet.ne.jp">
+	<LINK REL="Contents" HREF="./index.html">
+	<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-2022-jp">
+	<META NAME="Author" CONTENT="Seiji Ainoguchi">
+	<META NAME="Subject" CONTENT="CNxDIBImageSaver">
+	<TITLE>CNxDIBImageSaver クラス</TITLE>
+</HEAD>
+<BODY>
+<A NAME="top"><H1>CNxDIBImageSaver クラス</H1></A>
+
+<A HREF="#summary">概要</A><BR>
+<A HREF="#member">クラスメンバ</A><BR>
+<BR>
+<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+<A NAME="summary"><H2>概要</H2></A>
+<P>　CNxDIBImageLoader クラスは、<A HREF="CNxDIBImage.html">CNxDIBImage</A> オブジェクトを画像ファイルとして <A HREF="../NxStorage/index.html">CNxFile</A> オブジェクトへ書き出すクラスです。CNxDIBImageSaver 自体は抽象クラスである為、このクラスのオブジェクトを生成する事はできません。CNxDIBImageSaver の派生クラスには、<A HREF="CNxBMPImageSaver.html">CNxBMPImageSaver</A>, <A HREF="CNxPNGImageSaver.html">CNxPNGImageSaver</A> があります。</P>
+
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+<A NAME="member"><H2>CNxDIBImageSaver クラスメンバ</H2></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.SaveDIBImage">SaveDIBImage()</A></TD><TD>　CNxDIBImage オブジェクトを保存</TD></TR>
+</TABLE>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+<!-- CNxDIBImageSaver::SaveDIBImage() -->
+<A NAME="member.SaveDIBImage"><H3>CNxDIBImageSaver::SaveDIBImage()</H3></A>
+<H4>概要</H4>
+<P>　CNxDIBImage を CNxFile オブジェクトへ書き出します。</P>
+<H4>書式</H4>
+<TABLE>
+<TR><TD VALIGN="TOP" NOWRAP>virtual BOOL CNxDIBImageSaver::SaveDIBImage(</TD><TD VALIGN="TOP" NOWRAP>CNxFile&amp; <EM>nxfile</EM>,</TD></TR>
+<TR><TD></TD><TD VALIGN="TOP" NOWRAP>const CNxDIBImage&amp; <EM>srcDIBImage</EM>,</TD></TR>
+<TR><TD></TD><TD VALIGN="TOP" NOWRAP>const RECT* <EM>lpRect = NULL</EM>) const = 0</TD></TR>
+</TABLE>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>CNxFile&amp; <EM>nxfile</EM></TD><TD VALIGN="TOP" NOWRAP>　保存先オープン済み CNxFile オブジェクトへの参照</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const CNxDIBImage&amp; <EM>srcDIBImage</EM></TD><TD VALIGN="TOP" NOWRAP>　保存される CNxDIBImage オブジェクトへの参照</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const RECT* <EM>lpRect</EM></TD><TD VALIGN="TOP" NOWRAP>　保存される CNxDIBImage オブジェクトの矩形(NULL ならば全体)</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功ならば TRUE</P>
+<H4>解説</H4>
+<P>　書き込み先ファイルのモードは CNxFile::modeWrite (新規作成ならば CNxFile::modeCreate も)が含まれていなければなりません。この関数は、書き込み終了時に<FONT COLOR="RED">ファイルを閉じません。</FONT>明示的にファイルを閉じるには、CNxFile メンバの Close() 関数を呼び出して下さい。</P>
+
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+
+</BODY>
+</HTML>

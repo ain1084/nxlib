@@ -1,0 +1,318 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+	<LINK REV="Made" HREF="mailto:ain@da.airnet.ne.jp">
+	<LINK REL="Contents" HREF="./index.html">
+	<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-2022-jp">
+	<META NAME="Author" CONTENT="Seiji Ainoguchi">
+	<META NAME="Subject" CONTENT="CNxFile">
+	<TITLE>CNxFile クラス</TITLE>
+</HEAD>
+<BODY>
+
+<A NAME="top"><H1>CNxFile クラス</H1></A>
+
+<A HREF="#summary">概要</A><BR>
+<A HREF="#member">クラスメンバ</A><BR>
+<HR>
+
+<A NAME="summary"><H2>概要</H2></A>
+
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>
+<HR>
+
+<A NAME="member"><H2>CNxFile クラスメンバ</H2></A>
+<A HREF="#construct">構築</A><BR>
+<A HREF="#operation">操作</A><BR>
+<A HREF="#misc">その他</A><BR>
+
+<A NAME="construct"><P><FONT SIZE=+1>構築</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.CNxFile">CNxFile()</A></TD><TD>　コンストラクタ</TD></TR>
+</TABLE>
+
+<A NAME="set"><P><FONT SIZE=+1>操作</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.Open">Open()</A></TD><TD>　ファイルを開く</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.Close">Close()</A></TD><TD>　ファイルを閉じる</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.Flush">Flush()</A></TD><TD>　ファイルをフラッシュ</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.Read">Read()</A></TD><TD>　データを読み取る</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.Write">Write()</A></TD><TD>　データを書き込む</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.Seek">Seek()</A></TD><TD>　ファイルポインタを移動</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetSize">GetSize()</A></TD><TD>　ファイルサイズを取得</TD></TR>
+</TABLE>
+
+<A NAME="get"><P><FONT SIZE=+1>取得</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetNxColor">GetNxColor()</A></TD><TD>　NxColor 値を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetRed">GetRed()</A></TD><TD>　赤の値を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetGreen">GetGreen()</A></TD><TD>　緑の値を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetBlue">GetBlue()</A></TD><TD>　青の値を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetAlpha">GetAlpha()</A></TD><TD>　アルファの値を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetColorRef">GetColorRef()</A></TD><TD>　COLORREF 値を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetGrayscale">GetGrayscale()</A></TD><TD>　グレイスケール値を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.operatorNxColor">operator NxColor()</A></TD><TD>　NxColor への変換演算子</TD></TR>
+</TABLE>
+
+<A NAME="misc"><P><FONT SIZE=+1>その他</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.IsOpen">IsOpen()</A></TD><TD>　ファイルのオープン状態を調べる</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.Attach">Attach()</A></TD><TD>　HMMIO を CNxFile と結びつける</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.Detach">Detach()</A></TD><TD>　HMMIO を CNxFile から切り離す</TD></TR>
+</TABLE>
+
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxFile::CNxFile() -->
+<A NAME="member.CNxFile"><H3>CNxFile::CNxFile()</H3></A>
+<H4>概要</H4>
+<P>　CNxFile クラスのコンストラクタ</P>
+<H4>書式</H4>
+CNxFile::CNxFile()<BR>
+<BR>
+CNxFile::CNxFile(LPCTSTR <EM>lpszFileName</EM>, UINT <EM>fuMode = CNxFile::modeRead</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>LPCTSTR <EM>lpszFileName</EM></TD><TD>　ファイル名</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>UINT <EM>fuMode</EM></TD><TD>　アクセスモード</TD></TR>
+</TABLE>
+
+<H4>解説</H4>
+<P>　一番目の書式は、ファイルを開かずに CNxFile オブジェクトを構築します。ファイルを操作する前には、<A HREF="#member.Open">CNxFile::Open()</A> 関数を使用してファイルを開く必要があります。</P>
+
+<P>　二番目の書式は、指定されたディスク上のファイルを開きます。<EM>fuMode</EM> へは以下のアクセスモードを指定します。デフォルトは CNxFile::modeRead で、ファイルは読み取り専用となります。shareDenyRead, shareDenyWrite, shareDenyExclusive は任意ですが、mode は必ず一つ以上必要です。</P>
+
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>modeRead</TD><TD>　読み取りを許可</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>modeWrite</TD><TD>　書き込みを許可</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>modeReadWrite</TD><TD>　読み取りと書き込みを許可(modeRead と modeWirte の論理和)</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>modeCreate</TD><TD>　ファイルを作成</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>modeNoTruncate</TD><TD>　ファイルを作成する時に、既存のファイルを切り詰めません(modeCreate と併用)</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>shareDenyRead</TD><TD>　読み取り共有を拒否</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>shareDenyWrite</TD><TD>　書き込み共有を拒否</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>shareExclusive</TD><TD>　読み書き共有を拒否(shareDenyRead と shareDenyWirte の論理和)</TD></TR>
+</TABLE>
+
+<P>　ファイルのオープンが失敗しても例外が投げられる事はありません。ファイルのオープンが成功したかどうかを調べるには、<A HREF="#member.IsOpen">CNxFile::IsOpen()</A> 関数を使用して下さい。</P>
+
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>
+<HR>
+
+
+<!-- CNxFile::Open() -->
+<A NAME="member.Open"><H3>CNxFile::Open()</H3></A>
+<H4>概要</H4>
+<P>　ファイルを開きます</P>
+<H4>書式</H4>
+virtual BOOL CNxFile::Open(LPCTSTR <EM>lpszFileName</EM>, UINT <EM>fuMode = CNxFile::modeRead</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>LPCTSTR <EM>lpszFileName</EM></TD><TD>　ファイル名</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>UINT <EM>fuMode</EM></TD><TD>　アクセスモード</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功ならば TRUE</P>
+<H4>解説</H4>
+<P>　指定されたファイルを開きます。アクセスモードについては、<A HREF="#member.CNxFile">コンストラクタ</A> の解説を参照して下さい。</P>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>
+<HR>
+
+
+
+<!-- CNxFile::Close() -->
+<A NAME="member.Close"><H3>CNxFile::Close()</H3></A>
+<H4>概要</H4>
+<P>　ファイルを閉じます</P>
+<H4>書式</H4>
+BOOL CNxFile::Close()<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　成功ならば TRUE</P>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>
+<HR>
+
+
+
+<!-- CNxFile::Flush() -->
+<A NAME="member.Flush"><H3>CNxFile::Flush()</H3></A>
+<H4>概要</H4>
+<P>　ファイルバッファをフラッシュします</P>
+<H4>書式</H4>
+BOOL CNxFile::Flush()<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　成功ならば TRUE</P>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>
+<HR>
+
+
+
+<!-- CNxFile::Read() -->
+<A NAME="member.Read"><H3>CNxFile::Read()</H3></A>
+<H4>概要</H4>
+<P>　ファイルからデータを読み取ります</P>
+<H4>書式</H4>
+LONG CNxFile::Read(LPVOID <EM>lpBuffer</EM>, LONG <EM>lBytesToRead</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD NOWRAP>LPVOID <EM>lpBuffer</EM></TD><TD>　読み取りデータを受け取るバッファ</TD></TR>
+<TR><TD NOWRAP>LONG <EM>lBytesToRead</EM></TD><TD>　読み取る最大バイト数</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　ファイルから読み取ったバイト数。失敗ならば -1</P>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>
+<HR>
+
+
+
+<!-- CNxFile::Write() -->
+<A NAME="member.Write"><H3>CNxFile::Write()</H3></A>
+<H4>概要</H4>
+<P>　ファイルへデータを書き込みます</P>
+<H4>書式</H4>
+LONG CNxFile::Write(LPCVOID <EM>lpBuffer</EM>, LONG <EM>lBytesToWrite</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD NOWRAP>LPCVOID <EM>lpBuffer</EM></TD><TD>　書き込むデータを示すバッファ</TD></TR>
+<TR><TD NOWRAP>LONG <EM>lBytesToWrite</EM></TD><TD>　書き込みサイズ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　ファイルへ書き込まれたバイト数。失敗ならば -1</P>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>
+<HR>
+
+
+
+<!-- CNxFile::Seek() -->
+<A NAME="member.Seek"><H3>CNxFile::Seek()</H3></A>
+<H4>概要</H4>
+<P>　ファイルポインタを移動します</P>
+<H4>書式</H4>
+LONG CNxFile::Seek(LONG <EM>lOffset</EM>, int <EM>nOrigin</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD NOWRAP>LONG <EM>lOffset</EM></TD><TD>　ファイルポインタ</TD></TR>
+<TR><TD NOWRAP>int <EM>nOrigin</EM></TD><TD>　移動方法(SEEK_SET, SEEK_END, SEEK_CUR)</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　移動後のファイルポインタ</P>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>
+<HR>
+
+
+
+<!-- CNxFile::GetSize() -->
+<A NAME="member.GetSize"><H3>CNxFile::GetSize()</H3></A>
+<H4>概要</H4>
+<P>　ファイルのサイズを取得します</P>
+<H4>書式</H4>
+LONG CNxFile::GetSize()<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　バイト単位のファイルサイズ</P>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>
+<HR>
+
+
+
+<!-- CNxFile::GetFileName() -->
+<A NAME="member.GetFileName"><H3>CNxFile::GetFileName()</H3></A>
+<H4>概要</H4>
+<P>　ファイル名を取得します</P>
+<H4>書式</H4>
+int CNxFile::GetFileName(LPTSTR <EM>lpString</EM>, int <EM>nMaxCount</EM>) const<BR>
+<BR>
+void CNxFile::GetFileName(std::string&amp; <EM>rString</EM>) const<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD NOWRAP>LPTSTR <EM>lpString</EM></TD><TD>　ファイル名を受け取るバッファ</TD></TR>
+<TR><TD NOWRAP>int <EM>nMaxCount</EM></TD><TD>　文字単位のバッファの大きさ</TD></TR>
+<TR><TD NOWRAP>std::string&amp; <EM>rString</EM></TD><TD>　ファイル名を受け取る std::string への参照</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　バッファへ書き込まれた文字数</P>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>
+<HR>
+
+
+
+<!-- CNxFile::IsOpen() -->
+<A NAME="member.IsOpen"><H3>CNxFile::IsOpen()</H3></A>
+<H4>概要</H4>
+<P>　CNxFile が開かれているかを調べます</P>
+<H4>書式</H4>
+BOOL CNxFile::IsOpen() const<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　ファイルが開かれているならば TRUE</P>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>
+<HR>
+
+
+
+<!-- CNxFile::Attach() -->
+<A NAME="member.Attach"><H3>CNxFile::Attach()</H3></A>
+<H4>概要</H4>
+<P>　HMMIO を CNxFile と結びつけます</P>
+<H4>書式</H4>
+BOOL CNxFile::Attach(HMMIO <EM>hMMIO</EM>, LPCTSTR <EM>lpszFileName</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD NOWRAP>HMMIO <EM>hMMIO</EM></TD><TD>　オープン済み HMMIO</TD></TR>
+<TR><TD NOWRAP>LPCTSTR <EM>lpszFileName</EM></TD><TD>　ファイル名</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功ならば TRUE</P>
+<H4>解説</H4>
+<P>　HMMIO を CNxFile と結びつけます。既にファイルがオープンされている CNxFile オブジェクトに対して使用した場合、関数は失敗します。</P>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>
+<HR>
+
+
+
+<!-- CNxFile::Detach() -->
+<A NAME="member.Detach"><H3>CNxFile::Detach()</H3></A>
+<H4>概要</H4>
+<P>　HMMIO を CNxFile から切り離します</P>
+<H4>書式</H4>
+HMMIO CNxFile::Detach()<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　切り離された HMMIO。失敗ならば NULL
+<H4>解説</H4>
+<P>　切り離された HMMIO が不要になったら、必ず mmioClose() 関数で閉じて下さい。</P>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>
+
+</BODY>
+</HTML>

@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+	<LINK REV="Made" HREF="mailto:ain@da.airnet.ne.jp">
+	<LINK REL="Contents" HREF="./index.html">
+	<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-2022-jp">
+	<META NAME="Author" CONTENT="Seiji Ainoguchi">
+	<META NAME="Subject" CONTENT="NxDraw">
+	<TITLE>NxDraw グラフィック描画ライブラリ</TITLE>
+</HEAD>
+<BODY>
+<A NAME=top"><H1>NxDraw グラフィック描画ライブラリ</H1></A>
+
+<A HREF="#general">概要</A><BR>
+<A HREF="#character">特徴</A><BR>
+<A HREF="#requirement">動作環境</A><BR>
+<A HREF="#specification">ライブラリ仕様</A><BR>
+<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<A HREF="global.html">グローバル関数、構造体等</A><BR>
+<BR>
+<A HREF="../index.html">NxLib Reference Manual 目次</A><BR>
+<HR>
+
+
+
+<!-- general -->
+<A NAME="general"><H2>概要</H2></A>
+<P>　NxDraw は、グラフィック描画を行なう為の C++ クラスライブラリです。親子関係を持てるスプライト、イメージ同士のブレンド転送(いわゆるアルファブレンド)等の機能があります。出力先を画面に特化していませんので、画面やウィンドウへ直接描画するだけではなく、ビットマップへの描画を行い、その結果だけを利用する事も可能です。低レベルな部分(ビットマップへの直接描画ルーチン等)はクラスの中に隠蔽されていますので、通常の使用において意識する必要はありません。</P>
+<P>　NxDraw は複数のウィンドウへ描画を行なう事ができます。(例えば MDI アプリケーションの様に)複数のウィンドウを使用するアプリケーションの場合、それぞれのウィンドウと <A HREF="CNxWindow.html">CNxWindow</A> クラスとを結び付ける事で、ウィンドウ毎に異なる描画が可能です。フルスクリーンでも使用できます。</P>
+<HR>
+
+<!-- character -->
+<A NAME="character"><H2>特徴</H2></A>
+<H3>親子関係を持てるスプライト</H3>
+<P>　スプライトに親子関係を持たせて、操作、表示の階層化が可能です。スプライトは、単純に画像を表示するだけではなく、自分自身の移動によって生じた痕跡の消去も自動的に行ないます。また、差分追跡(要は差分描画)機能を持っており、更新時に必要な矩形のみを書き直す事で(多少の)高速化を実現しています。標準のクラスではインプリメントされていませんが、拡大縮小表示も可能です。スプライトの数、階層の深さ、サイズに特に制限はありません(メモリや CPU 速度によって実用限界はあります)。</P>
+<H3>サーフェス間の転送機能</H3>
+<P>　ブレンド(通常ブレンド(普通の半透明)の他に、加算、減算、乗算ブレンド等)や、グレイスケール化、RGB カラーバランス調整、色相変換、拡大縮小(Bi-Linear filter による補完可)、ぼかし、左右上下反転等が行なえます(<A HREF="global.html#NxBlt.function">機能一覧</A>)。ブレンド転送には、転送元のアルファチャンネルも使用できます(これには PNG ファイルのアルファチャンネルをそのまま利用できます)。NxDraw は主に 32bpp (RGB + アルファチャンネル)画像を扱いますが、パレット付き 8bpp 形式もサポートしています。なお、現在のところ<FONT COLOR="RED">回転や変形はサポートしていません。</FONT></P>
+<H3>画像の読み込みと保存</H3>
+<P>　NxDraw 自体は BMP, JPEG, PNG および MAG 画像の読み込みに対応しており、susie plug-in を利用する事で更に別のフォーマットにも対応できます。ディスクファイル以外に、.exe ファイル等のリソースや zip アーカイブからの読み込みも可能です(<A HREF="../NxStorage/index.html">NxStorage</A> ライブラリに依存)。NxDraw のサーフェス(<A HREF="CNxSurface.html">CNxSurface</A> クラス)へ読み込む以外に、DIB (<A HREF="CNxDIBImage.html">CNxDIBImage</A> オブジェクト)としても展開できます。画像の保存形式は、BMP, PNG が利用できます。画像の読み書き部分は、スプライトや描画クラスから独立しており、単独で使用する事ができます。</P>
+<H3>スムージングテキストの描画</H3>
+<P>　スムージング(アンチエイリアス)されたテキストを描画する事ができます。不透明度の指定、各種ブレンド描画も可能です。テキスト描画の結果を 32bpp サーフェスのアルファチャンネルへ転送して、文字の部分だけ画像を浮かび上がらせる...といった処理も可能です。</P>
+<H3>クリップ描画機能</H3>
+<P>　サーフェスに対する全ての描画関数は自動的にクリップを行います。範囲外の座標(例えば左上が負など)を指定しても正しく処理され、アクセス違反等を発生する事はありません。転送元と転送先のピクセルが一対一で対応しない転送(拡大縮小やぼかし等)も正しく処理されます。</P>
+
+<A HREF="#top">最初へ戻る</A><BR>
+<A HREF="../index.html">NxLib Reference Manual 目次</A><BR>
+<HR>
+
+
+<!-- requirement -->
+<A NAME="requirement"><H2>動作環境</H2></A>
+<DL>
+<LI>　Windows NT 4.0 / Windows95 / Windows98 / Windows2000
+<LI>　ハイカラー以上必須(フルカラー推奨)
+<LI>　メモリ 64MB 以上推奨
+</DL>
+
+<A HREF="#top">最初へ戻る</A><BR>
+<A HREF="../index.html">NxLib Reference Manual 目次</A><BR>
+<HR>
+
+<!-- specification -->
+<A NAME="specification"><H2>ライブラリ仕様</H2></A>
+<H3>提供されるクラス (<FONT SIZE=-1><A HREF="classes.html">クラス階層図</A></FONT>)</H3>
+<P>　大きく分類すると、描画する為の矩形を管理するスプライト(<A HREF="CNxSprite.html">CNxSprite</A>)クラス、サーフェスへの描画を行なう為の <A HREF="CNxSurface.html">CNxSurface</A> クラス、画像を扱う <A HREF="CNxDIBImageLoader.html">CNxDIBImageLoader</A>, <A HREF="CNxDIBImageSaver.html">CNxDIBImageSaver</A>, <A HREF="CNxDIBImage.html">CNxDIBImage</A> クラスがあります。</P>
+
+<P>　CNxSprite は、描画矩形を管理するクラスです。CNxSprite クラスのデフォルトのインプリメントでは何も描画しません。大半のクラスは CNxSprite から派生しています。</P>
+
+<P>　CNxSurface クラスは、描画そのものを行ないます。ウィンドウや画面へ何かを表示する場合、CNxSprite クラスによって描画されるべき場所(座標)を指定し、CNxSurface クラスのメンバ関数で実際に描画を行なうという事になります。大雑把に例えれば、ウィンドウが CNxSprite クラス、デバイスコンテキスト(とビットマップ)が CNxSurface クラスと対応します(実際、CNxSurface クラスは DIBSection を使用しています)。</P>
+
+<P>　CNxSprite 派生クラスの使用は必須ではありません。CNxSprite 派生クラスは間接的に CNxSurface クラスを参照しますが、逆はありません。スプライトの機能そのものが不要であれば、CNxSurface クラスの描画機能だけを利用できます(ただし、ソースレベルにおいて完全に切り離せるという意味ではありません)。例えば <A HREF="../../samples/tilescroll/">tilescroll</A> サンプルでは CNxSprite 派生クラスを一切使用していません。</P>
+
+<P>　CNxDIBImage クラスは、DIB を管理するクラスです。CNxDIBImageLoader および CNxDIBImageSaver クラスは、CNxDIBImage クラスを対象に画像の読み書きを行うクラス群です(ただし、CNxDIBImageLoader と CNxDIBImageSaver は抽象クラスであり、それ自体は使用できません)。画像の読み書きのみが必要な場合は、これらのクラスのみを利用できます。サンプルとして <A HREF="../../samples/dibimage/">dibimage</A> があります。</P>
+
+<P>　大部分のクラスは必要最低限の機能しか持たせていません。これは、特定のアプリケーション(例えばゲーム等)に特化しない様、意図的に行っています。この為、ほとんどの場合、カスタマイズした派生クラスを作成する必要があります。言い換えると、NxDraw のクラスは低機能であり、プログラミングの手間を最少に抑えてアプリケーションを作成する、という目的にはあまり向いていません。</P>
+
+<H3>継承階層</H3>
+<P>　基本的には単一継承です。一部多重継承のクラス(<A HREF="CNxLayerSprite.html">CNxLayerSprite</A> クラス)もあります。詳しくは、<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>をご覧ください。</P>
+
+<H3>拡張性</H3>
+<P>　CNxSprite クラス(とその派生クラス)から、独自のクラスを派生できます。それ以外のクラス(CNxSurface 等)からの派生については、(不可能ではありませんが)考慮していません。ほとんどのクラスは仮想デストラクタを持っています。</P>
+
+<H3>制限</H3>
+<P>　オブジェクト数に数値的な制限はありません。実用的な範囲は動作環境(CPU 速度やメモリ量)によります。</P>
+
+<H3>外部ライブラリについて</H3>
+<P>　zlib, libpng, jpeglib(<A HREF="#librarycopyright">※</A>) を利用しています(また、外部ライブラリではありませんが、内部で STL と C++ 標準ライブラリを使用しています)。zlib と libpng は PNG の画像の読み込み、jpeglib を JPEG 画像の読み込みの為に利用しています。jpeglib は nxdraw 以下のディレクトリにソースを同梱しています。zlib と libpng は別途入手して下さい。これらの画像の読み込みが不要であれば src/NxDraw/Config.h を書換えて再コンパイルする事でライブラリを利用しない様にする事ができます。具体的な方法は、<A HREF="global.html#macro">グローバル関数 : マクロ一覧</A> を参照して下さい。</P>
+
+<P>　jpeglib を含むプログラムを実行形式のみで配布する場合、ドキュメント等(about dialog box でも良いかと思います)に "this software is based in part on the work of the Independent JPEG Group" という表示が必要です。詳しくは、NxDraw/jpeglib/README を参照して下さい。ただし NxDraw/Config.h を書き換え、JPEG 画像の読み込みを外してコンパイルした場合、jpeglib のコードを一切含みませんので表示は不要です。このバージョンの nxdraw では、v6a をベースにしています。</P>
+
+<P>　<A HREF="../NxStorage/index.html">NxStorage</A> と NxShared を内部で使用します(自動的にリンクされます)。</P>
+
+<P>　DirectX は一切使用しません。DirectX 自体がインストールされていない環境でも、<A HREF="CNxScreen.html">CNxScreen</A> クラスのフルスクリーン化は利用可能です。</P>
+
+<H3>エラー処理</H3>
+<P>　サーフェスが作成できない等の実行時エラーは、関数からの戻値で判別できます。デバッグ版のライブラリでは、より詳細なエラー報告と厳しいチェックを行ないます。デバッグ版とリリース版の動作は全く同じです。現在のところ C++ 例外は使用していません。</P>
+
+<H3>マルチスレッドへの対応</H3>
+<P>　<A HREF="CNxDraw.html">CNxDraw</A> クラスを除き、グローバル変数、関数内のスタティック変数はありません。全ての(メンバ)関数は再入(re-entrant)が可能です。しかし、マルチスレッドを何も考慮していませんので、複数のスレッドによって同一オブジェクトのメンバ関数が呼び出されると異常動作します。マルチスレッドで使用される際には、同一オブジェクトへ複数のスレッドが同時にアクセスしない様、クリティカルセクション等で同期を取って下さい。</P>
+<P>　CNxDraw クラスは、アプリケーション中で一つしかインスタンスが存在しない特殊なクラスです。インスタンスを一つに制限する為に、グローバル変数(CNxDraw のインスタンスへのポインタとクリティカルセクション)を使用しています。</P>
+<P>　なお、ここで言う「グローバル変数」とは、実行中に値が変わる可能性のある変数の事を指しています。実際には、この他に起動時に作成される定数テーブルがあります。このテーブルは、自動的に初期化された後、アプリケーションが終了するまで内容が変わることはありません。</P>
+
+<A HREF="#top">最初へ戻る</A><BR>
+<A HREF="../index.html">NxLib Reference Manual 目次</A><BR>
+<HR>
+<A NAME="librarycopyright"><H3>利用しているライブラリの著作表示</H3></A>
+<P>　開発者の方々に感謝致します。</P>
+<DL>
+<DT><STRONG>zlib</STRONG>
+	<DD>(C) 1995-1998 Jean-loup Gailly and Mark Adler
+<DT><STRONG>libpng</STRONG>
+	<DD>Copyright (c) 1995, 1996 Guy Eric Schalnat, Group 42, Inc.
+	<DD>(libpng versions 0.5, May 1995, through 0.89c, May 1996)
+	<DD>Copyright (c) 1996, 1997 Andreas Dilger
+	<DD>(libpng versions 0.90, December 1996, through 0.96, May 1997)
+	<DD>Copyright (c) 1998, 1999, 2000 Glenn Randers-Pehrson
+	<DD>(libpng versions 0.97, January 1998, through 1.0.6, March 21, 2000)
+<DT><STRONG>jpeglib(The Independent JPEG Group's JPEG software)</STRONG>
+	<DD>Copyright (C) 1991-1996, Thomas G. Lane.
+	<DD>All Rights Reserved except as specified below.
+</DL>
+
+<A HREF="#top">最初へ戻る</A><BR>
+<A HREF="../index.html">NxLib Reference Manual 目次</A><BR>
+</BODY>
+</HTML>

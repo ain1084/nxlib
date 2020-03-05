@@ -1,0 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+	<LINK REV="Made" HREF="mailto:ain@da.airnet.ne.jp">
+	<LINK REL="Contents" HREF="./index.html">
+	<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-2022-jp">
+	<META NAME="Author" CONTENT="Seiji Ainoguchi">
+	<META NAME="Subject" CONTENT="NxStorage">
+	<TITLE>NxStorage ライブラリ</TITLE>
+</HEAD>
+<BODY>
+<H1>NxStorage ライブラリ</H1>
+
+<A NAME="summary"><H2>概要</H2></A>
+<P>　NxStorage は、データを読み込み元(又は書き込み先)となるファイルやリソースを同一の手順で扱える様にする為のクラス群です。NxDraw で引数として CNxFile クラスを取る関数(例えば <A HREF="../NxDraw/CNxSurface.html#member.LoadImage">CNxSurface::LoadImage()</A> 等)へ CNxFile 派生クラスオブジェクトを渡す事により、ファイル以外にリソース等からの画像の読み込みが行えます。NxStorage ライブラリでは、テキストファイルは扱わず、バイナリファイルのみを対象にしています。</P>
+
+<P></STRONG>　取り敢えず NxDraw で使用されると思われる範囲だけに限定して解説します。個々の関数やクラスの詳細はについては、しばらくお待ちください。</STRONG>暫定版ですが <A HREF="CNxFile.html">CNxFile</A> のみドキュメントがあります。</P>
+
+
+<P>　現在、ファイル、リソース、ZIP 書庫内のファイルのアクセスをサポートしています。それぞれ、CNxFile, CNxResourceFile, CNxZipFile クラスと対応します。CNxResourceFile と CNxZipFile は CNxFile の派生クラスです。</P>
+
+<P>　<A HREF="../NxDraw/CNxSurface.html">CNxSurface</A> クラスのオブジェクト(pSurface) へ、ファイルからイメージを読み込む場合は以下の様に使用します。</P>
+<TABLE><TR><TD>
+<PRE>	CNxFile file(_T(&quot;alpha.png&quot;), CNxFile::modeRead);
+	if (file.IsOpen())
+	{
+		pSurface-&gt;<A HREF="../NxDraw/CNxSurface.html#member.LoadImage">LoadImage</A>(0, 0, file);
+	}
+</PRE>
+</TD></TR></TABLE>
+
+<P>　CNxFilem クラスのコンストラクタは複数ありますが、上記の例の場合、最初の引数へファイル名を、次の引数へオープンモードを渡しています。デフォルトのオープンモードは CNxFile::modeRead ですので省略可能です。書き込みの場合は CFile::modeWrite (既存のファイルを削除して新規作成する場合は、CNxFile::modeCreate も)を指定します。IsOpen() 関数(CNxFile クラスのメンバ関数)は、ファイルがオープンされていれば TRUE を返します。CNxFile 派生クラスは現在のところ例外を throw しませんので、コンストラクタでオブジェクトを構築した後に、正しくファイルが開かれているかを確認するには IsOpen() 関数を使用して下さい。なお、<A HREF="../NxDraw/CNxSurface.html#member.LoadImage">CNxSurface::LoadImage()</A> 関数の最初でも、IsOpen() 関数によってチェックを行っていますので、特に必要でなければ省略しても構いません。</P>
+
+<P>　次の例では、ファイルの代わりにリソースからイメージを読み込みます。</P>
+<TABLE><TR><TD>
+<PRE>
+	CNxResourceFile file(NULL, MAKEINTRESOURCE(IDR_PNG_ALPHA), RT_RCDATA);
+	if (file.IsOpen())
+	{
+		pSurface-&gt;<A HREF="../NxDraw/CNxSurface.html#member.LoadImage">LoadImage</A>(0, 0, file);
+	}
+</PRE>
+</TD></TR></TABLE>
+<P>　CNxResourceFile クラスのコンストラクタの、最初の引数はリソースのインスタンスハンドル(HINSTANCE 型)、二番目はリソース識別子、最後がリソース種別です。CNxResourceFile クラスでは、読み込みしかサポートしていませんので、CNxFile クラスの様にオープンモードを指定する必要はありません。正常にオープンできれば、後はファイルからの読み込みと同じです。</P>
+
+<P>　次の例では、CNxZipArchive クラスと、CNxZipFile クラスを使用して ZIP 書庫ファイル(graphics.zip) から alpha.png をイメージとして読み込みます。</P>
+<TABLE><TR><TD>
+<PRE>
+	CNxFile af(_T(&quot;graphics.zip&quot;));
+	if (!af.IsOpen())
+		return;		// error
+
+	CNxZipArchive zipArchive(&amp;af);
+	pSurface-&gt;LoadImage(0, 0, CNxZipFile(&amp;zipArchive, _T(&quot;alpha.png&quot;)));
+</PRE></TD></TR></TABLE>
+
+<P>　CNxZipArchive クラスはコンストラクタの引数で指定された CNxFile 派生クラスオブジェクトを ZIP 書庫として管理します。ここでは、graphics.zip というディスクファイルを指定していますが、CNxResourceFile クラスを使用すれば、リソースとして .exe ファイル等に追加されている ZIP 書庫から読み込も事ができます。</P>
+
+<P>　CNxZipFile クラスは、CNxZipArchive クラスが管理している ZIP 書庫から指定されたファイルを探して開きます。一度 CNxZipArchive を構築してしまえば、何度でも CNxZipArchive クラスを通して ZIP 書庫ファイルからファイルを読み込めます。</P>
+
+<P>　なお、次の様に ZIP 書庫ファイルの中にある ZIP 書庫ファイルからファイルを開く事もできます。ただし、両方とも圧縮されている(以下の例で言えば圧縮された texture.zip を更に graphics.zip でも圧縮している)場合、ファイルをアクセスする度に2回解凍しなければならず速度が低下します(ただし、graphics.zip が無圧縮書庫であれば、通常のファイルと同じ速度で扱う事ができます)。一般的に zip 書庫を二重圧縮してもサイズの面ではほとんど効果はありません。</P>
+<TABLE><TR><TD>
+<PRE>
+	CNxFile af(_T(&quot;graphics.zip&quot;));
+	CNxZipArchive zipGraphics(&amp;af);
+	CNxZipFile afTexture(&amp;zipGraphics, _T(&quot;texture.zip&quot;));
+	CNxZipArchive zipTexture(&amp;afTexture);
+	pSurface-&gt;LoadImage(0, 0, CNxZipFile(&amp;zipTexture, _T(&quot;wall.png&quot;)));
+</PRE></TD></TR></TABLE>
+
+<A HREF="../index.html">NxLib Reference Manual 目次</A><BR>
+</BODY>
+</HTML>

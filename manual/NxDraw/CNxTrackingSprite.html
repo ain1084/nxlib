@@ -1,0 +1,410 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+	<LINK REV="Made" HREF="mailto:ain@da.airnet.ne.jp">
+	<LINK REL="Contents" HREF="./index.html">
+	<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-2022-jp">
+	<META NAME="Author" CONTENT="Seiji Ainoguchi">
+	<META NAME="Subject" CONTENT="CNxTrackingSprite">
+	<TITLE>CNxTrackingSprite クラス</TITLE>
+</HEAD>
+<BODY>
+<A NAME="top"><H1>CNxTrackingSprite クラス</H1></A>
+
+<PRE>
+<A HREF="CNxSprite.html">CNxSprite</A>
+  |
+  +--<STRONG>CNxTrackingSprite</STRONG>
+</PRE>
+
+<A HREF="#summary">概要</A><BR>
+<A HREF="#toplevelsprite">最上位スプライトについて</A><BR>
+<A HREF="#member">クラスメンバ</A><BR>
+
+<A NAME="summary"><H2>概要</H2></A>
+<P>　CNxTrackingSprite は、<A HREF="CNxSprite.html">CNxSprite</A> の派生クラスです。抽象クラスであるため、CNxTrackingSprite クラスのオブジェクトを構築する事はできせん。必ず派生クラスを作成して下さい。CNxTrackingSprite の派生クラスには、<A HREF="CNxWindow.html">CNxWindow</A> クラスがあります。</P>
+
+<P>　CNxTrackingSprite クラスは、通常最上位スプライトとして振る舞い、差分追跡(Differential Tracking)という機能があります。差分追跡とは、親スプライトが子スプライトの移動を追跡管理する事で、変化した最少の矩形のみの再描画を可能とする機能です。</P>
+<P>　以下の図は、差分追跡の動作を示したものです。背景の青は親スプライト、黄色と緑は子スプライトとします。</P>
+<CENTER>
+<TABLE BORDER>
+<TR><TH>移動前</TH><TH>移動後</TH><TH>(a)</TH><TH>(b)</TH></TR>
+<TR><TD><IMG SRC="images/DifferentialTracking0.png" WIDTH=128 HEIGHT=128></TD><TD><IMG SRC="images/DifferentialTracking1.png" WIDTH=128 HEIGHT=128></TD><TD><IMG SRC="images/DifferentialTracking2.png" WIDTH=128 HEIGHT=128></TD><TD><IMG SRC="images/DifferentialTracking3.png" WIDTH=128 HEIGHT=128></TD></TR>
+</TABLE>
+</CENTER>
+<P>　今回の描画で黄色のスプライトは右下へ、緑色のスプライトは右上へそれぞれ移動したとします。</P>
+<P>　「移動」ですから、前回の痕跡は消去されなければなりません。消去せずに単純に重ねると、(a) の様になります。一度全てのスプライトを消去して再描画してしまうという方法もありますが、差分追跡では移動によって再描画が必要な範囲のみを割り出し、その矩形だけを描画します。上の図で再描画が必要な矩形を示すと (b) になります。この例では (a) と全く同じ結果になりますが、全体再描画するよりも小さい範囲で済むことが分かります。上の図の親スプライトは CNxTrackingSprite 自身を示していますが、子スプライトが CNxTrackingSprite の直属の子でなくとも、最上位スプライトが CNxTrackingSprite であれば、差分追跡は有効です。</P>
+
+<P>　差分追跡を使用すると殆どの場合、描画のパフォーマンスを向上できます。しかしながら、再描画される矩形が小さく分断されていると、クリップのオーバーヘッドが増加して逆にパフォーマンスが低下する場合もあります。また、差分追跡を行う為に、親スプライトの大きさに応じたメモリが必要です。この為、差分追跡機能は状況に応じて無効にする事ができます(CNxTrackingSprite クラスのデフォルト動作では無効になっています)。差分追跡機能の有効と無効を切り替えるには、<A HREF="#member.EnableTracking">CNxTrackingSprite::EnableTracking()</A> 関数を使用します。毎回全体が無効化される様な場合、差分追跡を無効にした方が良いパフォーマンスを得られる事があります。</P>
+
+<P>　通常、差分追跡はピクセル単位ではなく、あらかじめ決められたブロック単位で行われます。このブロックの大きさは、<A HREF="#member.SetTrackingUnit">CNxTrackingSprite::SetTrackingUnit()</A> 関数で設定できますが、2 の <EM>n</EM> 乗単位でなくはなりません(ただし最小は 1)。単位を小さくすると、無駄な描画領域を減らす事ができますが、差分追跡の状態を記憶する為のメモリを多く消費します。また領域が細分化されてしまう事によって、クリップのオーバーヘッドが増加します(特にスプライトが多い場合は顕著に現れます)。逆に単位を大きくすると、無駄な描画領域が増加する代わりに、メモリ消費量とクリップのオーバーヘッドは少なくなります。<A HREF="#member.GetTrackingUnit">CNxTrackingSprite::GetTrackingUnit()</A> 関数によって、現在の差分追跡単位を取得できます。</P>
+
+<P>　差分追跡の最適な単位はアプリケーションの描画内容によって異なります(デフォルト設定は 32x8 です)。アプリケーションの描画内容に応じて調整すると、より良いパフォーマンスを得る事ができます。例えば、スプライトが比較的少ない場合、クリップのオーバーヘッドは然程問題にはなりませんので、単位を小さくします。逆にスプライトが多い場合は、クリップのオーバーヘッドを抑える為に、単位を大きくすると良いでしょう(ただし、あまりにスプライトが多い場合、差分追跡そのものを無効にした方が良い場合もあります)。</P>
+
+<P>　差分を更新するには、<A HREF="#member.Refresh">CNxTrackingSprite::Refresh()</A> 関数を呼び出します。この関数は、再描画が必要な矩形を列挙して <A HREF="#member.RefreshRect">CNxTrackingSprite::RefreshRect()</A> 関数へ渡します。なお、CNxTrackingSprite::RefreshRect() は純粋仮想間数です。</P>
+
+<P>　CNxTrackingSprite クラスでは、描画フレーム数をカウントしており、必要であれば<A HREF="#member.GetFPS">CNxTrackingSprite::GetFPS()</A> 関数で取得できます。</P>
+
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+<A NAME="member"><H2>クラスメンバ</H2></A>
+<A HREF="#construct">構築、消滅</A><BR>
+<A HREF="#affection">属性</A><BR>
+<A HREF="#override">オーバーライド可能な関数</A><BR>
+
+<A NAME="construct"><P><FONT SIZE=+1>構築、消滅</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD><A HREF="#member.CNxTrackingSprite">CNxTrackingSprite()</A></TD><TD>　コンストラクタ</TD></TR>
+</TABLE>
+
+<A NAME="affection"><P><FONT SIZE=+1>属性</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetTrackingUnit">SetTrackingUnit()</A></TD><TD>　最上位スプライトにおける差分追跡の単位を設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetTrackingUnit">GetTrackingUnit()</A></TD><TD>　差分追跡の単位を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.EnableTracking">EnableTracking()</A></TD><TD>　最上位スプライトにおける差分追跡の有効/無効を設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.IsTrackingEnabled">IsTrackingEnabled()</A></TD><TD>　最上位スプライトにおける差分追跡の有効/無効状態を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetFPS">GetFPS()</A></TD><TD>　描画したフレーム数を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.ResetFPS">ResetFPS()</A></TD><TD>　フレーム数カウンタをリセット</TD></TR>
+</TABLE>
+
+<A NAME="drawupdate"><P><FONT SIZE=+1>描画、更新</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.Refresh">Refresh()</A></TD><TD>　全てのスプライトの更新に必要な矩形を列挙</TD></TR>
+</TABLE>
+
+<A NAME="override"><P><FONT SIZE=+1>オーバーライド可能な関数(protected)</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.RefreshBegin">RefreshBegin()</A></TD><TD>　矩形列挙の前に Refresh() 関数内部から呼び出される仮想関数</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.RefreshRect">RefreshRect()</A></TD><TD>　矩形が列挙される度に呼び出される<STRONG>純粋仮想関数</STRONG></TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.RefreshEnd">RefreshEnd()</A></TD><TD>　全ての矩形の列挙が終了した後に Refresh() 関数内部から呼び出される仮想関数</TD></TR>
+</TABLE>
+
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxTrackingSprite::CNxTrackingSprite() -->
+<A NAME="member.CNxTrackingSprite"><H3>CNxTrackingSprite::CNxTrackingSprite()</H3></A>
+<H4>概要</H4>
+<P>　CNxTrackingSprite クラスのコンストラクタです。</P>
+<H4>書式</H4>
+CNxTrackingSprite::CNxTrackingSprite()<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　CNxTrackingSprite クラスのコンストラクタです。差分追跡(<A HREF="#member.EnableTracking">CNxTrackingSprite::EnableTracking()</A> 関数を参照)は無効として初期化されます</P>
+
+<H4>関連項目</H4>
+<A HREF="CNxSprite.html#member.CNxSprite">CNxSprite::CNxSprite()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxTrackingSprite::EnableTracking() -->
+<A NAME="member.EnableTracking"><H3>CNxTrackingSprite::EnableTracking()</H3></A>
+<H4>概要</H4>
+<P>　差分追跡機能を、有効または無効にします。</P>
+<H4>書式</H4>
+BOOL CNxTrackingSprite::EnableTracking(BOOL <EM>bEnable</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>BOOL <EM>bEnable</EM></TD><TD>　差分追跡機能を有効にするならば TRUE</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功ならば TRUE。それ以外は FALSE
+<H4>関連項目</H4>
+<A HREF="#member.IsTrackingEnabled">CNxTrackingSprite::IsTrackingEnabled()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxTrackingSprite::IsTrackingEnabled() -->
+<A NAME="member.IsTrackingEnabled"><H3>CNxTrackingSprite::IsTrackingEnabled()</H3></A>
+<H4>概要</H4>
+<P>　差分追跡機能の状態を返します。</P>
+<H4>書式</H4>
+BOOL CNxTrackingSprite::IsTrackingEnabled() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　差分追跡機能が有効ならば TRUE
+<H4>関連項目</H4>
+<A HREF="#member.EnableTracking">CNxTrackingSprite::EnableTracking()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+
+<!-- CNxTrackingSprite::SetTrackingUnit() -->
+<A NAME="member.SetTrackingUnit"><H3>CNxTrackingSprite::SetTrackingUnit()</H3></A>
+<H4>概要</H4>
+<P>　差分追跡の単位を設定します。</P>
+<H4>書式</H4>
+virtual BOOL CNxTrackingSprite::SetTrackingUnit(int <EM>nXUnit</EM>, int <EM>nYUnit</EM>)<BR>
+<H4>書式</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>uXUnit</EM></TD><TD>　水平単位</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>uYUint</EM></TD><TD>　垂直単位</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功ならば TRUE</P>
+<H4>解説</H4>
+<P>　単位は、2 の <EM>n</EM> 乗の値(2,4,8,16,32... 等)でなければなりません。2 の <EM>n</EM> 乗以外の値を指定すると、最も近い値へ切り上げられます。</P>
+<BR>
+<H4>関連項目</H4>
+<A HREF="#member.Refresh">CNxTrackingSprite::Refresh()</A>&nbsp;/&nbsp;
+<A HREF="#member.GetTrackingUnit">CNxTrackingSprite::GetTrackingUnit()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxTrackingSprite::GetTrackingUnit() -->
+<A NAME="member.GetTrackingUnit"><H3>CNxTrackingSprite::GetTrackingUnit()</H3></A>
+<H4>概要</H4>
+<P>　差分追跡の単位を取得します。</P>
+<H4>書式</H4>
+void CNxTrackingSprite::GetTrackingUnit(LPSIZE <EM>lpSize</EM>) const<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>LPSIZE <EM>lpSize</EM></TD><TD>　取得した単位を受け取る SIZE 構造体を示すポインタ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　単位はピクセル値で返されます。</P>
+<BR>
+<H4>関連項目</H4>
+<A HREF="#member.Refresh">CNxTrackingSprite::Refresh()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetTrackingUnit">CNxTrackingSprite::SetTrackingUnit()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxTrackingSprite::Refresh() -->
+<A NAME="member.Refresh"><H3>CNxTrackingSprite::Refresh()</H3></A>
+<H4>概要</H4>
+<P>　全てのスプライトの更新に必要な矩形を列挙します。</P>
+<H4>書式</H4>
+<TABLE>
+<TR><TD>BOOL CNxTrackingSprite::Refresh(</TD><TD>int <EM>nMaxWidthOfEnum</EM>, int <EM>nMaxHeightOfEnum</EM>,</TD></TR>
+<TR><TD></TD><TD>LPVOID <EM>lpContext</EM>, BOOL <EM>bForce = FALSE</EM>)</TD></TR>
+</TABLE>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>nMaxWidthOfEnum</EM></TD><TD>　列挙される最大の幅</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>nMaxHeightOfEnum</EM></TD><TD>　列挙される最大の高さ</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>LPVOID <EM>lpContext</EM></TD><TD>　追加情報を持つ構造体等へのポインタ</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>BOOL <EM>bForce</EM></TD><TD>　全域を無効化して列挙するならば TRUE</TD></TR>
+</TABLE>
+<H4>解説</H4>
+<P>　全てのスプライトの更新に必要な矩形を列挙して、矩形毎に <A HREF="#member.RefreshRect">CNxTrackingSprite::RefreshRect()</A> 仮想関数を呼び出します。</P>
+
+<P>　この関数は、列挙を開始する前に全ての子スプライトを Z 値に従って正しくソートします。この関数の中で、明示的な <A HREF="CNxSprite.html#member.SortChildren">CNxSprite::SortChildren</A> 関数の呼び出しは必要はありません。</P>
+
+<P>　<EM>nMaxWidthOfEnum</EM> および <EM>nMaxHeightOfEnum</EM> 引数へは列挙される矩形の、幅と高さの最大サイズをピクセル単位で指定します。これらは、<A HREF="#member.GetTrackingUnit">CNxTrackingSprite::GetTrackingUnit()</A> 関数で取得される値の倍数でなくてはなりません。スプライトの更新に必要な矩形が大きい場合 は、この指定の幅と高さを超えない様に分割しながら CNxSprite::RefreshRect() 関数が呼び出されます。</P>
+
+<P>　<EM>lpContext</EM> 引数は、矩形と共に RefreshRect() 関数へ引き渡されます。描画時に必要な引数(例えば 描画先のデバイスコンテキストやサーフェスオブジェクトへのポインタ等)を渡す目的等に使用できます。Refresh() 関数自体は、内容の解釈は何も行いません。</P>
+
+<P>　<EM>bForce</EM> 引数を TRUE にすると、列挙前にスプライトの全域が無効化されます。この場合、自分自身と子スプライトの、<A HREF="CNxSprite.html#member.PreUpdate">CNxSprite::PreUpdate()</A> 関数は呼び出されません。</P>
+
+<H4>関連項目</H4>
+<A HREF="#member.EnableTracking">CNxTrackingSprite::EnableTracking()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetTrackingUnit">CNxTrackingSprite::SetTrackingUnit()</A>&nbsp;/&nbsp;
+<A HREF="#member.GetTrackingUnit">CNxTrackingSprite::GetTrackingUnit()</A>&nbsp;/&nbsp;
+<A HREF="CNxSprite.html#member.PreUpdate">CNxSprite::PreUpdate()</A>&nbsp;/&nbsp;
+<A HREF="#member.RefreshRect">CNxTrackingSprite::RefreshRect()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxTrackingSprite::RefreshBegin() -->
+<A NAME="member.RefreshBegin"><H3>CNxTrackingSprite::RefreshBegin()</H3></A>
+<H4>概要</H4>
+<P>　矩形の列挙が開始される前に <A HREF="#member.Refresh">CNxTrackingSprite::Refresh()</A> 関数内部から呼び出される仮想関数です。</P>
+<H4>書式</H4>
+virtual BOOL CNxSprite::RefreshBegin(LPVOID lpContext) const<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD NOWRAP>LPVOID <EM>lpContext</EM></TD><TD>　CNxTrackingSprite::Refresh() 関数へ渡された <EM>lpContext</EM> 引数の値</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　列挙を開始するならば TRUE。FALSE を返すと中止します。</P>
+<H4>解説</H4>
+<P>　この関数は、列挙する矩形(更新差分)がある場合に限り、CNxTrackingSprite::Refresh() 関数の内部から呼び出されます。必要ならば CNxTrackingSprite::RefreshRect() 関数の為の準備等を行う事ができます。列挙される矩形がない又は、この関数が FALSE を返した場合、CNxTrackingSprite::RefreshRect() と <A HREF=#member.RefreshRect">CNxTrackingSprite::RefreshEnd()</A> 関数は呼び出されず、CNxTrackingSprite::Refresh() 関数は FALSE を返します。</P>
+
+<P>　この関数の実装は任意です。この関数のデフォルトインプリメントは常に TRUE を返します。</P>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+<!-- CNxSprite::RefreshRect() -->
+<A NAME="member.RefreshRect"><H3>CNxTrackingSprite::RefreshRect()</H3></A>
+<H4>概要</H4>
+<P>　<A HREF="#member.Refresh">CNxTrackingSprite::Refresh()</A> 関数から矩形毎に呼び出される protected 純粋仮想関数です。</P>
+<H4>書式</H4>
+virtual void CNxTrackingSprite::RefreshRect(const RECT* <EM>lpRect</EM>, LPVOID <EM>lpContext</EM>) const = 0<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>const RECT* <EM>lpRect</EM></TD><TD>　更新が必要な矩形を示す RECT 構造体へのポインタ</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>LPVOID <EM>lpContext</EM></TD><TD>　CNxSprite::Refresh() 関数へ渡された <EM>lpContext</EM> 引数の値</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　<EM>lpRect</EM> 引数は、スプライト内の更新矩形を示します。通常は、この矩形を <A HREF="CNxSprite.html#member.DrawSurface">CNxSprite::DrawSurface()</A> 関数へ渡して、<A HREF="CNxSurface.html">CNxSurface </A> 派生クラスオブジェクトへスプライトを描画します。</P>
+
+<H4>例</H4>
+<P>　全ての子スプライトの描画を自分自身のサーフェス内へ行う、CNxTrackingWindow 派生クラスを作成します。</P>
+
+<H4>NxTrackingWindow.h (CNxTrackingWindow クラスのヘッダファイル)</H4>
+<PRE>
+    <FONT COLOR="BLUE">class</FONT> CNxTrackingWindow : <FONT COLOR="BLUE">public</FONT> CNxTrackingSprite
+    {
+    <FONT COLOR="BLUE">public</FONT>:
+        CNxTrackingWindow();
+        <FONT COLOR="BLUE">virtual</FONT> ~CNxTrackingWindow();
+
+        <FONT COLOR="BLUE">virtual</FONT> BOOL SetRect(<FONT COLOR="BLUE">const</FONT> RECT* lpRect);
+    <FONT COLOR="BLUE">protected</FONT>:
+        <FONT COLOR="BLUE">virtual void</FONT> RefreshRect(<FONT COLOR="BLUE">const</FONT> RECT* lpRect, LPVOID lpContext) <FONT COLOR="BLUE">const</FONT>;
+    <FONT COLOR="BLUE">private</FONT>:
+        <A HREF="CNxSurface.html">CNxSurface</A>* m_pSurface;
+    };
+</PRE>
+
+<H4>NxTrackingWindow.cpp</H4>
+<PRE>
+    CNxTrackingWindow::CNxTrackingWindow()
+    {
+        m_pSurface = NULL;
+    }
+
+    CNxTrackingWindow::~CNxTrackingWindow()
+    {
+        <FONT COLOR="BLUE">delete</FONT> m_pSurface;
+    }
+
+    BOOL CNxTrackingWindow::SetRect(<FONT COLOR="BLUE">const</FONT> RECT* lpRect)
+    {
+        if (!CNxTrackingSprite::SetRect(lpRect))
+            <FONT COLOR="BLUE">return</FONT> FALSE;
+
+        <FONT COLOR="BLUE">delete</FONT> m_pSurface;
+        m_pSurface = <FONT COLOR="BLUE">new</FONT> CNxSurface;
+        <FONT COLOR="BLUE">return</FONT> m_pSurface->Create(<A HREF="CNxSprite.html#member.GetWidth">GetWidth()</A>, <A HREF="CNxSprite.html#member.GetHeight">GetHeight()</A>);
+    }
+
+    <FONT COLOR="BLUE">void</FONT> CNxTrackingWindow::RefreshRect(<FONT COLOR="BLUE">const</FONT> RECT* lpRect, LPVOID lpContext) <FONT COLOR="BLUE">const</FONT>
+    {
+        <A HREF="CNxSprite.html#member.DrawSurface">DrawSurface</A>(m_pSurface, lpRect->left, lpRect->top, lpRect, FALSE);
+    }
+</PRE>
+
+<P>　CNxTrackingWindow クラスは、メンバ変数として CNxSurface オブジェクトへのポインタを一つだけ持っています。このサーフェスはデフォルトでは作成されていませんが、SetRect() 関数をオーバーライドして、スプライトのサイズと一致する様にしています。</P>
+
+<P>　オーバーライドした RefreshRect() 関数の本体は一行だけです。CNxTrackingWindow クラスでは、スプライトの矩形とサーフェスの矩形は一致していますので、<EM>lpRect</EM> 引数の値をそのまま渡しています。<A HREF="#member.Refresh">CNxSprite::Refresh()</A> 関数の解説に理由はありますが、Z 順ソートは不要ですので、最後の引数は FALSE です。</P>
+
+<P>　CNxTrackingWindow クラスの Refresh() 関数を以下の様に呼び出すと、CNxTrackingWindow クラスの全ての子スプライト(自分自身も含む)が、サーフェスへ書き出されます。</P>
+
+<FONT SIZE=-1>
+<PRE>
+	m_pTrackingWindow-&gt;<A HREF="#member.Refresh">Refresh</A>(m_pTrackingWindow-&gt;CNxSprite::GetWidth(), m_pTrackingWindow-&gt;CNxSprite::GetHeight(), NULL, FALSE);
+</PRE>
+</FONT>
+
+<P>　Refresh() 関数の最初と二番目の引数は、それぞれ列挙矩形の最大の幅と高さを意味しますが、ここでは単純に親スプライト自身の大きさを渡しています。</P>
+
+<FONT SIZE=-1><P>　簡単に予想できると思いますが、Refresh() 関数を呼び出す時に、サーフェスが正しく作成されていない事が有り得ます。また、SetRect() 関数内で幅と高さが正常である(ゼロ以下でない)というチェックも必要です(ここでは、解説を簡単にする為にそれらを敢えて省略しています)。</P></FONT>
+
+<P>　一度にスプライト全体が必要でない場合は、列挙矩形の大きさを制限した方が良い事があります。例えば <A HREF="CNxWindow.html">CNxWindow</A> クラスでは、内部で作成しているサーフェスの大きさは、意図的にウィンドウより小さくしています。RefreshRect() 関数内では、上の例と同じく <A HREF="CNxSprite.html#member.DraSurface">CNxSprite::DrawSurface()</A> 関数を呼び出して描画していますが、デバイスコンテキストへ BitBlt() を行ってしまえばサーフェスの内容は必要ありません。続けて RefreshRect() 関数が呼び出されると、以前の内容を上書きさせる様に DrawToSurface() 関数の描画先座標は常に (0, 0) を指定しています。つまり、サーフェスは単なるバッファとして使用している訳です。Refresh() 関数の列挙矩形の最大サイズへは、このサーフェスの幅と高さを渡します。CNxWindow クラスがこの様な方法を採っているのには、サーフェスの為のメモリ消費を抑える事だけではなく、描画速度の向上という意図もあります。</P>
+<H4>参照</H4>
+<A HREF="#member.Refresh">CNxTrackingSprite::Refresh()</A>&nbsp;/&nbsp;
+<A HREF="#member.DrawToSurface">CNxTrackingSprite::DrawToSurface()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxTrackingSprite::RefreshEnd() -->
+<A NAME="member.RefreshEnd"><H3>CNxTrackingSprite::RefreshEnd()</H3></A>
+<H4>概要</H4>
+<P>　全ての矩形の列挙が終了した後に、<A HREF="#member.Refresh">CNxTrackingSprite::Refresh()</A> 関数内部から呼び出される仮想関数です。</P>
+<H4>書式</H4>
+virtual void CNxSprite::RefreshEnd(LPVOID lpContext) const<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>LPVOID <EM>lpContext</EM></TD><TD>　CNxTrackingSprite::Refresh() 関数へ渡された <EM>lpContext</EM> 引数の値</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　この関数は、列挙する矩形(更新差分)があった場合に限り、CNxTrackingSprite::Refresh() 関数の内部から呼び出されます。<A HREF="#member.RefreshBegin">CNxTrackingSprite::RefreshBegin()</A> 仮想関数が FALSE を返した場合、この関数は呼び出されません。</P>
+
+<P>　この関数の実装は任意です。この関数のデフォルトインプリメントでは何も行いません。</P>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxTrackingSprite::GetFPS() -->
+<A NAME="member.GetFPS"><H3>CNxTrackingSprite::GetFPS()</H3></A>
+<H4>概要</H4>
+<P>　過去に描画したフレーム数を返します。</P>
+<H4>書式</H4>
+int CNxTrackingSprite::GetFPS()<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　1秒間あたりのフレーム数を 1000 倍した値を返します。無効ならば -1 を返します。</P>
+<H4>解説</H4>
+<P>　過去一秒間に、<A HREF="#member.Refresh">CNxTrackingSprite::Refresh()</A> 関数が呼び出された回数を 1000倍した値で返します。</P>
+<P>　-1 以外(FPS として有効な値)が返されると、次に 1 秒経過するまでは -1 を返しつづけます。</P>
+<H4>参照</H4>
+<A HREF="#member.Refresh">CNxTrackingSprite::Refresh()</A>&nbsp;/&nbsp;
+<A HREF="#member.ResetFPS">CNxTrackingSprite::ResetFPS()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxTrackingSprite::ResetFPS() -->
+<A NAME="member.ResetFPS"><H3>CNxTrackingSprite::ResetFPS()</H3></A>
+<H4>概要</H4>
+<P>　<A HREF="#member.GetFPS">CNxTrackingSprite::GetFPS()</A> 関数で返される、フレーム数の内部カウンタをリセットします。</P>
+<H4>書式</H4>
+void CNxTrackingSprite::ResetFPS()<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　FPS の内部カウンタをリセットし、この関数が呼び出された時間から計測を再開する様にします。前回の取得時から Refresh() 関数の呼び出しが連続していない(例えばユーザーによる一時停止)場合、FPS として正しい値が返りません。描画の再開時に、この関数を呼び出す事で次回から正しい FPS が返される様になります。</P>
+<H4>参照</H4>
+<A HREF="#member.Refresh">CNxTrackingSprite::Refresh()</A>&nbsp;/&nbsp;
+<A HREF="#member.GetFPS">CNxTrackingSprite::GetFPS()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+
+
+
+</BODY>
+</HTML>

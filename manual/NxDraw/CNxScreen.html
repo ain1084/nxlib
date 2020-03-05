@@ -1,0 +1,219 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+	<LINK REV="Made" HREF="mailto:ain@da.airnet.ne.jp">
+	<LINK REL="Contents" HREF="./index.html">
+	<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-2022-jp">
+	<META NAME="Author" CONTENT="Seiji Ainoguchi">
+	<META NAME="Subject" CONTENT="CNxScreen">
+	<TITLE>CNxScreen クラス</TITLE>
+</HEAD>
+<BODY>
+<H1>CNxScreen クラス</H1>
+<PRE>
+<A HREF="CNxSprite.html">CNxSprite</A>
+  |
+  +--<A HREF="CNxTrackingSprite.html">CNxTrackingSprite</A>
+      |
+      +--<A HREF="CNxWindow.html">CNxWindow</A>
+          |
+          +--<STRONG>CNxScreen</STRONG>
+</PRE>
+
+<A HREF="#summary">概要</A><BR>
+<A HREF="#member">クラスメンバ</A><BR>
+<BR>
+<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<A NAME="summary"><H2>概要</H2></A>
+<P>　CNxScreen クラスは <A HREF="CNxWindow.html">CNxWindow</A> の派生クラスです。CNxWindow クラスの対象がクライアントウィンドウであるのに対し、CNxScreen クラスはサイズ固定のフレームウィンドウが対象です。フルスクリーンへの切り換えもサポートします。</P>
+
+<P>　CNxScreen クラスでは、ウィンドウを <A HREF="#member.SetScreenMode">CNxScreen::SetScreenMode()</A> 関数で指定されたサイズへ固定しようとします。::SetWindowPos() 関数等を使用して、ウィンドウのサイズを一時的に変更する事は可能ですが、画面モードを切り替えるまでの間のみ有効となります。</P>
+
+<P>　CNxScreen クラスを使用するには、コンストラクタでオブジェクトを構築した後、CNxWindow クラスメンバの <A HREF="CNxWindow.html#member.Attach">CNxWindow::Attach()</A> 関数を呼び出します。デフォルトでは、640x480 ウィンドウモードが使用されます。<FONT COLOR="RED">以前のバージョンと異なり Attach() 関数を呼び出した時点ではウィンドウのサイズ等の変更は行いません。また、CNxScreen::SetScreenMode() 関数は、Attach() 関数より前には呼び出せません</FONT>。ウィンドウのサイズや解像度の変更は、<A HREF="#member.SetScreenMode">CNxScreen::SetScreenMode()</A> 関数を呼び出した時に行われます。CNxScreen::SetScreenMode() 関数を呼び出さない場合、CNxScreen クラスの動作は CNxWindow クラスと全く同じです。</P>
+
+<P>　指定の画面モードが使用可能であるかを調べるには <A HREF="#member.IsCanUseWindowMode">CNxScreen::IsCanUseWindowMode()</A> と、<A HREF="#member.IsCanUseFullScreenMode">CNxScreen::IsCanUseFullScreenMode()</A> を使用します。これらは、static 関数ですので、CNxScreen クラスを構築する前に呼び出す事ができます。</P>
+
+<P>　CNxScreen クラスが動作するには 16bpp (high color) 以上の色数を表示可能な画面モードが必須です。フルスクリーンのみを使用する場合でも、CNxScreen クラスではフルスクリーンへの切り替え時に、現在のデスクトップの色数を使用する(色数の切り替えを行わない)為、デスクトップの色数は 16bpp 以上でなければなりません。</P>
+
+<P>　画面モードは、<A HREF="#member.SetScreenMode">CNxScreen::SetScreenMode()</A> 関数を呼び出す事によっていつでも切り替え可能です。</P>
+
+<P>　フルスクリーンの状態で、アプリケーションが非アクティブにされた時の動作は DirectDraw によるフルスクリーン化と異なります。CNxScreen クラスでは非アクティブにされた場合、CNxScreen::SetScreenMode() 関数を呼び出して、ウィンドウモードへ切り替えるだけです。DirectDraw の様にウィンドウの最小化は行いません。また、再びアクティブ状態になってもフルスクリーンへの切り替えは行いません。</P>
+
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<A NAME="member"><H2>CNxScreen クラスメンバ</H2></A>
+
+<A HREF="#screenmode">画面モード</A><BR>
+<A HREF="#attribute">属性</A><BR>
+<A HREF="#misc">その他</A><BR>
+
+<A NAME="screenmode"><P><FONT SIZE=+1>画面モード</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetScreenMode">SetScreenMode()</A></TD><TD>　画面モード変更</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.IsFullScreenMode">IsFullScreenMode()</A></TD><TD>　フルスクリーンモードであるかを返す</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.IsCanUseFullScreenMode">IsCanUseFullScreenMode()</A></TD><TD>　フルスクリーンモードが使用可能であるかを返す</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.IsCanUseWindowMode">IsCanUseWindowMode()</A></TD><TD>　ウィンドウモードが使用可能であるかを返す</TD></TR>
+</TABLE>
+
+<A NAME="attribute"><P><FONT SIZE=+1>属性</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetScreenWidth">GetScreenWidth()</A></TD><TD>　画面の幅を返す</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetScreenHeight">GetScreenHeight()</A></TD><TD>　画面の高さを返す</TD></TR>
+</TABLE>
+
+<A NAME="misc"><P><FONT SIZE=+1>その他</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.EnableAutoHideMenuBar">EnableAutoHideMenuBar()</A></TD><TD>　フルスクリーン時にメニューバーを自動的に隠す機能を、有効又は無効にする</TD></TR>
+</TABLE>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxScreen::SetScreenMode() -->
+<A NAME="member.SetScreenMode"><H3>CNxScreen::SetScreenMode()</H3></A>
+<H4>概要</H4>
+<P>　画面モードの変更を行ないます。</P>
+<H4>書式</H4>
+BOOL CNxScreen::SetScreenMode(UINT <EM>uWidth</EM>, UINT <EM>uHeight</EM>, BOOL <EM>bFullScreen</EM>)<BR>
+<BR>
+BOOL CNxScreen::SetScreenMode(BOOL <EM>bFullScreen</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP">UINT <EM>uWidth</EM></TD><TD>　画面の幅</TD></TR>
+<TR><TD VALIGN="TOP">UINT <EM>uHeight</EM></TD><TD>　画面の高さ</TD></TR>
+<TR><TD VALIGN="TOP">BOOL <EM>bFullScreen</EM></TD><TD>　フルスクリーンへ切り替えるなら TRUE</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功ならば TRUE</P>
+<H4>解説</H4>
+<P>　要求された画面モードへ切り替えます。要求された画面モードと、現在の画面モードが同じならば何も行なわずに TRUE を返します。<EM>bFullScreen</EM> 引数を TRUE にするとフルスクリーン、FALSE ならばウィンドウモードへ切り換えます。要求された画面モードへ切り換えられなかった時は FALSE を返します。</P>
+<P>　引数が一つだけの関数は、解像度は変更せず、フルスクリーンとウィンドウを切り換えるのに使用できます。</P>
+<FONT COLOR="RED"><P>　以前のバージョンと異なり、CNxScreen::Attach() 関数より前に、呼び出すことはできません。実際に画面モードを切り替える前に、目的のモードが使用可能であるかを調べるには、<A HREF="#member.IsCanUseWindowMode">CNxScreen::IsCanUseWindowMode()</A> 又は <A HREF="#member.IsCanUseFullScreenMode">CNxScreen::IsCanUseFullScreenMode()</A> 関数を使用して下さい。</FONT></P>
+
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxScreen::IsFullScreenMode() -->
+<A NAME="member.IsFullScreenMode"><H3>CNxScreen::IsFullScreenMode()</H3></A>
+<H4>概要</H4>
+<P>　画面がフルスクリーンモードであるか調べます。</P>
+<H4>書式</H4>
+BOOL CNxScreen::IsFullScreenMode() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　フルスクリーンモードならば TRUE を返します。</P>
+<H4>関連項目</H4>
+<A HREF="#member.SetScreenMode">CNxScreen::SetScreenMode()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxScreen::IsCanUseFullScreenMode -->
+<A NAME="member.IsCanUseFullScreenMode"><H3>CNxScreen::IsCanUseFullScreenMode()</H3></A>
+<H4>概要</H4>
+<P>　フルスクリーンモードが使用可能であるかを返します。</P>
+<H4>書式</H4>
+static BOOL CNxScreen::IsCanUseFullScreenMode(UINT uWidth, UINT uHeight)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP">UINT <EM>uWidth</EM></TD><TD>　画面の幅</TD></TR>
+<TR><TD VALIGN="TOP">UINT <EM>uHeight</EM></TD><TD>　画面の高さ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　指定された解像度でフルスクリーンモードが使用可能であれば TRUE を返します。</P>
+<H4>関連項目</H4>
+<A HREF="#member.IsFullScreenMode">CNxScreen::IsFullScreenMode()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxScreen::IsCanUseWindowMode() -->
+<A NAME="member.IsCanUseWindowMode"><H3>CNxScreen::IsCanUseWindowMode()</H3></A>
+<H4>概要</H4>
+<P>　ウィンドウモードが使用可能であるかを返します。</P>
+<H4>書式</H4>
+static BOOL CNxScreen::IsCanUseWindowMode()<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　現在の解像度でウィンドウモードが使用可能であれば TRUE を返します。</P>
+<H4>解説</H4>
+<P>　この関数から FALSE が返される理由は一つで、現在のデスクトップの色数が 16bpp 以下の場合のみです。</P>
+<H4>関連項目</H4>
+<A HREF="#member.IsFullScreenMode">CNxScreen::IsFullScreenMode()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxScreen::GetScreenWidth() -->
+<A NAME="member.GetScreenWidth"><H3>CNxScreen::GetScreenWidth()</H3></A>
+<H4>概要</H4>
+<P>　画面の幅を返します。</P>
+<H4>書式</H4>
+UINT CNxScreen::GetScreenWidth() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　画面の幅をドット数で返します。</P>
+<H4>解説</H4>
+<P>　この関数は <A HREF="#member.SetScreenMode">CNxScreen::SetScreenMode()</A> メンバ関数で指定された <EM>uWidth</EM> 引数を返します。通常、この値は現在の CNxScreen の幅( = 画面の幅)を示します。</P>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxScreen::GetScreenHeight() -->
+<A NAME="member.GetScreenHeight"><H3>CNxScreen::GetScreenHeight()</H3></A>
+<H4>概要</H4>
+<P>　画面の高さを返します。</P>
+<H4>書式</H4>
+UINT CNxScreen::GetScreenHeight() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　画面の高さをドット数で返します。</P>
+<H4>解説</H4>
+<P>　この関数は <A HREF="#member.SetScreenMode">CNxScreen::SetScreenMode()</A> メンバ関数で指定された <EM>uHeight</EM> 引数を返します。通常、この値は現在の CNxScreen の高さ( = 画面の高さ)を示します。</P>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxScreen::EnableAutoHideMenuBar() -->
+<A NAME="member.EnableAutoHideMenuBar"><H3>CNxScreen::EnableAutoHideMenuBar()</H3></A>
+<H4>概要</H4>
+<P>　フルスクリーン時にメニューバーを自動的に隠す機能を、有効又は無効にします。</P>
+<H4>書式</H4>
+BOOL CNxSprite::EnableAutoHideMenuBar(BOOL <EM>bAutoHide</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD>BOOL <EM>bAutoHide</EM></TD><TD>　有効にするならば TRUE</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　以前の状態</P>
+<H4>解説</H4>
+<P>　<EM>bAutoHide</EM> 引数へ TRUE を渡すと、メニューバーを自動的に隠す機能が有効になります。マウスカーソルを画面の最上部へ移動する(又はキーボードの Alt キーを押す)とメニューが出現します。その後マウスカーソルがメニューバーから遠ざかるか、メニューを決定するとメニューは消えます。</P>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+</BODY>
+</HTML>

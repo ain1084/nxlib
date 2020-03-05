@@ -1,0 +1,399 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+	<LINK REV="Made" HREF="mailto:ain@da.airnet.ne.jp">
+	<LINK REL="Contents" HREF="./index.html">
+	<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-2022-jp">
+	<META NAME="Author" CONTENT="Seiji Ainoguchi">
+	<META NAME="Subject" CONTENT="CNxDIBImage">
+	<TITLE>CNxDIBImage クラス</TITLE>
+</HEAD>
+<BODY>
+<A NAME="top"><H1>CNxDIBImage クラス</H1></A>
+
+<A HREF="#summary">概要</A><BR>
+<A HREF="#member">クラスメンバ</A><BR>
+<BR>
+<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+<A NAME="summary"><H2>概要</H2></A>
+<P>　CNxDIBImage クラスは、Windows のDIB を扱うクラスです。CNxDIBImage クラスで扱う DIB は、カラーテーブル全体を含む BITMAPINFO 構造体と、ビットデータから構成されています。
+
+<P>　CNxDIBImage クラスを使用するには、ヒープ又はスタック上に構築した後、<A HREF="#member.Create">CNxDIBImage::Create()</A> メンバ関数を呼び出します。既存の DIB へのポインタを与えた場合、CNxDIBImage クラスはメモリを確保せず、与えられた DIB の wrapper の様に振る舞います。それ以外の形式の場合、CNxDIBImage クラスはローカルヒープから DIB の為のメモリを確保し、オブジェクトの消滅時には自動的に開放されます。</P>
+
+<P>　<STRONG>CNxDIBImage クラスが保持している BITMAPINFO 構造体は、<A HREF="#member.GetInfo">CNxDIBImage::GetInfo()</A> メンバ関数でポインタを取得できますが、戻り値は const であり、読み出し専用です。いくつかのメンバ関数が返す値は、<A HREF="#member.Create">CNxDIBImage::Create()</A> メンバ関数を呼び出した時点で設定されているため、BITMAPINFOHEADER メンバ部を書き換えた後の動作は不定になります。</STRONG></P>
+
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+<A NAME="member"><H2>CNxDIBImage クラスメンバ</H2></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.Create">Create()</A></TD><TD>　CNxDIBImage を初期化</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetInfoHeader">GetInfoHeader()</A></TD><TD>　BITMAPINFOHEADER 構造体へのポインタを取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetInfo">GetInfo()</A></TD><TD>　BITMAPINFO 構造体へのポインタを取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetInfoSize">GetInfoSize()</A></TD><TD>　BITMAPINFO 構造体の大きさを取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetImageSize">GetImageSize()</A></TD><TD>　ビットデータのサイズを取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetWidth">GetWidth()</A></TD><TD>　DIB の幅を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetHeight">GetHeight()</A></TD><TD>　DIB の高さを取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetRect">GetRect()</A></TD><TD>　DIB の矩形を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetBitCount">GetBitCount()</A></TD><TD>　DIB のビット深度を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetColorCount">GetColorCount()</A></TD><TD>　カラーテーブルの要素数を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetColorTable">GetColorTable()</A></TD><TD>　カラーテーブルへのポインタを取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetPitch">GetPitch()</A></TD><TD>　DIB の一行あたりのバイト数を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetBits">GetBits()</A></TD><TD>　左上のピクセルを示すビットデータへのポインタを取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetDIBits">GetDIBits()</A></TD><TD>　ビットデータの開始ポインタを取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.Blt">Blt()</A></TD><TD>　ビットブロック転送</TD></TR>
+</TABLE>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxDIBimage::Create -->
+<A NAME="member.Create"><H3>CNxDIBImage::Create()</H3></A>
+<H4>概要</H4>
+<P>　CNxDIBImage オブジェクトを初期化します。</P>
+<H4>書式</H4>
+BOOL CNxDIBImage::Create(int <EM>nWidth</EM>, int <EM>nHeight</EM>, UINT <EM>uBitCount</EM>)<BR>
+<BR>
+BOOL CNxDIBImage::Create(const BITMAPINFO* <EM>lpbmi</EM>)<BR>
+<BR>
+BOOL CNxDIBImage::Create(LPBITMAPINFO <EM>lpbmi</EM>, LPVOID <EM>lpvBits</EM>)<BR>
+<BR>
+BOOL CNxDIBImage::Create(HGLOBAL <EM>hGlobal</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>nWidth</EM></TD><TD>　DIB の幅</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>nHeight</EM></TD><TD>　DIB の高さ</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>UINT <EM>uBitCount</EM></TD><TD>　DIB のビット深度</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const BITMAPINFO* <EM>lpbmi</EM></TD><TD>　作成する DIB の情報を示す BITMAPINFO 構造体へのポインタ</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>LPBITMAPINFO <EM>lpbmi</EM></TD><TD>　LPBITMAPINFO 構造体へのポインタ</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>LPVOID <EM>lpvBits</EM></TD><TD>　ビットデータへのポインタ</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>HGLOBAL <EM>hGlobal</EM></TD><TD>　DIB を示すグローバルメモリのハンドル</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功ならば TRUE</P>
+<H4>解説</H4>
+
+<P>　一番目の書式は、指定された大きさとビット深度で、空の DIB を作成します。<EM>nHeight</EM> 引数の値を負にすると、作成される DIB は top-down 形式になります。ビット深度へは 1, 4, 8, 16, 24, 32 が指定可能です。</P>
+
+<P>　二番目の書式は、指定された BITMAPINFO 構造体の内容を用いて、空の DIB を作成します。CNxDIBImage オブジェクトは、<EM>lpbmi</EM> で示される BITMAPINFO 構造体全体のコピーを持ちます。</P>
+
+<P>　三番目の書式は、指定された BITMAPINFO 構造体とビットデータへのポインタを DIB として扱う様に、CNxDIBImage オブジェクトを初期化します。CNxDIBImage オブジェクト自身は DIB の為のメモリ確保を行いません。それぞれのポインタは CNxDIBImage オブジェクトを破棄するまで、有効でなければなりません。主に、独自の方法で作成された、DIB を CNxDIBImage オブジェクトとして扱う為に使用します。<EM>lpvBits</EM> を NULL にした場合、<EM>lpbmp</EM> で指定される BITMAPINFO 構造体の内容の直後にビットデータが連続していると見なし、<EM>lpvBits</EM> を自動的に設定します。</P>
+
+<P>　四番目の書式は、<EM>hGlobal</EM> を Lock した後、内容全体を CNxDIBImage へコピーして、Unlock します(グローバルメモリの所有権は移動しません)。グローバルメモリの先頭は BITMAPINFO 構造体から始まり、ビットデータ等が全て連続して配置されていなければなりません。クリップボードからのコピーの際に利用すると便利です。</P>
+
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+<!-- CNxDIBimage::GetInfoHeader() -->
+<A NAME="member.GetInfoHeader"><H3>CNxDIBImage::GetInfoHeader()</H3></A>
+<H4>概要</H4>
+<P>　BITMAPINFOHEADER 構造体へのポインタを取得します。
+<H4>書式</H4>
+const BITMAPINFOHEADER* CNxDIBImage::GetInfoHeader() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　BITMAPINFOHEADER 構造体へのポインタ</P>
+<H4>解説</H4>
+<P>　返されるポインタは、BITMAPINFO 構造体へのポインタと同じです。例えば、以下の様に reinterpret_cast 演算子を使用して、BITMAPINFO 構造体へのポインタへ変換できます。</P>
+<PRE>    <FONT COLOR="BLUE">const</FONT> BITMAPINFO* lpbmi = <FONT COLOR="BLUE">reinterpret_cast</FONT>&lt;<FONT COLOR="BLUE">const</FONT> BITMAPINFO*&gt;(dibImage.GetInfoHeader());</PRE>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+<!-- CNxDIBimage::GetInfo() -->
+<A NAME="member.GetInfo"><H3>CNxDIBImage::GetInfo()</H3></A>
+<H4>概要</H4>
+<P>　BITMAPINFO 構造体へのポインタを取得します。
+<H4>書式</H4>
+const BITMAPINFO* CNxDIBImage::GetInfo() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　BITMAPINFO 構造体へのポインタ</P>
+<H4>解説</H4>
+<P>　返されるポインタは、BITMAPINFOHEADER 構造体へのポインタと同じです。例えば、以下の様に reinterpret_cast 演算子を使用して、BITMAPINFOHEADER 構造体へのポインタへ変換できます。</P>
+<PRE>    <FONT COLOR="BLUE">const</FONT> BITMAPINFOHEADER* lpbmih = <FONT COLOR="BLUE">reinterpret_cast</FONT>&lt;<FONT COLOR="BLUE">const</FONT> BITMAPINFOHEADER*&gt;(dibImage.GetInfo());</PRE>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+<!-- CNxDIBImage::GetInfoSize() -->
+<A NAME="member.GetInfoSize"><H3>CNxDIBImage::GetInfoSize()</H3></A>
+<H4>概要</H4>
+<P>　BITMAPINFO 構造体の大きさを返します。</P>
+<H4>書式</H4>
+DWORD CNxDIBImage::GetInfoSize() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　バイト単位の BITMAPINFO 構造体の大きさ</P>
+<H4>解説</H4>
+<P>　BITMAPINFOHEADER 構造体と、カラーテーブル全体を含む大きさをバイト単位で返します。</P>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxDIBImage::GetImageSize() -->
+<A NAME="member.GetImageSize"><H3>CNxDIBImage::GetImageSize()</H3></A>
+<H4>概要</H4>
+<P>　ビットデータの大きさを返します。</P>
+<H4>書式</H4>
+DWORD CNxDIBImage::GetImageSize() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　バイト単位のビットデータの大きさ</P>
+<H4>解説</H4>
+
+<P>　ビットデータの大きさをバイト単位で返します。返される値は、<A HREF="#member.GetPitch">CNxDIBImage::GetPitch()</A> 関数と、<A HREF="#member.GetHeight">CNxDIBImage::GetHeight()</A> 関数の戻り値、それぞれの絶対値を乗算したものです。</P>
+
+<P>　意味自体は BITMAPINFOHEADER 構造体の biSizeImage メンバと同じですが、CNxDIBImage オブジェクト自身が DIB のメモリを管理しない(<A HREF="#member.Create">CNxDIBImage::Create()</A> 関数の BITMAPINFO 構造体とビットデータへのポインタを渡す形式を使用した)場合、CNxDIBImage クラスは与えられた BITMAPINFOHEADER 構造体の biSizeImage メンバを書き換えない為、biSizeImage メンバの値とは異なった値になる場合があります。</P>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxDIBImage::GetWidth() -->
+<A NAME="member.GetWidth"><H3>CNxDIBImage::GetWidth()</H3></A>
+<H4>概要</H4>
+<P>　DIB の幅を返します。</P>
+<H4>書式</H4>
+UINT CNxDIBImage::GetWidth() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　ピクセル単位の DIB の幅</P>
+<H4>解説</H4>
+<P>　DIB の幅をピクセル単位で返します。返される値は常に正の値です。</P>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+<!-- CNxDIBImage::GetHeight() -->
+<A NAME="member.GetHeight"><H3>CNxDIBImage::GetHeight()</H3></A>
+<H4>概要</H4>
+<P>　DIB の高さを返します。</P>
+<H4>書式</H4>
+UINT CNxDIBImage::GetHeight() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　ピクセル単位の DIB の高さ</P>
+<H4>解説</H4>
+<P>　DIB の高さをピクセル単位で返します。返される値は DIB の形式(bottom-up, top-down) とは関係なく、常に正の値です。</P>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxDIBImage::GetRect() -->
+<A NAME="member.GetRect"><H3>CNxDIBImage::GetRect()</H3></A>
+<H4>概要</H4>
+<P>　DIB 全体を示す矩形を返します。</P>
+<H4>書式</H4>
+void CNxDIBImage::GetRect(LPRECT <EM>lpRect</EM>) const<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD>LPRECT <EM>lpRect</EM></TD><TD>　矩形を受け取る RECT 構造体へのポインタ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　RECT 構造体メンバは以下の様に設定されます。</P>
+<BLOCKQUOTE>
+	<TABLE BORDER>
+	<TR><TD>left</TD><TD>0</TD></TR>
+	<TR><TD>top</TD><TD>0</TD></TR>
+	<TR><TD>right</TD><TD>DIB の幅(<A HREF="#member.GetWidth">CNxDIBImage::GetWidth()</A> の戻値と同じ</TD></TR>
+	<TR><TD>bottom</TD><TD>DIB の高さ(<A HREF="#member.GetHeight">CNxDIBImage::GetHeight()</A> の戻値と同じ</TD></TR>
+	</TABLE>
+</BLOCKQUOTE>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxDIBImage::GetBitCount() -->
+<A NAME="member.GetBitCount"><H3>CNxDIBImage::GetBitCount()</H3></A>
+<H4>概要</H4>
+<P>　DIB のビット深度を返します。</P>
+<H4>書式</H4>
+UINT CNxDIBImage::GetBitCount() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　DIB のビット深度(1, 2, 4, 8, 24, 32)</P>
+<H4>解説</H4>
+<P>　この関数は、BITMAPINFOHEADER 構造体の biBitCount メンバの値を返します。</P>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxDIBimage::GetColorCount() -->
+<A NAME="member.GetColorCount"><H3>CNxDIBImage::GetColorCount()</H3></A>
+<H4>概要</H4>
+<P>　カラーテーブルの要素数を取得
+<H4>書式</H4>
+DWORD CNxDIBImage::GetColorCount() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　カラーテーブルの要素数</P>
+<H4>解説</H4>
+<P>　BITMAPINFOHEADER の後に続く、カラーテーブルの要素数を返します。パレット付き DIB では、RGBQUAD 構造体の個数を、
+16bpp DIB や 32bpp DIB では、カラーマスクのサイズ(通常は3)を返します。カラーマスクもパレットも持たない DIB (24bpp 等)の場合、戻値は 0 になります。</P>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+<!-- CNxDIBimage::GetColorTable() -->
+<A NAME="member.GetColorTable"><H3>CNxDIBImage::GetColorTable()</H3></A>
+<H4>概要</H4>
+<P>　カラーテーブルへのポインタを取得します。</P>
+<H4>書式</H4>
+RGBQUAD* CNxDIBImage::GetColorTable()<BR>
+<BR>
+const RGBQUAD* CNxDIBImage::GetColorTable() const<BR>
+<H4>戻値</H4>
+<P>　カラーテーブルへのポインタ</P>
+<H4>解説</H4>
+<P>　カラーテーブルの最初のエントリへのポインタを返します。パレット付き DIB の場合は、インデックス0 の RGBQUAD 構造体を示します。16bpp や 32bpp では、BITMAPINFOHEADER 構造体の biCompression メンバが BI_BITFIELDS の場合、カラーマスクへのポインタを示します。</P>
+<P>　カラーテーブルが存在しない形式の場合は NULL を返します。</P>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+<!-- CNxDIBimage::GetPitch() -->
+<A NAME="member.GetPitch"><H3>CNxDIBImage::GetPitch()</H3></A>
+<H4>概要</H4>
+<P>　DIB の一行あたりの幅を返します。</P>
+<H4>書式</H4>
+LONG CNxDIBImage::GetPitch() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　一行あたりの幅</P>
+<H4>解説</H4>
+<P>　DIB 一行が占める幅をバイト単位で返します。値は必ず 4 の倍数です。bottom-up 形式 DIB の場合、負の値が返されます。</P>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+<!-- CNxDIBimage::GetBits() -->
+<A NAME="member.GetBits"><H3>CNxDIBImage::GetBits()</H3></A>
+<H4>概要</H4>
+<P>　画像の左上を示すビットデータへのポインタを返します。</P>
+<H4>書式</H4>
+LPVOID CNxDIBImage::GetBits()<BR>
+<BR>
+LPCVOID CNxDIBImage::GetBits() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　ビットデータへのポインタ</P>
+<H4>解説</H4>
+<P>　DIB の bottom-up, top-down 形式に関らず、左上 (X = 0, Y = 0) のピクセルへのポインタを返します。
+ビットデータの開始ポインタではありませんので、Win32API の StretchDIBits() 関数等へは渡さないで下さい。ビットデータの開始ポインタが必要な場合は、代わりに <A HREF="#member.GetDIBits">CNxDIBImage::GetDIBits()</A> 関数を使用して下さい。</P>
+
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+<!-- CNxDIBImage::GetDIBits() -->
+<A NAME="member.GetDIBits"><H3>CNxDIBImage::GetDIBits()</H3></A>
+<H4>概要</H4>
+<P>　DIB のビットデータ部の開始ポインタを返します。</P>
+<H4>書式</H4>
+LPVOID CNxDIBImage::GetBits()<BR>
+<BR>
+LPCVOID CNxDIBImage::GetBits() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　ビットデータへのポインタ</P>
+<H4>解説</H4>
+<P>　ビットデータ部の開始ポインタを返します。返されたポインタが示すピクセルは DIB の形式によって異なります。</P>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+<!-- CNxDIBImage::Blt() -->
+<A NAME="member.Blt"><H3>CNxDIBImage::Blt()</H3></A>
+<H4>概要</H4>
+<P>　CNxDIBImage オブジェクト間のビットブロック転送を行います。</P>
+<H4>書式</H4>
+BOOL CNxDIBImage::Blt(int <EM>dx</EM>, int <EM>dy</EM>, const CNxDIBImage* <EM>pSrcDIBImage</EM>, const RECT* <EM>lpRect = NULL</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>dx</EM></TD><TD>　転送先 X 座標</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>dy</EM></TD><TD>　転送先 Y 座標</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const CNxDIBImage* <EM>pSrcDIBImage</EM></TD><TD>　転送元 CNxDIBImage オブジェクトへのポインタ</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const RECT* <EM>lpRect</EM></TD><TD>　転送元矩形(NULL ならば全体)</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功ならば TRUE</P>
+<H4>解説</H4>
+<P>　CNxDIBImage オブジェクト間のブロック転送を行います。　転送元と転送先のビット深度が異なる場合は、自動的に変換されます。ただし、Win32API の BitBlt() 関数の様に全ての転送をサポートしている訳ではありません。転送が行えない場合、関数は FALSE を返します。現在サポートされている転送は以下の通りです。</P>
+<P>
+<TABLE BORDER>
+<TR><TD><BR></TD><TD>to 1bpp</TD><TD>to 4bpp</TD><TD>to 8bpp</TD><TD>to 16bpp</TD><TD>to 24bpp</TD><TD>to 32bpp</TD></TR>
+<TR><TD>from 1bpp</TD><TD>○<FONT SIZE=-1>(※1)(※6)</FONT></TD><TD>○<FONT SIZE=-1>(※2)</FONT></TD><TD>○</TD><TD>○</TD><TD>○</TD><TD>○<FONT SIZE=-1>(※3)</FONT></TD></TR>
+<TR><TD>from 4bpp</TD><TD>×</TD><TD>○<FONT SIZE=-1>(※6)</FONT></TD><TD>○<FONT SIZE=-1>(※2)</FONT></TD><TD>○</TD><TD>○</TD><TD>○<FONT SIZE=-1>(※3)</FONT></TD></TR>
+<TR><TD>from 8bpp</TD><TD>×</TD><TD>×</TD><TD>○</TD><TD>○</TD><TD>○</TD><TD>○<FONT SIZE=-1>(※3)</FONT></TD></TR>
+<TR><TD>from 16bpp</TD><TD>×</TD><TD>×</TD><TD>○</TD><TD>○</TD></TD><TD>○<FONT SIZE=-1>(※7)</FONT></TD><TD>○<FONT SIZE=-1>(※3)(※7)</FONT></TD></TR>
+<TR><TD>from 24bpp</TD><TD>×</TD><TD>×</TD><TD>○</TD><TD>○</TD><TD>○</TD><TD>○<FONT SIZE=-1>(※3)</FONT></TD></TR>
+<TR><TD>from 32bpp</TD><TD>×</TD><TD>×</TD><TD>○</TD><TD>○</TD><TD>○<FONT SIZE=-1>(※5)</FONT></TD><TD>○</TD></TR>
+</TABLE>
+</P>
+<P>
+<TABLE>
+<TR><TD>※1</TD><TD>　転送先のカラーテーブルは参照せず、ビットデータをそのまま転送します。</TD></TR>
+<TR><TD>※2</TD><TD>　転送先のカラーテーブルは参照しません。パレットインデックスを拡張します。</TD></TR>
+<TR><TD>※3</TD><TD>　アルファは 255 (完全不透明) になります。</TD></TR>
+<TR><TD>※4</TD><TD>　転送先のカラーマスクによってビットデータは変化します。</TD></TR>
+<TR><TD>※5</TD><TD>　転送元アルファの値は無視されます。</TD></TR>
+<TR><TD>※6</TD><TD>　転送先 X 座標がバイト境界でない場合は失敗します。</TD></TR>
+<TR><TD>※7</TD><TD>　転送元ビットマスクを参照し、true color へ変換されます。</TD></TR>
+<TR><TD>※8</TD><TD>　グレイスケール化されます。</TD></TR>
+</TABLE>
+</P>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+</BODY>
+</HTML>

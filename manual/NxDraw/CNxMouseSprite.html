@@ -1,0 +1,104 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+	<LINK REV="Made" HREF="mailto:ain@da.airnet.ne.jp">
+	<LINK REL="Contents" HREF="./index.html">
+	<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-2022-jp">
+	<META NAME="Author" CONTENT="Seiji Ainoguchi">
+	<META NAME="Subject" CONTENT="CNxMouseSprite">
+	<TITLE>CNxMouseSprite クラス</TITLE>
+</HEAD>
+<BODY>
+
+<A NAME="top"><H1>CNxMouseSprite クラス</H1></A>
+
+<PRE>
+<A HREF="CNxSprite.html">CNxSprite</A>
+  |
+  +--<A HREF="CNxSurfaceSprite.html">CNxSurfaceSprite</A>
+      |
+      +--<STRONG>CNxMouseSprite</STRONG>
+</PRE>
+
+<A HREF="#summary">概要</A><BR>
+<A HREF="#member">クラスメンバ</A><BR>
+<BR>
+<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+<A NAME="summary"><H2>概要</H2></A>
+<P>　CNxMouseSprite クラスは、<A HREF="CNxSurfaceSprite.html">CNxSurfaceSprite</A> の派生クラスです。自動的にマウスカーソルに追従する機能を持っています。このクラスを使用すると、ソフトウェアカーソルを簡単に実現できます。</P>
+
+<P>　CNxMouseSprite クラスは、マウスカーソルの座標と常に一致する様に、<A HREF="CNxSprite.html">CNxSprite</A> クラスの <A HREF="CNxSprite.html#member.SetPos">SetPos()</A> 関数をオーバーライドして、マウスカーソルの座標を制御しています。この点を除き、実際(Windows 上)のマウスカーソルの制御は行ないません。Windows のマウスカーソルを非表示にするには、<STRONG>::ShowCursor()</STRONG> 関数を呼び出して下さい。</P>
+
+<P>　CNxMouseSprite クラス自体には、カーソルのホットスポットを設定するメンバ関数はありませんが、ほぼ同様の設定を <A HREF="CNxSprite.html#member.SetDisplayOrg">CNxSprite::SetDisplayOrg()</A> 関数によって行う事ができます。例えば、32x32 サイズのカーソルにおいて、ホットスポットをカーソルの中心(16, 16) に設定する場合は、SetDisplayOrg() 関数の <EM>x</EM> と <EM>y</EM> 引数へ -16 を渡します。</P>
+
+<P>　このクラスの実際の使用例として、<A HREF="../../samples/mouse/">mouse サンプル</A> があります。</P>
+
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+<A NAME="member"><H2>CNxMouseSprite クラスメンバ</H2></A>
+
+<A HREF="#construct">構築</A><BR>
+<A HREF="#operation">操作</A><BR>
+
+<A NAME="construct"><H3>構築</H3></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.CNxMouseSprite">CNxMouseSprite()</A></TD><TD>　コンストラクタ</TD></TR>
+</TABLE>
+
+<A NAME="operation"><H3>操作</H3></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.Show">Show()</A></TD><TD>　表示カウンタを増減させる</TD></TR>
+</TABLE>
+<P></P>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxMouseSprite::CNxMouseSprite() -->
+<A NAME="member.CNxMouseSprite"><H3>CNxMouseSprite::CNxMouseSprite()</H3></A>
+<H4>概要</H4>
+<P>　CNxMouseSprite クラスのコンストラクタ</P>
+<H4>書式</H4>
+CNxMouseSprite::CNxMouseSprite(CNxWindow* <EM>pParent</EM>, CNxSurface* <EM>pSurface = NULL</EM>, const RECT* <EM>lpRect = NULL</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP">CNxWindow* <EM>pParent</EM></TD><TD>　親スプライトを示す <A HREF="CNxWindow.html">CNxWindow</A> 派生クラスへのポインタ</TD></TR>
+<TR><TD VALIGN="TOP">CNxSurface* <EM>pSurface</EM></TD><TD>　転送元として使用する <A HREF="CNxSurface.html">CNxSurface</A> クラスへのポインタ</TD></TR>
+<TR><TD VALIGN="TOP">const RECT* <EM>lpRect</EM></TD><TD>　転送元サーフェスから転送される矩形(NULL ならばサーフェス全体)</TD></TR>
+</TABLE>
+<H4>解説</H4>
+<P>　親スプライトには、CNxWindow 派生クラスを指定しなければなりません。その他の引数の用法は <A HREF="CNxSurfaceSprite.html#member.CNxSurfaceSprite">CNxSurfaceSprite::CNxSurfaceSprite()</A> と全く同じです。</P>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxMouseSprite::Show() -->
+<A NAME="member.Show"><H3>CNxMouseSprite::Show()</H3></A>
+<H4>概要</H4>
+<P>　スプライトの表示カウンタを増減し、カウンタが正の値であればカーソルを表示、負の値ならばカーソルを非表示にします。</P>
+<H4>書式</H4>
+int CNxMouseSprite::Show(BOOL <EM>bShow</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP">BOOL <EM>bShow</EM></TD><TD>　カウンタを増やすならば TRUE、減らすなら FALSE。</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　現在のカウンタ</P>
+<H4>備考</H4>
+<P>　カウンタの初期値は 0 です。カウンタが 0 を跨ぐ時、内部で <A HREF="CNxSprite.html#member.SetVisible">CNxSprite::SetVisible()</A> 関数を呼び出してスプライトの表示を操作します。この関数を通さずに、直接 CNxSprite::SetVisible() 関数を呼び出しても問題はありません(ただし、カウンタは増減しません)。</P>
+<P>　この関数が操作するのは、スプライトの表示状態のみです。Windows のマウスカーソルの表示状態とは関係ありません。</P>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+</BODY>
+</HTML>

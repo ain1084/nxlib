@@ -1,0 +1,82 @@
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nxdraw", "nxdraw\nxdraw.vcproj", "{458F1F51-C3FE-4FE2-B15C-3198AC0F0654}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1576E98F-D727-4331-A93C-E04EBD7B729F} = {1576E98F-D727-4331-A93C-E04EBD7B729F}
+		{3CBBB626-AB0B-4B32-B8FD-1B6DB76C8653} = {3CBBB626-AB0B-4B32-B8FD-1B6DB76C8653}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nxstorage", "nxstorage\nxstorage.vcproj", "{E7759B60-DC24-48BD-A168-DCCC0E9F32F9}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "jpeglib", "nxdraw\jpeglib\jpeglib.vcproj", "{3CBBB626-AB0B-4B32-B8FD-1B6DB76C8653}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libpng", "nxdraw\libpng\libpng.vcproj", "{1576E98F-D727-4331-A93C-E04EBD7B729F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nxshared", "nxshared\nxshared.vcproj", "{D2336265-AF16-49EB-8FE1-1A50D0FDCC23}"
+	ProjectSection(ProjectDependencies) = postProject
+		{DCB58942-336B-46C7-B3C3-D27DDF4D4A9D} = {DCB58942-336B-46C7-B3C3-D27DDF4D4A9D}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "nxshared\zlib\zlib.vcproj", "{DCB58942-336B-46C7-B3C3-D27DDF4D4A9D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug Dynamic|Win32 = Debug Dynamic|Win32
+		Debug Static|Win32 = Debug Static|Win32
+		Release Dynamic|Win32 = Release Dynamic|Win32
+		Release Static|Win32 = Release Static|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{458F1F51-C3FE-4FE2-B15C-3198AC0F0654}.Debug Dynamic|Win32.ActiveCfg = Debug Dynamic|Win32
+		{458F1F51-C3FE-4FE2-B15C-3198AC0F0654}.Debug Dynamic|Win32.Build.0 = Debug Dynamic|Win32
+		{458F1F51-C3FE-4FE2-B15C-3198AC0F0654}.Debug Static|Win32.ActiveCfg = Debug Static|Win32
+		{458F1F51-C3FE-4FE2-B15C-3198AC0F0654}.Debug Static|Win32.Build.0 = Debug Static|Win32
+		{458F1F51-C3FE-4FE2-B15C-3198AC0F0654}.Release Dynamic|Win32.ActiveCfg = Release Dynamic|Win32
+		{458F1F51-C3FE-4FE2-B15C-3198AC0F0654}.Release Dynamic|Win32.Build.0 = Release Dynamic|Win32
+		{458F1F51-C3FE-4FE2-B15C-3198AC0F0654}.Release Static|Win32.ActiveCfg = Release Static|Win32
+		{458F1F51-C3FE-4FE2-B15C-3198AC0F0654}.Release Static|Win32.Build.0 = Release Static|Win32
+		{E7759B60-DC24-48BD-A168-DCCC0E9F32F9}.Debug Dynamic|Win32.ActiveCfg = Debug Dynamic|Win32
+		{E7759B60-DC24-48BD-A168-DCCC0E9F32F9}.Debug Dynamic|Win32.Build.0 = Debug Dynamic|Win32
+		{E7759B60-DC24-48BD-A168-DCCC0E9F32F9}.Debug Static|Win32.ActiveCfg = Debug Static|Win32
+		{E7759B60-DC24-48BD-A168-DCCC0E9F32F9}.Debug Static|Win32.Build.0 = Debug Static|Win32
+		{E7759B60-DC24-48BD-A168-DCCC0E9F32F9}.Release Dynamic|Win32.ActiveCfg = Release Dynamic|Win32
+		{E7759B60-DC24-48BD-A168-DCCC0E9F32F9}.Release Dynamic|Win32.Build.0 = Release Dynamic|Win32
+		{E7759B60-DC24-48BD-A168-DCCC0E9F32F9}.Release Static|Win32.ActiveCfg = Release Static|Win32
+		{E7759B60-DC24-48BD-A168-DCCC0E9F32F9}.Release Static|Win32.Build.0 = Release Static|Win32
+		{3CBBB626-AB0B-4B32-B8FD-1B6DB76C8653}.Debug Dynamic|Win32.ActiveCfg = Debug Dynamic|Win32
+		{3CBBB626-AB0B-4B32-B8FD-1B6DB76C8653}.Debug Dynamic|Win32.Build.0 = Debug Dynamic|Win32
+		{3CBBB626-AB0B-4B32-B8FD-1B6DB76C8653}.Debug Static|Win32.ActiveCfg = Debug Static|Win32
+		{3CBBB626-AB0B-4B32-B8FD-1B6DB76C8653}.Debug Static|Win32.Build.0 = Debug Static|Win32
+		{3CBBB626-AB0B-4B32-B8FD-1B6DB76C8653}.Release Dynamic|Win32.ActiveCfg = Release Dynamic|Win32
+		{3CBBB626-AB0B-4B32-B8FD-1B6DB76C8653}.Release Dynamic|Win32.Build.0 = Release Dynamic|Win32
+		{3CBBB626-AB0B-4B32-B8FD-1B6DB76C8653}.Release Static|Win32.ActiveCfg = Release Static|Win32
+		{3CBBB626-AB0B-4B32-B8FD-1B6DB76C8653}.Release Static|Win32.Build.0 = Release Static|Win32
+		{1576E98F-D727-4331-A93C-E04EBD7B729F}.Debug Dynamic|Win32.ActiveCfg = Debug Dynamic|Win32
+		{1576E98F-D727-4331-A93C-E04EBD7B729F}.Debug Dynamic|Win32.Build.0 = Debug Dynamic|Win32
+		{1576E98F-D727-4331-A93C-E04EBD7B729F}.Debug Static|Win32.ActiveCfg = Debug Static|Win32
+		{1576E98F-D727-4331-A93C-E04EBD7B729F}.Debug Static|Win32.Build.0 = Debug Static|Win32
+		{1576E98F-D727-4331-A93C-E04EBD7B729F}.Release Dynamic|Win32.ActiveCfg = Release Dynamic|Win32
+		{1576E98F-D727-4331-A93C-E04EBD7B729F}.Release Dynamic|Win32.Build.0 = Release Dynamic|Win32
+		{1576E98F-D727-4331-A93C-E04EBD7B729F}.Release Static|Win32.ActiveCfg = Release Static|Win32
+		{1576E98F-D727-4331-A93C-E04EBD7B729F}.Release Static|Win32.Build.0 = Release Static|Win32
+		{D2336265-AF16-49EB-8FE1-1A50D0FDCC23}.Debug Dynamic|Win32.ActiveCfg = Debug Dynamic|Win32
+		{D2336265-AF16-49EB-8FE1-1A50D0FDCC23}.Debug Dynamic|Win32.Build.0 = Debug Dynamic|Win32
+		{D2336265-AF16-49EB-8FE1-1A50D0FDCC23}.Debug Static|Win32.ActiveCfg = Debug Static|Win32
+		{D2336265-AF16-49EB-8FE1-1A50D0FDCC23}.Debug Static|Win32.Build.0 = Debug Static|Win32
+		{D2336265-AF16-49EB-8FE1-1A50D0FDCC23}.Release Dynamic|Win32.ActiveCfg = Release Dynamic|Win32
+		{D2336265-AF16-49EB-8FE1-1A50D0FDCC23}.Release Dynamic|Win32.Build.0 = Release Dynamic|Win32
+		{D2336265-AF16-49EB-8FE1-1A50D0FDCC23}.Release Static|Win32.ActiveCfg = Release Static|Win32
+		{D2336265-AF16-49EB-8FE1-1A50D0FDCC23}.Release Static|Win32.Build.0 = Release Static|Win32
+		{DCB58942-336B-46C7-B3C3-D27DDF4D4A9D}.Debug Dynamic|Win32.ActiveCfg = Debug Dynamic|Win32
+		{DCB58942-336B-46C7-B3C3-D27DDF4D4A9D}.Debug Dynamic|Win32.Build.0 = Debug Dynamic|Win32
+		{DCB58942-336B-46C7-B3C3-D27DDF4D4A9D}.Debug Static|Win32.ActiveCfg = Debug Static|Win32
+		{DCB58942-336B-46C7-B3C3-D27DDF4D4A9D}.Debug Static|Win32.Build.0 = Debug Static|Win32
+		{DCB58942-336B-46C7-B3C3-D27DDF4D4A9D}.Release Dynamic|Win32.ActiveCfg = Release Dynamic|Win32
+		{DCB58942-336B-46C7-B3C3-D27DDF4D4A9D}.Release Dynamic|Win32.Build.0 = Release Dynamic|Win32
+		{DCB58942-336B-46C7-B3C3-D27DDF4D4A9D}.Release Static|Win32.ActiveCfg = Release Static|Win32
+		{DCB58942-336B-46C7-B3C3-D27DDF4D4A9D}.Release Static|Win32.Build.0 = Release Static|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

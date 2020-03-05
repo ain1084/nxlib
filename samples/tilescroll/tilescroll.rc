@@ -1,0 +1,151 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// 日本語 resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
+#ifdef _WIN32
+LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
+#pragma code_page(932)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINFRAME MENU DISCARDABLE 
+BEGIN
+    POPUP "ﾌｧｲﾙ(&F)"
+    BEGIN
+        MENUITEM "終了(&E)\tAlt+F4",            ID_FILE_EXIT
+    END
+    POPUP "表示(&V)"
+    BEGIN
+        POPUP "ｻｲｽﾞ(&S)"
+        BEGIN
+            MENUITEM "256x256\tCtrl+1",             ID_VIEW_SIZE_256_256
+            MENUITEM "320x240\tCtrl+2",             ID_VIEW_SIZE_320_240
+            MENUITEM "640x480\tCtrl+3",             ID_VIEW_SIZE_640_480
+            MENUITEM "800x600\tCtrl+4",             ID_VIEW_SIZE_800_600
+        END
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// PNG
+//
+
+IDR_PNG_TEX0            PNG     DISCARDABLE     "res\\tex64_0.png"
+IDR_PNG_TEX1            PNG     DISCARDABLE     "res\\tex64_1.png"
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 2001,4,21,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "041104b0"
+        BEGIN
+            VALUE "CompanyName", "N/A\0"
+            VALUE "FileDescription", "NxLib sample - tilescroll\0"
+            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "InternalName", "tilescroll\0"
+            VALUE "LegalCopyright", "Copyright (C) 2000, 2001 S.Ainoguchi\0"
+            VALUE "OriginalFilename", "tilescroll.exe\0"
+            VALUE "ProductName", "NxLib\0"
+            VALUE "ProductVersion", "2001, 4, 21, 1\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x411, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_MAINFRAME ACCELERATORS DISCARDABLE 
+BEGIN
+    "1",            ID_VIEW_SIZE_256_256,   VIRTKEY, CONTROL, NOINVERT
+    "2",            ID_VIEW_SIZE_320_240,   VIRTKEY, CONTROL, NOINVERT
+    "3",            ID_VIEW_SIZE_640_480,   VIRTKEY, CONTROL, NOINVERT
+    "4",            ID_VIEW_SIZE_800_600,   VIRTKEY, CONTROL, NOINVERT
+END
+
+#endif    // 日本語 resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

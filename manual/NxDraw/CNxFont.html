@@ -1,0 +1,250 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+	<LINK REV="Made" HREF="mailto:ain@da.airnet.ne.jp">
+	<LINK REL="Contents" HREF="./index.html">
+	<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-2022-jp">
+	<META NAME="Author" CONTENT="Seiji Ainoguchi">
+	<META NAME="Subject" CONTENT="CNxFont">
+	<TITLE>CNxFont クラス</TITLE>
+</HEAD>
+<BODY>
+<A NAME="top"><H1>CNxFont クラス</H1></A>
+
+<A HREF="#summary">概要</A><BR>
+<A HREF="#member">クラスメンバ</A><BR>
+<BR>
+<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+<A NAME="summary"><H2>概要</H2></A>
+
+<P>　CNxFont クラスは、LOGFONT 構造体からのフォントの作成を、簡易化する為のクラスです。<A HREF="CNxSurface.html#member.DrawText">CNxSurface::DrawText()</A> で描画されるテキストのフォントを指定する為にも使用されます。メンバとして LOGFONT 構造体と、それから作成したフォントへのハンドル(HFONT型)を保持しています。メンバ関数によって LOGFONT 構造体が操作されると、CNxFont クラスは、現在のフォントを削除して、LOGFONT 構造体から新しいフォントを作成します。</P>
+
+<P>　<A HREF="#member.GetHandle">CNxFont::GetHandle()</A> 関数によって、フォントのハンドルを取得できますが、前述の通り LOGFONT 構造体を操作した後は、前回とは異なるハンドルが返されます。この関数で取得したハンドルは一時的な物として扱って下さい。CNxSurface クラスへは <A HREF="CNxSurface.html#member.SetFont">CNxSurfac::SetFont()</A> 関数によって、使用する CNxFont オブジェクトを指定しますが、この関数へ与える引数は CNxFont のポインタです。以後、フォントが必要になる度に、このポインタを通して CNxFont::GetHandle() を呼び出しますので、<A HREF="CNxSurface.html#member.SetFont">CNxSurfac::SetFont()</A> で CNxFont を一度設定した後も影響を受けます。以下の例では、二つの DrawText() で描画されるテキストの大きさは異なります。</P>
+
+<PRE>    CNxFont font(_T(&quot;ＭＳ Ｐゴシック&quot), 32);
+    pSurface-&gt;<A HREF="CNxSurface.html#member.SetFont">SetFont</A>(&amp;font);
+    pSurface-&gt;<A HREF="CNxSurface.html#member.DrawText">DrawText</A>(_T(&quot;あいうえお&quot;).....);
+    font.<A HREF="#member.SetSize">SetSize</A>(64);
+    pSurface-&gt;DrawText(_T(&quot;あいうえお&quot;).....);
+</PRE>
+
+<P>　CNxFont クラスは、CNxSurface::DrawText() 関数によるスムージングテキストの描画の為に、実際には HFONT を二つ持っています。一方は、CNxFont::GetHandle() 関数で取得できますが、もう一方は取得できません(CNxSurface クラスの実装に依存する為です)。現在のバージョンでは、LOGFONT 構造体の lfHeight と lfWidth メンバを 4倍にしたフォントが作成されます。このため、スムージング描画を行う場合、フォントは任意の倍率へ拡大可能なフォント(true type 等)でなければなりません。ビットマップフォントでは正しい大きさになりません。</P>
+
+<P>　CNxFont クラスは、全てのオブジェクトが異なる HFONT を持ちます。コピーコンストラクタや代入演算子(CNxFont newfont = font; 等)によって、LOGFONT 構造体はコピーされますが、ハンドルはコピーされません。LOGFONT 構造体が同一でも、<A HREF="#member.GetHandle">CNxFont::GetHandle()</A> 関数によってフォントが取得される時には、必ず新しいフォントが作成されます。つまり、CNxFont が保持している HFONT は CNxFont オブジェクト毎にプライベートであり、共有されません。</P>
+
+<P>　CNxFont クラスが保持している HFONT はオブジェクトの消滅時に自動的に削除されますが、必要があれば、<A HREF="#member.Detach">CNxFont::Detach()</A> 関数によって CNxFont から切り離して、使用する事ができます。</P>
+
+<P>　CNxFont クラスのメンバ関数のほとんどは LOGFONT 構造体のメンバを個別に操作する為のものです。LOGFONT 構造体のメンバ名を元に、CNxFont::SetXXXXX() と CNxFont::GetXXXXX() となっています。SetXXXX() 関数は、LOGFONT 構造体に値を設定してから、<A HREF="#member.GetHandle">CNxFont::GetHandle()</A> 関数によって新しいフォントが作成される様にフラグを立てます。GetXXXX() 関数は、LOGFONT 構造体から値を取得します。ここでは、それぞのメンバについての解説は省略します。Win32API Reference Manual 等の LOGFONT 構造体の解説を参照して下さい。</P>
+
+<TABLE BORDER>
+<TR><TH>設定</TH><TH>取得(全て const)</TH></TR>
+<TR><TD VALIGN="TOP" NOWRAP>void CNxFont::SetHeight(LONG <EM>lHeight</EM>)</TD><TD VALIGN="TOP" NOWRAP>LONG CNxFont::GetHeight()</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>void CNxFont::SetWidth(LONG <EM>lWidth</EM>)</TD><TD>LONG CNxFont::GetWidth()</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>void CNxFont::SetEscapement(LONG <EM>lEscapement</EM>)</TD><TD VALIGN="TOP" NOWRAP>LONG CNxFont::GetEscapement()</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>void CNxFont::SetOrientation(LONG <EM>lOrientation</EM>)</TD><TD VALIGN="TOP" NOWRAP>LONG CNxFont::GetOrientation()</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>void CNxFont::SetWeight(LONG <EM>lWeight</EM>)</TD><TD VALIGN="TOP" NOWRAP>LONG CNxFont::GetWeight()</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>void CNxFont::SetItalic(BOOL <EM>bItalic</EM>)</TD><TD VALIGN="TOP" NOWRAP>BOOL CNxFont::GetItalic()</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>void CNxFont::SetUnderline(BOOL <EM>bUnderline</EM>)</TD><TD VALIGN="TOP" NOWRAP>BOOL CNxFont::GetUnderline()</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>void CNxFont::SetStrikeOut(BOOL <EM>bStrikeOut</EM>)</TD><TD VALIGN="TOP" NOWRAP>BOOL CNxFont::GetStrikeOut()</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>void CNxFont::SetCharSet(BYTE <EM>byCharSet</EM>)</TD><TD VALIGN="TOP" NOWRAP>BYTE CNxFont::GetCharSet()</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>void CNxFont::SetOutPrecision(BYTE <EM>byPrecision</EM>)</TD><TD VALIGN="TOP" NOWRAP>BYTE CNxFont::GetOutPrecision()</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>void CNxFont::SetClipPrecision(BYTE <EM>byClipPrecision</EM>)</TD><TD VALIGN="TOP" NOWRAP>BYTE CNxFont::GetClipPrecision()</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>void CNxFont::SetQuality(BYTE <EM>byQuality</EM>)</TD><TD VALIGN="TOP" NOWRAP>BYTE CNxFont::GetQuality()</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>void CNxFont::SetPitchAndFamily(BYTE <EM>byPitchAndFamily</EM>)</TD><TD VALIGN="TOP" NOWRAP>BYTE CNxFont::GetPitchAndFamily()</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>void CNxFont::SetFaceName(LPCTSTR <EM>lpszName</EM>)</TD><TD VALIGN="TOP" NOWRAP>void CNxFont::GetFaceName(TCHAR faceName[LF_FACESIZE])<BR>LPCTSTR CNxFont::GetFaceName()</TD></TR>
+</TABLE>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+<A NAME="member"><H2>CNxFont クラスメンバ</H2></A>
+
+<A HREF="#construct">構築</A><BR>
+<A HREF="#operation">操作</A><BR>
+<A HREF="#misc">その他</A><BR>
+
+<A NAME="construct"><P><FONT SIZE=+1>構築</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.CNxFont">CNxFont()</A></TD><TD>　コンストラクタ</TD></TR>
+</TABLE>
+
+<A NAME="operation"><P><FONT SIZE=+1>操作</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetLogFont">SetLogFont()</A></TD><TD>　LOGFONT 構造体を設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetLogFont">GetLogFont()</A></TD><TD>　LOGFONT 構造体を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetSize">SetSize()</A></TD><TD>　サイズを設定</TD></TR>
+</TABLE>
+
+<A NAME="misc"><P><FONT SIZE=+1>その他</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetHandle">GetHandle()</A></TD><TD>　現在のフォントハンドル(HFONT)を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.Attach">Attach()</A></TD><TD>　HFONT を結び付ける</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.Detach">Detach()</A></TD><TD>　HFONT を切り離す</TD></TR>
+</TABLE>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+<!-- CNxFont::CNxFont() -->
+<A NAME="member.CNxFont"><H3>CNxFont::CNxFont()</H3></A>
+<H4>概要</H4>
+<P>　CNxFont クラスのコンストラクタです。</P>
+<H4>書式</H4>
+CNxFont::CNxFont()<BR>
+<BR>
+CNxFont::CNxFont(LPCTSTR <EM>lpszFaceName</EM>, LONG <EM>lSize</EM>)<BR>
+<BR>
+CNxFont::CNxFont(const CNxFont&amp; <EM>font</EM>)<BR>
+<BR>
+CNxFont::CNxFont(const LOGFONT* <EM>lpLogFont</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD NOWRAP VALIGN="TOP">LPCTSTR <EM>lpszFaceName</EM></TD><TD>　フォントの名前</TD></TR>
+<TR><TD NOWRAP VALIGN="TOP">LONG <EM>lSize</EM></TD><TD>　フォントのサイズ</TD></TR>
+<TR><TD NOWRAP VALIGN="TOP">const CNxFont& <EM>font</EM></TD><TD>　既存の CNxFont オブジェクトへの参照</TD></TR>
+<TR><TD NOWRAP VALIGN="TOP">const LOGFONT* <EM>lpLogFont</EM></TD><TD>　LOGFONT 構造体へのポインタ</TD></TR>
+</TABLE>
+<BR>
+<H4>解説</H4>
+<P>　引数が無い最初の形式は、フォント名 「Arial」、サイズ 10 (lfHeight = 10, lfWidth = 0) で LOGFONT 構造体を初期化します。</P>
+<P>　二番目の形式は、指定されたフォント名とサイズを LOGFONT 構造体へ設定して初期化します。サイズは LOGFONT 構造体の lfHeight メンバへ設定します。lfWidth  メンバは 0 になります。</P>
+<P>　三番目の形式は、CNxFont コピーコンストラクタです。LOGFONT 構造体のみをコピーして初期化します。</P>
+<P>　四番目の形式は、指定された LOGFONT 構造体をコピーして初期化します。</P>
+<STRONG><P>　全てのコンストラクタは、LOGFONT 構造体を初期化するだけです。実際にフォントは作成されません。</P></STRONG>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+<!-- CNxFont::SetLogFont() -->
+<A NAME="member.SetLogFont"><H3>CNxFont::SetLogFont()</H3></A>
+<H4>概要</H4>
+<P>　LOGFONT 構造体を設定し、次回ハンドル取得時にフォントが再作成される様にフラグを立てます。</P>
+<H4>書式</H4>
+void CNxFont::SetLogFont(const LOGFONT* <EM>lpLogFont</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>const LOGFONT* <EM>lpLogFont</EM></TD><TD>　設定する LOGFONT 構造体へのポインタ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>参照</H4>
+<A HREF="#member.GetLogFont">CNxFont::GetLogFont()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxFont::SetSize() -->
+<A NAME="member.SetSize"><H3>CNxFont::SetSize()</H3></A>
+<H4>概要</H4>
+<P>　サイズを設定します。</P>
+<H4>書式</H4>
+void CNxFont::SetSize(LONG <EM>lSize</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>LONG <EM>lSize</EM></TD><TD>　フォントのサイズ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　この関数は LOGFONT 構造体の lfWidth メンバを 0 にして、lfHeight メンバへ <EM>lSize</EM> を設定します。</P>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+<!-- CNxFont::GetLogFont() -->
+<A NAME="member.GetLogFont"><H3>CNxFont::GetLogFont()</H3></A>
+<H4>概要</H4>
+<P>　現在の LOGFONT 構造体を取得します。</P>
+<H4>書式</H4>
+void CNxFont::GetLogFont(LOGFONT* <EM>lpLogFont</EM>) const</TD><BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>LOGFONT* <EM>lpLogFont</EM></TD><TD>　結果受け取る LOGFONT 構造体へのポインタ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>参照</H4>
+<A HREF="#member.SetLogFont">CNxFont::SetLogFont()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxFont::GetHandle() -->
+<A NAME="member.GetHandle"><H3>CNxFont::GetHandle()</H3></A>
+<H4>概要</H4>
+<P>　作成したフォントハンドルを返します。</P>
+<H4>書式</H4>
+HFONT CNxFont::GetHandle()<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　フォントのハンドル。失敗ならば NULL</P>
+<H4>解説</H4>
+<P>　LOGFONT 構造体が前回呼び出し時から変更されているならば、以前のフォントを削除してから、新しいフォントを作成して返します。変更されていない場合は前回と同じハンドルを返します。</P>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxFont::Attach() -->
+<A NAME="member.Attach"><H3>CNxFont::Attach()</H3></A>
+<H4>概要</H4>
+<P>　フォントハンドルを CNxFont と結び付けます。</P>
+<H4>書式</H4>
+BOOL CNxFont::Attach(HFONT <EM>hFont</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>HFONT <EM>hFont</EM></TD><TD>　結び付けられるフォントのハンドル</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功ならば TRUE</P>
+<H4>解説</H4>
+<P>　結び付けられたフォントは CNxFont オブジェクトに所有されます。所有されたフォントを切り離すには、<A HREF="#member.Detach">CNxFont::Detach()</A> 関数を呼び出します。</P>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxFont::Deatch() -->
+<A NAME="member.Detach"><H3>CNxFont::Detach()</H3></A>
+<H4>概要</H4>
+<P>　フォントハンドルを CNxFont から切り離します。</P>
+<H4>書式</H4>
+HFONT CNxFont::Detach()<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　成功ならばフォントのハンドルを返します。失敗ならば NULL</P>
+<H4>解説</H4>
+<P>　現在の LOGFONT 構造体からフォントを作成して、そのハンドルを返します。ハンドルが不要になった時は、必ず Win32API の DeleteObject() で削除して下さい。</P>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+</BODY>
+</HTML>

@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+	<LINK REV="Made" HREF="mailto:ain@da.airnet.ne.jp">
+	<LINK REL="Contents" HREF="./index.html">
+	<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-2022-jp">
+	<META NAME="Author" CONTENT="Seiji Ainoguchi">
+	<META NAME="Subject" CONTENT="NxDraw クラス階層図">
+	<TITLE>NxDraw ライブラリ クラス階層図</TITLE>
+</HEAD>
+<BODY>
+<H1>NxDraw ライブラリ クラス階層図</H1>
+
+<MAP NAME="class_layer">
+<AREA COORDS="0,0,121,33" HREF="CNxSprite.html" ALT="CNxSprite: スプライトの矩形を管理するクラスです。">
+<AREA COORDS="30,48,151,81" HREF="CNxSurfaceSprite.html" ALT="CNxSurfaceSprite: サーフェスの任意の矩形を任意の転送方法で表示するスプライトです。">
+<AREA COORDS="60,96,181,129" HREF="CNxLayerSprite.html" ALT="CNxLayerSprite: CNxSurfaceSprite と CNxSurface を多重継承したクラスです。サーフェスとスプライトを分離せずに同一のオブジェクトとして扱えます。">
+<AREA COORDS="60,144,181,177" HREF="CNxMouseSprite.html" ALT="CNxMouseSprite: マウスの動きに追従して自動的に移動するスプライトです。CNxWindow クラスを親スプライトとします。">
+<AREA COORDS="30,192,151,225" HREF="CNxTrackingSprite.html" ALT="CNxTrackingSprite: 常に最上位スプライトして使用します。子スプライトの移動等によって無効化された矩形のみを再描画する機能を持っています。">
+<AREA COORDS="60,240,181,273" HREF="CNxWindow.html" ALT="CNxWindow: Windows のウィンドウと結び付けて、ウィンドウのクライアント領域への表示を行ないます。">
+<AREA COORDS="90,288,211,321" HREF="CNxScreen.html" ALT="CNxScreen: CNxWindow クラスの対象がクライアントウィンドウであるのに対し、CNxScreen クラスはフレームウィンドウが対象です。フルスクリーンへの切り換えもサポートします。">
+<AREA COORDS="150,0,271,33" HREF="CNxSurface.html" ALT="CNxSurface: 画像データを扱うクラスです。サーフェス間のビットブロック転送を行なったり、PNG や JPEG 等の画像を読み込む事ができます。">
+<AREA COORDS="300,0,421,33" HREF="CNxDIBImageLoader.html" ALT="CNxDIBImageLoader: CNxDIBImage オブジェクトをファイルへ保存します。抽象クラスです。">
+<AREA COORDS="330,48,451,81" HREF="CNxBMPImageLoader.html" ALT="CNxBMPImageLoader: BMP 画像ファイルを読み込んで CNxDIBImage オブジェクトを返すクラスです。">
+<AREA COORDS="330,96,451,129" HREF="CNxPNGImageLoader.html" ALT="CNxPNGImageLoader: PNG 画像を読み込んで CNxDIBImage オブジェクトを返すクラスです。">
+<AREA COORDS="330,144,451,177" HREF="CNxMAGImageLoader.html" ALT="CNxMAGImageLoader: MAG 画像を読み込んで CNxDIBImage オブジェクトを返すクラスです。">
+<AREA COORDS="330,192,451,225" HREF="CNxJPEGImageLoader.html" ALT="CNxJPEGImageLoader: JPEG 画像を読み込んで CNxDIBImage オブジェクトを返すクラスです。">
+<AREA COORDS="330,240,451,273" HREF="CNxSPIImageLoader.html" ALT="CNxSPIImageLoader: susie 32bit plug-in を通して画像を読み込み、CNxDIBImage オブジェクトを返すクラスです。">
+<AREA COORDS="300,288,421,321" HREF="CNxDIBImageSaver.html" ALT="CNxDIBImageSaver: CNxDIBImage オブジェクトの内容をファイルへ保存します。抽象クラスです。">
+<AREA COORDS="330,336,451,369" HREF="CNxBMPImageSaver.html" ALT="CNxBMPImageSaver: CNxDIBImage オブジェクトの内容を BMP 画像として保存するクラスです。">
+<AREA COORDS="330,384,451,417" HREF="CNxPNGImageSaver.html" ALT="CNxPNGImageSaver: CNxDIBImage オブジェクトの内容を PNG 画像として保存するクラスです。">
+<AREA COORDS="480,0,601,33" HREF="CNxColor.html" ALT="CNxColor: RGBA カラーの操作をサポートするクラスです。">
+<AREA COORDS="480,48,601,81" HREF="CNxHLSColor.html" ALT="CNxHLSColor: HLS カラーの操作をサポートするクラスです。">
+<AREA COORDS="480,96,601,129" HREF="CNxDraw.html" ALT="CNxDraw: CNxDraw 全体に係るグローバル変数などを保持するクラスです。構築できるのは一つだけです。">
+<AREA COORDS="480,144,601,177" HREF="CNxDIBImage.html" ALT="CNxDIBImage: BITMAPINFO 構造体とビットイメージから成る、DIB を管理するクラスです。主に CNxDIBImageLoader と CNxDIBImageSaver の中間オブジェクトとして使用します。">
+<AREA COORDS="480,192,601,225" HREF="CNxFont.html" ALT="CNxFont: フォントの作成を行うクラスです。CNxSurface でテキストを描画する際には、このクラスのオブジェクトを使用します。">
+</MAP>
+
+<TABLE BORDER><TR><TD><IMG SRC="images/class_layer.png" WIDTH=608 HEIGHT=424 BORDER=0 USEMAP="#class_layer"></TD></TR></TABLE>
+<BR>
+<A HREF="index.html">NxDraw グラフィック描画ライブラリ目次</A><BR>
+</BODY>
+</HTML>

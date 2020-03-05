@@ -1,0 +1,633 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+	<LINK REV="Made" HREF="mailto:ain@da.airnet.ne.jp">
+	<LINK REL="Contents" HREF="./index.html">
+	<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-2022-jp">
+	<META NAME="Author" CONTENT="Seiji Ainoguchi">
+	<META NAME="Subject" CONTENT="CNxColor">
+	<TITLE>CNxColor クラス</TITLE>
+</HEAD>
+<BODY>
+
+<A NAME="top"><H1>CNxColor クラス</H1></A>
+
+<A HREF="#summary">概要</A><BR>
+<A HREF="#member">クラスメンバ</A><BR>
+<BR>
+<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+<A NAME="summary"><H2>概要</H2></A>
+
+<P>　CNxColor クラスは RGBA カラー(R = 赤、G = 緑、B = 青、A = アルファ)の操作をサポートするクラスです。メンバ変数として <A HREF="global.html#NxColor">NxColor</A> を持っています。NxColor への変換演算子が定義されているため、引数として NxColor を使用する関数(<A HREF="CNxSurface.html#member.FillRect">CNxSurface::FillRect()</A> 等)へそのまま引き渡す事ができます。</P>
+
+<P>　CNxColor クラスの構築には、コンストラクタの引数へ RGBA 要素の値を指定する他に、CNxColor クラスの中で宣言されている列挙子も使用できます。</P>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+<A NAME="member"><H2>CNxColor クラスメンバ</H2></A>
+<A HREF="#construct">構築</A><BR>
+<A HREF="#set">設定</A><BR>
+<A HREF="#get">取得</A><BR>
+
+<A NAME="construct"><P><FONT SIZE=+1>構築</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.CNxColor">CNxColor()</A></TD><TD>　コンストラクタ</TD></TR>
+</TABLE>
+
+<A NAME="set"><P><FONT SIZE=+1>設定</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetRGBA">SetRGBA()</A></TD><TD>　RGBA 値を設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetNxColor">SetNxColor()</A></TD><TD>　NxColor 値を設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetRed">SetRed()</A></TD><TD>　赤の値を設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetGreen">SetGreen()</A></TD><TD>　緑の値を設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetBlue">SetBlue()</A></TD><TD>　青の値を設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetAlpha">SetAlpha()</A></TD><TD>　アルファの値を設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetColorRef">SetColorRef()</A></TD><TD>　COLORREF 値を設定</TD></TR>
+</TABLE>
+
+<A NAME="get"><P><FONT SIZE=+1>取得</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetNxColor">GetNxColor()</A></TD><TD>　NxColor 値を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetRed">GetRed()</A></TD><TD>　赤の値を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetGreen">GetGreen()</A></TD><TD>　緑の値を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetBlue">GetBlue()</A></TD><TD>　青の値を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetAlpha">GetAlpha()</A></TD><TD>　アルファの値を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetColorRef">GetColorRef()</A></TD><TD>　COLORREF 値を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetGrayscale">GetGrayscale()</A></TD><TD>　グレイスケール値を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.operatorNxColor">operator NxColor()</A></TD><TD>　NxColor への変換演算子</TD></TR>
+</TABLE>
+
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxColor::CNxColor() -->
+<A NAME="member.CNxColor"><H3>CNxColor::CNxColor()</H3></A>
+<H4>概要</H4>
+<P>　CNxColor クラスのコンストラクタ</P>
+<H4>書式</H4>
+CNxColor::CNxColor()<BR>
+<BR>
+CNxColor::CNxColor(NxColor <EM>nxColor</EM>)<BR>
+<BR>
+CNxColor::CNxColor(ColorName <EM>colorName</EM>)<BR>
+<BR>
+CNxColor::CNxColor(BYTE <EM>byRed</EM>, BYTE <EM>byGreen</EM>, BYTE <EM>byBlue</EM>, BYTE <EM>byAlpha = 255</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP><A HREF="global.html#NxColor">NxColor</A> <EM>nxColor</EM></TD><TD>　NxColor 型の色(下位バイトから、青、緑、赤、アルファの順の色)</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>ColorName <EM>colorName</EM></TD><TD>　色の名前を示す列挙子</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>BYTE <EM>byRed</EM></TD><TD>　赤の値(0 〜 255)</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>BYTE <EM>byGreen</EM></TD><TD>　緑の値(0 〜 255)</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>BYTE <EM>byBlue</EM></TD><TD>　青の値(0 〜 255)</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>BYTE <EM>byAlpha</EM></TD><TD>　アルファの値(0 〜 255)</TD></TR>
+</TABLE>
+
+<H4>解説</H4>
+<P>　デフォルトコンストラクタは RGBA 全ての要素へゼロを設定し、それ以外の形式は引数の内容によって RGBA を設定します。</P>
+<P>　列挙子には以下の物が使用できます。HTML の文字列による色指定と同じです。これらの色のアルファ値は全て 255 です。</P>
+
+<CENTER>
+<TABLE BORDER>
+<TR>
+	<TD BGCOLOR="aliceblue" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>aliceblue</TD>
+	<TD BGCOLOR="antiquewhite" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>antiquewhite</TD>
+	<TD BGCOLOR="aqua" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>aqua</TD>
+	<TD BGCOLOR="aquamarine" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>aquamarine</TD>
+	<TD BGCOLOR="azure" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>azure</TD>
+</TR>
+<TR>
+	<TD BGCOLOR="beige" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>beige</TD>
+	<TD BGCOLOR="bisque" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>bisque</TD>
+	<TD BGCOLOR="black" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>black</TD>
+	<TD BGCOLOR="blanchedalmond" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>blancehedalmond</TD>
+	<TD BGCOLOR="blue" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>blue</TD>
+</TR>
+<TR>
+	<TD BGCOLOR="blueviolet" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>blueviolet</TD>
+	<TD BGCOLOR="brown" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>brown</TD>
+	<TD BGCOLOR="burlywood" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>burlywood</TD>
+	<TD BGCOLOR="cadetblue" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>cadetblue</TD>
+	<TD BGCOLOR="chartreuse" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>chartreuse</TD>
+</TR>
+<TR>
+	<TD BGCOLOR="chocolate" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>chocolate</TD>
+	<TD BGCOLOR="coral" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>coral</TD>
+	<TD BGCOLOR="cormflowerblue" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>cormflowerblue</TD>
+	<TD BGCOLOR="comsilk" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>comsilk</TD>
+	<TD BGCOLOR="crimson" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>crimson</TD>
+</TR>
+<TR>
+	<TD BGCOLOR="cyan" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>cyan</TD>
+	<TD BGCOLOR="darkblue" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>darkblue</TD>
+	<TD BGCOLOR="darkcyan" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>darkcyan</TD>
+	<TD BGCOLOR="darkgoldenrod" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>darkgoldenrod</TD>
+	<TD BGCOLOR="darkgray" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>darkgray</TD>
+</TR>
+<TR>
+	<TD BGCOLOR="darkgreen" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>darkgreen</TD>
+	<TD BGCOLOR="darkkhaki" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>darkkhaki</TD>
+	<TD BGCOLOR="darkmagenta" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>darkmagenta</TD>
+	<TD BGCOLOR="darkolivegreen" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>darkolivegreen</TD>
+	<TD BGCOLOR="darkorange" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>darkorange</TD>
+</TR>
+<TR>
+	<TD BGCOLOR="darkorchid" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>darkorchid</TD>
+	<TD BGCOLOR="darkred" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>darkred</TD>
+	<TD BGCOLOR="darksalmon" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>darksalmon</TD>
+	<TD BGCOLOR="darkseagreen" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>darkseagreen</TD>
+	<TD BGCOLOR="darkslateblue" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>darkslateblue</TD>
+</TR>
+<TR>
+	<TD BGCOLOR="darkslategray" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>darkslategray</TD>
+	<TD BGCOLOR="darkturquoise" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>darkturquoise</TD>
+	<TD BGCOLOR="darkviolet" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>darkviolet</TD>
+	<TD BGCOLOR="deeppink" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>deeppink</TD>
+	<TD BGCOLOR="deepskyblue" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>deepskyblue</TD>
+</TR>
+<TR>
+	<TD BGCOLOR="dimgray" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>dimgray</TD>
+	<TD BGCOLOR="dodgerblue" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>dodgerblue</TD>
+	<TD BGCOLOR="firebrick" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>firebrick</TD>
+	<TD BGCOLOR="floralwhite" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>floralwhite</TD>
+	<TD BGCOLOR="forestgreen" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>forestgreen</TD>
+</TR>
+<TR>
+	<TD BGCOLOR="fuchsia" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>fuchsia</TD>
+	<TD BGCOLOR="gainsboro" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>gainsboro</TD>
+	<TD BGCOLOR="ghostwhite" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>ghostwhite</TD>
+	<TD BGCOLOR="gold" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>gold</TD>
+	<TD BGCOLOR="goldenrod" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>goldenrod</TD>
+</TR>
+<TR>
+	<TD BGCOLOR="gray" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>gray</TD>
+	<TD BGCOLOR="green" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>green</TD>
+	<TD BGCOLOR="greenyellow" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>greenyellow</TD>
+	<TD BGCOLOR="honeydew" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>honeydew</TD>
+	<TD BGCOLOR="hotpink" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>hotpink</TD>
+</TR>
+<TR>
+	<TD BGCOLOR="indianred" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>indianred</TD>
+	<TD BGCOLOR="indigo" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>indigo</TD>
+	<TD BGCOLOR="ivory" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>ivory</TD>
+	<TD BGCOLOR="khaki" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>khaki</TD>
+	<TD BGCOLOR="lavender" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>lavender</TD>
+</TR>
+<TR>
+	<TD BGCOLOR="lavenderblush" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>lavenderblush</TD>
+	<TD BGCOLOR="lawngreen" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>lawngreen</TD>
+	<TD BGCOLOR="lemonchiffon" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>lemonchiffon</TD>
+	<TD BGCOLOR="lightblue" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>lightblue</TD>
+	<TD BGCOLOR="lightcoral" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>lightcoral</TD>
+</TR>
+<TR>
+	<TD BGCOLOR="lightcyan" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>lightcyan</TD>
+	<TD BGCOLOR="lightgoldenrodyellow" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>lightgoldenrodyellow</TD>
+	<TD BGCOLOR="lightgreen" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>lightgreen</TD>
+	<TD BGCOLOR="lightgrey" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>lightgrey</TD>
+	<TD BGCOLOR="lightpink" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>lightpink</TD>
+</TR>
+<TR>
+	<TD BGCOLOR="lightsalmon" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>lightsalmon</TD>
+	<TD BGCOLOR="lightseagreen" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>lightseagreen</TD>
+	<TD BGCOLOR="lightskyblue" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>lightskyblue</TD>
+	<TD BGCOLOR="lightslategray" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>lightslategray</TD>
+	<TD BGCOLOR="lightsteelblue" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>lightsteelblue</TD>
+</TR>
+<TR>
+	<TD BGCOLOR="lightyellow" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>lightyellow</TD>
+	<TD BGCOLOR="lime" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>lime</TD>
+	<TD BGCOLOR="limegreen" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>limegreen</TD>
+	<TD BGCOLOR="linen" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>linen</TD>
+	<TD BGCOLOR="magenta" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>magenta</TD>
+</TR>
+<TR>
+	<TD BGCOLOR="maroon" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>maroon</TD>
+	<TD BGCOLOR="mediumaquamarine" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>mediumaquamarine</TD>
+	<TD BGCOLOR="mediumblue" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>mediumblue</TD>
+	<TD BGCOLOR="mediumorchid" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>mediumorchid</TD>
+	<TD BGCOLOR="mediumpurple" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>mediumpurple</TD>
+</TR>
+<TR>
+	<TD BGCOLOR="mediumseagreen" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>mediumseagreen</TD>
+	<TD BGCOLOR="mediumspringgreen" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>mediumspringgreen</TD>
+	<TD BGCOLOR="mediumturquoise" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>mediumturquoise</TD>
+	<TD BGCOLOR="midnightblue" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>midnightblue</TD>
+	<TD BGCOLOR="midnightblue" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>midnightblue</TD>
+</TR>
+<TR>
+	<TD BGCOLOR="mintcream" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>mintcream</TD>
+	<TD BGCOLOR="mistyrose" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>mistyrose</TD>
+	<TD BGCOLOR="moccasin" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>moccasin</TD>
+	<TD BGCOLOR="navajowhite" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>navajowhite</TD>
+	<TD BGCOLOR="navy" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>navy</TD>
+</TR>
+<TR>
+	<TD BGCOLOR="oldlace" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>oldlace</TD>
+	<TD BGCOLOR="olive" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>olive</TD>
+	<TD BGCOLOR="olivedrab" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>olivedrab</TD>
+	<TD BGCOLOR="orange" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>orange</TD>
+	<TD BGCOLOR="orangered" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>orangered</TD>
+</TR>
+<TR>
+	<TD BGCOLOR="orchid" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>orchid</TD>
+	<TD BGCOLOR="palegoldenrod" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>palegoldenrod</TD>
+	<TD BGCOLOR="palegreen" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>palegreen</TD>
+	<TD BGCOLOR="paleturquoise" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>paleturquoise</TD>
+	<TD BGCOLOR="palevioletred" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>palevioletred</TD>
+</TR>
+<TR>
+	<TD BGCOLOR="papayawhip" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>papayawhip</TD>
+	<TD BGCOLOR="peachpuff" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>peachpuff</TD>
+	<TD BGCOLOR="peru" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>peru</TD>
+	<TD BGCOLOR="pink" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>pink</TD>
+	<TD BGCOLOR="powderblue" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>powderblue</TD>
+</TR>
+<TR>
+	<TD BGCOLOR="purple" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>purple</TD>
+	<TD BGCOLOR="red" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>red</TD>
+	<TD BGCOLOR="rosybrown" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>rosybrown</TD>
+	<TD BGCOLOR="royalblue" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>royalblue</TD>
+	<TD BGCOLOR="saddlenbrown" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>saddlenbrown</TD>
+</TR>
+<TR>
+	<TD BGCOLOR="salmon" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>salmon</TD>
+	<TD BGCOLOR="sandybrown" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>sandybrown</TD>
+	<TD BGCOLOR="seagreen" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>seagreen</TD>
+	<TD BGCOLOR="seashell" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>seashell</TD>
+	<TD BGCOLOR="sienna" WIDTH=20 ALIGN?"LEFT">&nbsp;</TD><TD NOWRAP>sienna</TD>
+</TR>
+<TR>
+	<TD BGCOLOR="silver" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>silver</TD>
+	<TD BGCOLOR="skyblue" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>skyblue</TD>
+	<TD BGCOLOR="slateblue" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>slateblue</TD>
+	<TD BGCOLOR="slategray" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>slategray</TD>
+	<TD BGCOLOR="snow" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>snow</TD>
+</TR>
+<TR>
+	<TD BGCOLOR="springgreen" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>springgreen</TD>
+	<TD BGCOLOR="steelblue" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>steelblue</TD>
+	<TD BGCOLOR="tan" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>tan</TD>
+	<TD BGCOLOR="teal" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>teal</TD>
+	<TD BGCOLOR="thistle" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>thistle</TD>
+</TR>
+<TR>
+	<TD BGCOLOR="tomato" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>tomato</TD>
+	<TD BGCOLOR="turquoise" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>turquoise</TD>
+	<TD BGCOLOR="violet" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>violet</TD>
+	<TD BGCOLOR="wheat" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>wheat</TD>
+	<TD BGCOLOR="white" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>white</TD>
+</TR>
+<TR>
+	<TD BGCOLOR="whitesmoke" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>whitesmoke</TD>
+	<TD BGCOLOR="yellow" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>yellow</TD>
+	<TD BGCOLOR="yellowgreen" WIDTH=20 ALIGN="LEFT">&nbsp;</TD><TD NOWRAP>yellowgreen</TD>
+	<TD ROWSPAN=2 COLSPAN=4>&nbsp;</TD>
+</TR>
+</TABLE>
+</CENTER>
+
+<P>　例えば drakblue でサーフェス全体を塗り潰すのであれば、以下の様に使用します。</P>
+
+<PRE>
+	pSurface-&gt;<A HREF="CNxSurface.html#member.FillRect">FillRect</A>(NULL, CNxColor::darkblue);
+</PRE>
+<H4>参照</H4>
+<A HREF="#member.SetNxColor">CNxColor::SetNxColor()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetRGBA">CNxColor::SetRGBA()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+<!-- CNxColor::SetRGBA() -->
+<A NAME="member.SetRGBA"><H3>CNxColor::SetRGBA()</H3></A>
+<H4>概要</H4>
+<P>　RGBA 値を設定</P>
+<H4>書式</H4>
+CNxColor& CNxColor::SetRGBA(BYTE <EM>byRed</EM>, BYTE <EM>byGreen</EM>, BYTE <EM>byBlue</EM>, BYTE <EM>byAlpha = 255</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>BYTE <EM>byRed</EM></TD><TD>　赤の値(0 〜 255)</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>BYTE <EM>byGreen</EM></TD><TD>　緑の値(0 〜 255)</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>BYTE <EM>byBlue</EM></TD><TD>　青の値(0 〜 255)</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>BYTE <EM>byAlpha</EM></TD><TD>　アルファの値(0 〜 255)</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　自分自身への参照を返します。</P>
+<H4>解説</H4>
+<P>　RGBA 全ての色が設定されます。</P>
+<H4>参照</H4>
+<A HREF="#member.CNxColor">CNxColor::CNxColor()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetRed">CNxColor::SetRed()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetGreen">CNxColor::SetGreen()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetBlue">CNxColor::SetBlue()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetAlpha">CNxColor::SetRed()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxColor::SetNxColor() -->
+<A NAME="member.SetNxColor"><H3>CNxColor::SetNxColor()</H3></A>
+<H4>概要</H4>
+<P>　NxColor 値を設定</P>
+<H4>書式</H4>
+CNxColor& CNxColor::SetNxColor(NxColor <EM>nxColor</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP><A HREF="global.html#NxColor">NxColor</A> <EM>nxColor</EM></TD><TD>　NxColor 値</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　自分自身への参照を返します。</P>
+<H4>解説</H4>
+<P>　NxColor 値をそのまま設定します。NxColor は下位バイトから青、緑、赤、アルファの順で割り当てられます。</P>
+<H4>参照</H4>
+<A HREF="#member.GetNxColor">CNxColor::GetNxColor()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxColor::SetRed() -->
+<A NAME="member.SetRed"><H3>CNxColor::SetRed()</H3></A>
+<H4>概要</H4>
+<P>　赤の値を設定</P>
+<H4>書式</H4>
+CNxColor& CNxColor::SetRed(BYTE <EM>byRed</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>BYTE <EM>byRed</EM></TD><TD>　設定する赤の値(0 〜 255)</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　自分自身への参照を返します。</P>
+<H4>参照</H4>
+<A HREF="#member.GetRed">CNxColor::SetRed()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetRGBA">CNxColor::SetRGBA()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxColor::SetGreen() -->
+<A NAME="member.SetGreen"><H3>CNxColor::SetGreen()</H3></A>
+<H4>概要</H4>
+<P>　緑の値を設定</P>
+<H4>書式</H4>
+CNxColor& CNxColor::SetGreen(BYTE <EM>byGreen</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>BYTE <EM>byGreen</EM></TD><TD>　設定する緑の値(0 〜 255)</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　自分自身への参照を返します。</P>
+<H4>参照</H4>
+<A HREF="#member.GetGreen">CNxColor::SetGreen()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetRGBA">CNxColor::SetRGBA()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxColor::SetBlue() -->
+<A NAME="member.SetBlue"><H3>CNxColor::SetBlue()</H3></A>
+<H4>概要</H4>
+<P>　青の値を設定</P>
+<H4>書式</H4>
+CNxColor& CNxColor::SetBlue(BYTE <EM>byBlue</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>BYTE <EM>byBlue</EM></TD><TD>　設定する青の値(0 〜 255)</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　自分自身への参照を返します。</P>
+<H4>参照</H4>
+<A HREF="#member.GetBlue">CNxColor::SetBlue()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetRGBA">CNxColor::SetRGBA()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxColor::SetAlpha() -->
+<A NAME="member.SetAlpha"><H3>CNxColor::SetAlpha()</H3></A>
+<H4>概要</H4>
+<P>　アルファの値を設定</P>
+<H4>書式</H4>
+CNxColor& CNxColor::SetAlpha(BYTE <EM>byAlpha</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>BYTE <EM>byAlpha</EM></TD><TD>　設定するアルファの値(0 〜 255)</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　自分自身への参照を返します。</P>
+<H4>参照</H4>
+<A HREF="#member.GetAlpha">CNxColor::SetAlpha()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetRGBA">CNxColor::SetRGBA()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxColor::SetColorRef() -->
+<A NAME="member.SetColorRef"><H3>CNxColor::SetColorRef()</H3></A>
+<H4>概要</H4>
+<P>　COLORREF 値を設定</P>
+<H4>書式</H4>
+CNxColor& CNxColor::SetColorRef(COLORREF <EM>crColor</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>COLORREF <EM>crColor</EM></TD><TD>　設定する COLORREF 値</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　自分自身への参照を返します。</P>
+<H4>解説</H4>
+<P>　GDI で使用される COLORREF 値を、<A HREF="global.html#NxColor">NxColor</A> へ変換して設定します。アルファの値は 255 になります。</P>
+<H4>参照</H4>
+<A HREF="#member.GetColorRef">CNxColor::GetColorRef()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxColor::GetNxColor() -->
+<A NAME="member.GetNxColor"><H3>CNxColor::GetNxColor()</H3></A>
+<H4>概要</H4>
+<P>　NxColor 値を取得</P>
+<H4>書式</H4>
+NxColor CNxColor::GetNxColor() const<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　<A HREF="global.html#NxColor">NxColor</A> 値を返します。</P>
+<H4>参照</H4>
+<A HREF="#member.SetNxColor">CNxColor::SetNxColor()</A>&nbsp;/&nbsp;
+<A HREF="#member.operatorNxColor">CNxColor::operator NxColor()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxColor::GetRed() -->
+<A NAME="member.GetRed"><H3>CNxColor::GetRed()</H3></A>
+<H4>概要</H4>
+<P>　赤の値を設定</P>
+<H4>書式</H4>
+BYTE CNxColor::GetRed() const<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　赤の値を返します。</P>
+<H4>参照</H4>
+<A HREF="#member.SetRed">CNxColor::SetRed()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetRGBA">CNxColor::SetRGBA()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxColor::GetGreen() -->
+<A NAME="member.GetGreen"><H3>CNxColor::GetGreen()</H3></A>
+<H4>概要</H4>
+<P>　緑の値を設定</P>
+<H4>書式</H4>
+BYTE CNxColor::GetGreen() const<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　緑の値を返します。</P>
+<H4>参照</H4>
+<A HREF="#member.SetGreen">CNxColor::SetGreen()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetRGBA">CNxColor::SetRGBA()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxColor::GetBlue() -->
+<A NAME="member.GetBlue"><H3>CNxColor::GetBlue()</H3></A>
+<H4>概要</H4>
+<P>　青の値を設定</P>
+<H4>書式</H4>
+BYTE CNxColor::GetBlue() const<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　青の値を返します。</P>
+<H4>参照</H4>
+<A HREF="#member.SetBlue">CNxColor::SetBlue()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetRGBA">CNxColor::SetRGBA()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxColor::GetAlpha() -->
+<A NAME="member.GetAlpha"><H3>CNxColor::GetAlpha()</H3></A>
+<H4>概要</H4>
+<P>　アルファの値を設定</P>
+<H4>書式</H4>
+BYTE CNxColor::GetAlpha() const<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　アルファの値を返します。</P>
+<H4>参照</H4>
+<A HREF="#member.SetAlpha">CNxColor::SetAlpha()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetRGBA">CNxColor::SetRGBA()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxColor::GetColorRef() -->
+<A NAME="member.GetColorRef"><H3>CNxColor::GetColorRef()</H3></A>
+<H4>概要</H4>
+<P>　COLORREF 値を取得</P>
+<H4>書式</H4>
+COLORREF CNxColor::GetColorRef() const<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　COLORREF 値を返します。</P>
+<H4>解説</H4>
+<P>　RGBA 値を COLORREF 値へ変換して返します。アルファの値は無視され、返される COLORREF の最上位バイトは常にゼロになります。</P>
+<H4>参照</H4>
+<A HREF="#member.SetColorRef">CNxColor::SetColorRef()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxColor::GetGrayscale() -->
+<A NAME="member.GetGrayscale"><H3>CNxColor::GetGrayscale()</H3></A>
+<H4>概要</H4>
+<P>　グレイスケール値を取得</P>
+<H4>書式</H4>
+BYTE CNxColor::GetGrayscale() const<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　グレイスケール値を返します。</P>
+<H4>解説</H4>
+<P>　RGB 値をグレイスケールへ変換した値を返します。アルファ値は考慮されません。</P>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxColor::operator NxColor() -->
+<A NAME="member.operatorNxColor"><H3>CNxColor::operator NxColor()</H3></A>
+<H4>概要</H4>
+<P>　CNxColor オブジェクトを NxColor へ変換して返します。</P>
+<H4>書式</H4>
+CNxColor::operator <A HREF="global.html#NxColor">NxColor</A>() const<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　NxColor 値</P>
+<H4>解説</H4>
+<P>　この演算子は CNxColor 内の NxColor メンバの値をそのまま返します。</P>
+<H4>参照</H4>
+<A HREF="#member.GetNxColor">CNxColor::GetNxColor()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+</BODY>
+</HTML>

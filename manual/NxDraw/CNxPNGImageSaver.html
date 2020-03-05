@@ -1,0 +1,78 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+	<LINK REV="Made" HREF="mailto:ain@da.airnet.ne.jp">
+	<LINK REL="Contents" HREF="./index.html">
+	<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-2022-jp">
+	<META NAME="Author" CONTENT="Seiji Ainoguchi">
+	<META NAME="Subject" CONTENT="CNxPNGImageSaver">
+	<TITLE>CNxPNGImageSaver クラス</TITLE>
+</HEAD>
+<BODY>
+<A NAME="top"><H1>CNxPNGImageSaver クラス</H1></A>
+
+<PRE>
+<A HREF="CNxDIBImageSaver.html">CNxDIBImageSaver</A>
+  |
+  +--<STRONG>CNxPNGImageSaver</STRONG>
+</PRE>
+
+<A HREF="#summary">概要</A><BR>
+<A HREF="#member">クラスメンバ</A><BR>
+<BR>
+<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+<A NAME="summary"><H2>概要</H2></A>
+<P>　CNxPNGImageLoader クラスは、<A HREF="CNxDIBImage.html">CNxDIBImage</A> オブジェクトの内容を PNG 画像ファイルとして保存する、<A HREF="CNxDIBImageSaver.html">CNxDIBImageSaver</A> の派生クラスです。全ての CNxDIBImage 形式に対応しており、アルファを含む完全な情報を保存する事ができます。</P>
+
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+<A NAME="member"><H2>CNxPNGImageSaver クラスメンバ</H2></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.CNxPNGImageSaver">CNxPNGImageSaver()</A></TD><TD>　コンストラクタ</TD></TR>
+</TABLE>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+<!-- CNxPNGImageSaver::CNxPNGImageSaver() -->
+<A NAME="member.CNxPNGImageSaver"><H3>CNxPNGImageSaver::CNxPNGImageSaver()</H3></A>
+<H4>概要</H4>
+<P>　CNxPNGImageSaver クラスのコンストラクタです。</P>
+<H4>書式</H4>
+CNxPNGImageSaver(DWORD <EM>dwFlags = allFilters</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP">DWORD <EM>dwFlags</EM></TD><TD>　フラグ</TD></TR>
+</TABLE>
+<H4>解説</H4>
+</P>　<EM>dwFlags</EM> へは、0 又は以下のフラグを一つ以上指定します。デフォルトは allFilters です。</P>
+
+<DL>
+<DT><STRONG>noFilters</STRONG>
+	<DD>　フィルタを一切使用しません
+<DT><STRONG>filterNone</STRONG>
+	<DD>　none フィルタを使用します
+<DT><STRONG>filterSub</STRONG>
+	<DD>　Sub フィルタを使用します
+<DT><STRONG>filterUp</STRONG>
+	<DD>　Up フィルタを使用します
+<DT><STRONG>filterAvg</STRONG>
+	<DD>　Avg フィルタを使用します
+<DT><STRONG>filterPaeth</STRONG>
+	<DD>　Paeth フィルタを使用します
+<DT><STRONG>allFilters</STRONG>
+	<DD>　全てのフィルタを使用します(filterNone, filterSub, filterUp, filterAvg, filterPaeth の論理和)
+<DT><STRONG>stripAlpha</STRONG>
+	<DD>　アルファ値情報を保存しません(32bpp のみ有効)
+<DT><STRONG>interlace</STRONG>
+	<DD>　インターレース形式で保存します
+</DL>
+
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+
+</BODY>
+</HTML>

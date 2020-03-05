@@ -1,0 +1,423 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+	<LINK REV="Made" HREF="mailto:ain@da.airnet.ne.jp">
+	<LINK REL="Contents" HREF="./index.html">
+	<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-2022-jp">
+	<META NAME="Author" CONTENT="Seiji Ainoguchi">
+	<META NAME="Subject" CONTENT="CNxHLSColor">
+	<TITLE>CNxHLSColor クラス</TITLE>
+</HEAD>
+<BODY>
+
+<A NAME="top"><H1>CNxHLSColor クラス</H1></A>
+
+<A HREF="#summary">概要</A><BR>
+<A HREF="#member">クラスメンバ</A><BR>
+<BR>
+<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+<A NAME="summary"><H2>概要</H2></A>
+
+<P>　CNxHLSColor クラスは、HLS 色空間による色の操作をサポートするクラスです。CNxColor クラスと同様に NxColor への変換演算子を持っているため、RGBA カラーの <A HREF="CNxColor.html">CNxColor</A> クラスと同様に扱えます。CNxHLSColor クラスは、RGBA カラーを直接扱うクラスではないため、CNxColor クラスの様に RGB それぞれの値を独立して操作する事はできません。</P>
+
+<P>　HLS 色空間では色相(Hue)、明度(Lightness)、彩度(Saturation)によって色を指定します。CNxHLSColor クラスの場合、色相は 0 ～ 359、明度と彩度は 0 ～ 255 の範囲です。</P>
+
+<P>　Hue は、青や赤と言った色合い(色の系統)です。0 は赤、120 は緑、240 では青となります。</P>
+
+<P>　Lightness は、明るさを指定します。値が小さい場合は暗く、逆に大きくすると白くなります(255 では真っ白)。</P>
+
+<P>　Saturation は、色の鮮やかさです。255 では最も鮮やかな色、値を小さくすると鮮やかさが失われてモノクロに近くなります。</P>
+
+<P>　以下の表は、横方向へ色相を最低値(0)から最高値(359)まで、縦方向へ彩度を最高値から最低値まで変化させたものです。</P>
+
+<TABLE BORDER>
+<TR><TH>Lightness = 64</TH><TH>Lightness = 128</TH><TH>Lightness = 192</TH><TH>Lightness = 255</TH></TR>
+<TR>
+	<TD><IMG SRC="images/HLS25.png" ALT="Lightness = 64" WIDTH=240 HEIGHT=128></TD>
+	<TD><IMG SRC="images/HLS50.png" ALT="Lightness = 128" WIDTH=240 HEIGHT=128></TD>
+	<TD><IMG SRC="images/HLS75.png" ALT="Lightness = 192" WIDTH=240 HEIGHT=128></TD>
+	<TD><IMG SRC="images/HLS100.png" ALT=Lightness = 255" WIDTH=240 HEIGHT=128></TD>
+</TR>
+</TABLE>
+
+<P>　CNxHLSColor へ設定された <A HREF="global.html#NxColor">NxColor</A> はその時点で HLS へ変換されます。逆に、NxColor を取り出す時は HLS からの変換が行われます。CNxHLSColor クラスで保持しているのは HLS だけです。HLS と RGB は一対一で対応していないのと、変換に多少の誤差があるため、何度も変換を繰り返すと色が失われます(特に色相)。</P>
+
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<A NAME="member"><H2>CNxHLSColor クラスメンバ</H2></A>
+
+<A HREF="#construct">構築</A><BR>
+<A HREF="#set">設定</A><BR>
+<A HREF="#get">取得</A><BR>
+
+<A NAME="construct"><H3>構築</H3></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.CNxHLSColor">CNxHLSColor()</A></TD><TD>　コンストラクタ</TD></TR>
+</TABLE>
+
+<A NAME="set"><P><FONT SIZE=+1>設定</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetNxColor">SetNxColor()</A></TD><TD>　NxColor を設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetHLS">SetHLS()</A></TD><TD>　HLS 値を設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetHue">SetHue()</A></TD><TD>　Hue を設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetLightness">SetLightness()</A></TD><TD>　Lightness を設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetSaturation">SetSaturation()</A></TD><TD>　Saturation を設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetAlpha">SetAlpha()</A></TD><TD>　アルファの値を設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetColorRef">SetColorRef()</A></TD><TD>　COLORREF 値を設定</TD></TR>
+</TABLE>
+
+<A NAME="get"><P><FONT SIZE=+1>取得</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetNxColor">GetNxColor()</A></TD><TD>　NxColor を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetHue">GetHue()</A></TD><TD>　Hue を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetLightness">GetLightness()</A></TD><TD>　Lightness を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetSaturation">GetSaturation()</A></TD><TD>　Saturation を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetAlpha">GetAlpha()</A></TD><TD>　アルファの値を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetColorRef">GetColorRef()</A></TD><TD>　COLORREF 値を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.operatorNxColor">operator NxColor()</A></TD><TD>　NxColor への変換演算子</TD></TR>
+</TABLE>
+
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxHLSColor::CNxHLSColor() -->
+<A NAME="member.CNxHLSColor"><H3>CNxHLSColor::CNxHLSColor()</H3></A>
+<H4>概要</H4>
+<P>　CNxHLSColor クラスのコンストラクタ</P>
+<H4>書式</H4>
+CNxHLSColor::CNxHLSColor()<BR>
+<BR>
+CNxHLSColor::CNxHLSColor(NxColor <EM>nxColor</EM>)<BR>
+<BR>
+CNxHLSColor::CNxHLSColor(WORD <EM>wHue</EM>, BYTE <EM>byLightness</EM>, BYTE <EM>bySaturation</EM>, BYTE <EM>byAlpha = 255</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP><A HREF="global.html#NxColor">NxColor</A> <EM>nxColor</EM></TD><TD>　NxColor 型の RGBA 値</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>WORD <EM>wHue</EM></TD><TD>　色相(0 ～ 359)</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>BYTE <EM>byLightness</EM></TD><TD>　明度(0 ～ 255)</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>BYTE <EM>bySaturation</EM></TD><TD>　彩度(0 ～ 255)</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>BYTE <EM>byAlpha</EM></TD><TD>　アルファの値(0 ～ 255)</TD></TR>
+</TABLE>
+<H4>解説</H4>
+<P>　引数がない最初の形式は、HLS とアルファ値を全てゼロで初期化します。</P>
+<P>　2番目の形式は、NxColor 型の RGBA 値 を HLS へ変換して設定します。</P>
+<P>　3番目の形式は、HLS の各値へ引数を設定します。</P>
+<H4>参照</H4>
+<A HREF="#member.SetNxColor">CNxHLSColor::SetNxColor()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxHLSColor::SetNxColor() -->
+<A NAME="member.SetNxColor"><H3>CNxHLSColor::SetNxColor()</H3></A>
+<H4>概要</H4>
+<P>　NxColor 型の RGBA 値を HLS へ変換して設定します。</P>
+<H4>書式</H4>
+CNxHLSColor& CNxHLSColor::SetNxColor(NxColor <EM>nxColor</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP><A HREF="global.html#NxColor">NxColor</A> <EM>nxColor</EM></TD><TD>　NxColor 型の RGBA 値</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　自分自身への参照を返します。</P>
+<H4>参照</H4>
+<A HREF="#member.GetNxColor">CNxHLSColor::GetNxColor()</A>&nbsp;/&nbsp;
+<A HREF="#member.CNxHLSColor">CNxHLSColor::CNxHLSColor()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxHLSColor::SetHLS() -->
+<A NAME="member.SetHLS"><H3>CNxHLSColor::SetHLS()</H3></A>
+<H4>概要</H4>
+<P>　HLS 全てとアルファの値を設定します。</P>
+<H4>書式</H4>
+CNxHLSColor& CNxHLSColor::SetHLS(WORD <EM>wHue</EM>, BYTE <EM>byLightness</EM>, BYTE <EM>bySaturation</EM>, BYTE <EM>byAlpha = 255</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>WORD <EM>wHue</EM></TD><TD>　色相(0 ～ 359)</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>BYTE <EM>byLightness</EM></TD><TD>　明度(0 ～ 255)</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>BYTE <EM>bySaturation</EM></TD><TD>　彩度(0 ～ 255)</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>BYTE <EM>byAlpha</EM></TD><TD>　アルファの値(0 ～ 255)</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　自分自身への参照を返します。</P>
+<H4>解説</H4>
+<P>　Hue、Lightness および Saturation と、アルファの値を設定します。</P>
+<H4>参照</H4>
+<A HREF="#member.CNxHLSColor">CNxHLSColor::CNxHLSColor()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxHLSColor::SetHue() -->
+<A NAME="member.SetHue"><H3>CNxHLSColor::SetHue()</H3></A>
+<H4>概要</H4>
+<P>　Hue (色相)の値を設定します。</P>
+<H4>書式</H4>
+CNxHLSColor& CNxHLSColor::SetHue(WORD wHue)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>WORD <EM>wHue</EM></TD><TD>　色相(0 ～ 359)</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　自分自身への参照を返します。</P>
+<H4>参照</H4>
+<A HREF="#member.GetHue">CNxHLSColor::GetHue()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetHLS">CNxHLSColor::SetHLS()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxHLSColor::SetLightness() -->
+<A NAME="member.SetLightness"><H3>CNxHLSColor::SetLightness()</H3></A>
+<H4>概要</H4>
+<P>　Lightness (明度)の値を設定します。</P>
+<H4>書式</H4>
+CNxHLSColor& CNxHLSColor::SetLightness(BYTE byLightness)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>BYTE <EM>byLightness</EM></TD><TD>　明度(0 ～ 255)</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　自分自身への参照を返します。</P>
+<H4>参照</H4>
+<A HREF="#member.GetLightness">CNxHLSColor::GetLightness()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetHLS">CNxHLSColor::SetHLS()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxHLSColor::SetSaturation() -->
+<A NAME="member.SetSaturation"><H3>CNxHLSColor::SetSaturation()</H3></A>
+<H4>概要</H4>
+<P>　Saturation (彩度)の値を設定します。</P>
+<H4>書式</H4>
+CNxHLSColor& CNxHLSColor::SetSaturation(BYTE bySaturation)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>BYTE <EM>bySaturation</EM></TD><TD>　彩度(0 ～ 255)</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　自分自身への参照を返します。</P>
+<H4>参照</H4>
+<A HREF="#member.GetSaturation">CNxHLSColor::GetSaturation()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetHLS">CNxHLSColor::SetHLS()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxHLSColor::SetAlpha() -->
+<A NAME="member.SetAlpha"><H3>CNxHLSColor::SetAlpha()</H3></A>
+<H4>概要</H4>
+<P>　アルファの値を設定</P>
+<H4>書式</H4>
+CNxHLSColor& CNxHLSColor::SetAlpha(BYTE <EM>byAlpha</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>BYTE <EM>byAlpha</EM></TD><TD>　設定するアルファの値(0 ～ 255)</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　自分自身への参照を返します。</P>
+<H4>参照</H4>
+<A HREF="#member.GetAlpha">CNxHLSColor::SetAlpha()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetNxColor">CNxHLSColor::SetNxColor()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxHLSColor::SetColorRef() -->
+<A NAME="member.SetColorRef"><H3>CNxHLSColor::SetColorRef()</H3></A>
+<H4>概要</H4>
+<P>　COLORREF 値を HLS へ変換して設定します。</P>
+<H4>書式</H4>
+CNxHLSColor& CNxHLSColor::SetColorRef(COLORREF <EM>crColor</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>COLORREF <EM>crColor</EM></TD><TD>　設定する COLORREF 値</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　自分自身への参照を返します。</P>
+<H4>解説</H4>
+<P>　GDI で使用される COLORREF 値を、HLS へ変換して設定します。アルファの値は 255 になります。</P>
+<H4>参照</H4>
+<A HREF="#member.GetColorRef">CNxHLSColor::GetColorRef()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxHLSColor::GetNxColor() -->
+<A NAME="member.GetNxColor"><H3>CNxHLSColor::GetNxColor()</H3></A>
+<H4>概要</H4>
+<P>　HLS を NxColor 型の RGBA 値へ変換して返します。</P>
+<H4>書式</H4>
+<A HREF="global.html#NxColor">NxColor</A> CNxHLSColor::GetNxColor() const<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　変換された NxColor を返します。</P>
+<H4>参照</H4>
+<A HREF="#member.SetNxColor">CNxHLSColor::SetNxColor()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxHLSColor::GetHue() -->
+<A NAME="member.GetHue"><H3>CNxHLSColor::GetHue()</H3></A>
+<H4>概要</H4>
+<P>　Hue (色相)の値を取得します。</P>
+<H4>書式</H4>
+WORD CNxHLSColor::GetHue() const<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　Hue の値を返します。</P>
+<H4>参照</H4>
+<A HREF="#member.SetHue">CNxHLSColor::SetHue()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetHLS">CNxHLSColor::SetHLS()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxHLSColor::GetLightness() -->
+<A NAME="member.GetLightness"><H3>CNxHLSColor::GetLightness()</H3></A>
+<H4>概要</H4>
+<P>　Lightness (明度)の値を取得します。</P>
+<H4>書式</H4>
+BYTE CNxHLSColor::GetLightness() const<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　Lightness の値を返します。</P>
+<H4>参照</H4>
+<A HREF="#member.SetLightness">CNxHLSColor::SetLightness()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetHLS">CNxHLSColor::SetHLS()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxHLSColor::GetSaturation() -->
+<A NAME="member.GetSaturation"><H3>CNxHLSColor::GetSaturation()</H3></A>
+<H4>概要</H4>
+<P>　Saturation (彩度)の値を取得します。</P>
+<H4>書式</H4>
+BYTE CNxHLSColor::GetSaturation() const<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　Saturation の値を返します。</P>
+<H4>参照</H4>
+<A HREF="#member.SetSaturation">CNxHLSColor::SetSaturation()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetHLS">CNxHLSColor::SetHLS()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxHLSColor::GetAlpha() -->
+<A NAME="member.GetAlpha"><H3>CNxHLSColor::GetAlpha()</H3></A>
+<H4>概要</H4>
+<P>　アルファの値を設定</P>
+<H4>書式</H4>
+BYTE CNxHLSColor::GetAlpha() const<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　アルファの値を返します。</P>
+<H4>参照</H4>
+<A HREF="#member.SetAlpha">CNxHLSColor::SetAlpha()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetNxColor">CNxHLSColor::SetNxColor()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxHLSColor::GetColorRef() -->
+<A NAME="member.GetColorRef"><H3>CNxHLSColor::GetColorRef()</H3></A>
+<H4>概要</H4>
+<P>　COLORREF 値を取得</P>
+<H4>書式</H4>
+COLORREF CNxHLSColor::GetColorRef() const<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　COLORREF 値を返します。</P>
+<H4>解説</H4>
+<P>　HLS を COLORREF 値へ変換して返します。アルファの値は無視され、返される COLORREF の最上位バイトは常にゼロになります。</P>
+<H4>参照</H4>
+<A HREF="#member.SetColorRef">CNxColor::SetHLSColorRef()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxHLSColor::operator NxColor() -->
+<A NAME="member.operatorNxColor"><H3>CNxHLSColor::operator NxColor()</H3></A>
+<H4>概要</H4>
+<P>　CNxHLSColor オブジェクトを NxColor へ変換して返します。</P>
+<H4>書式</H4>
+CNxHLSColor::operator <A HREF="global.html#NxColor">NxColor</A>() const<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　NxColor 値</P>
+<H4>解説</H4>
+<P>　この演算子は HLS を RGBA へ変換して返します。</P>
+<H4>参照</H4>
+<A HREF="#member.GetNxColor">CNxHLSColor::GetNxColor()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+</BODY>
+</HTML>

@@ -1,0 +1,1120 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+	<LINK REV="Made" HREF="mailto:ain@da.airnet.ne.jp">
+	<LINK REL="Contents" HREF="./index.html">
+	<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-2022-jp">
+	<META NAME="Author" CONTENT="Seiji Ainoguchi">
+	<META NAME="Subject" CONTENT="CNxSurface">
+	<TITLE>CNxSurface クラス</TITLE>
+</HEAD>
+<BODY>
+<A NAME="top"><H1>CNxSurface クラス</H1></A>
+
+<A HREF="#summary">概要</A><BR>
+<A HREF="#transform">DIB からサーフェスへの変換について</A><BR>
+<A HREF="#member">クラスメンバ</A><BR>
+<BR>
+<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<A NAME="summary"><H2>概要</H2></A>
+
+<P>　CNxSurface クラスは、サーフェス(画像データ)を管理するクラスです。CNxSurface クラスは、サイズを指定して空のサーフェスを作成するか、画像を読み込んでそのサイズに合わせたサーフェスを構築できます。読み込み可能な画像については、<A HREF="CNxImageLoader.html">CNxImageLoader</A> クラスを参照して下さい。</P>
+
+<P>　CNxSurface クラスは、実際の画像メモリとして DIBSection を作成します。CNxSurface クラスのメンバ関数による描画だけではなく、<A HREF="#member.GetDC">CNxSurface::GetDC()</A> 関数によって取得したデバイスコンテキストを介して、GDI 関数を使用できます。また、DIBSection のハンドルも可能です。GDI の制限により、<FONT COLOR="RED">Windows95 / Windows98 では横幅 32767 (0x7fff) 以上の DIBSection は作成できません</FONT>。この制限は、Windows NT / Windows2000 にはありません。</P>
+
+<P>　CNxSurface クラスの一部の関数では、矩形の指定に RECT 構造体を用いますが、右下の1ドットは領域に含みません。つまり (0, 0) - (32,32) という矩形が示す幅と高さは、32 ドットです。</P>
+
+<P>　CNxSurface クラスが扱えるサーフェスのピクセル形式は 32bpp 又は 8bpp 形式のみです。サーフェスの形式は、<A HREF="#member.CNxSurface">コンストラクタ</A> の引数で指定します。</P>
+
+<P>　32bpp 形式は、RGB の他にピクセル単位の不透明度を示す A (アルファチャンネル)があります。アルファチャンネル情報を全く持たない画像(JPEG 等)を読み込むと、32bpp へ変換される際にアルファチャンネル情報を 255 (不透明) に設定します。PNG では、透過色もアルファチャンネル情報(0 又は 255)へ変換されます。</P>
+
+<P>　8bpp 形式は、カラーテーブル(パレット)付きの画像又は、アルファチャンネル付きの(濃淡を持つ矩形の塗り潰し)の転送元として使用できます。8bpp サーフェスをアルファチャンネルとして使用する場合は、ピクセルの値のみが意味を持ちます。</P>
+
+<P>　カラーテーブルは 32bpp 形式サーフェスへの転送の際に参照されます。この際に参照されるカラーテーブルは、DIBSection の物とは全く別です。</STRONG>DIBSection のカラーテーブルは作成時にグレイスケールとして設定され、<A HREF="#member.SetColorTable">CNxSurface::SetColorTable()</A> 関数等でカラーテーブルの操作を行っても、DIBSection のカラーテーブルは変化しません。<A HREF="#member.UpdateDIBColorTable">CNxSurface::UpdateDIBColorTable()</A> メンバ関数によって、現在の(CNxSurface クラスの)カラーテーブルを DIBSection のカラーテーブルへ設定できます。</P>
+
+<P>　CNxSurface クラスの描画関数は、設定されている原点座標とクリッピング矩形に従って、描画のクリップを行ないます。デフォルトでは、原点座標は左上(0,0)、クリッピング矩形はサーフェス全体が設定されています。CNxSurface クラスにおけるクリッピング矩形とは、サーフェスへの描画可能な矩形を示します。例えば、クリッピング矩形が (20, 0) - (100, 100) と設定されている状態で、<A HREF="#member.Blt">Blt()</A> メンバ関数等によって (0, 0) - (100, 100) への描画を行っても、左端 20dot 分へは何も描画されません。原点座標は、描画されるサーフェスの描画(転送先)座標へ加算され、その結果が最終的な描画座標となります。クリッピングは原点座標を加算した結果について行われます。なお、クリッピング矩形と原点座標は、1つしか設定できません。原点座標は <A HREF="#member.SetOrg">CNxSurface::SetOrg()</A>、クリッピング矩形は <A HREF="#member.SetClipRect">CNxSurface::SetClipRect()</A> 関数で設定します。</P>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+<A NAME="transform"><H2>DIB からサーフェスへの変換について</H2></A>
+
+<P>　画像の読み込み時には、画像フォーマットに関らず、内部で CNxDIBImage オブジェクトへ変換され、その後サーフェスと同じ形式へ変換されます。変換の詳細を以下の表に示します。</P>
+
+<H3>32bpp 形式のサーフェス</H3>
+<TABLE BORDER>
+<TR><TH NOWRAP>転送元 DIB</TH><TH>動作</TH></TR>
+<TR><TD ALIGN="RIGHT">32bpp</TD><TD>そのまま転送されます。ピクセル毎の4バイト目はアルファチャンネルとして扱います。</TD></TR>
+<TR><TD ALIGN="RIGHT">24bpp</TD><TD>RGB 自体はそのまま転送されます。全てのピクセルのアルファは 255 (不透明) になります。</TD></TR>
+<TR><TD ALIGN="RIGHT">16bpp</TD><TD>フルカラーへ変換されます。全てのピクセルのアルファは 255 になります。</TD></TR>
+<TR><TD ALIGN="RIGHT">8bpp</TD><TD>カラーテーブル(パレット)を参照しながら、32bpp へ変換されます。</TD></TR>
+<TR><TD ALIGN="RIGHT">4bpp</TD><TD>8bpp と同じです。</TD></TR>
+<TR><TD ALIGN="RIGHT">1bpp</TD><TD>8bpp と同じです。</TD></TR>
+</TABLE>
+
+<H3>8bpp 形式のサーフェス</H3>
+<TABLE BORDER>
+<TR><TH NOWRAP>転送元 DIB</TH><TH>動作</TH></TR>
+<TR><TD ALIGN="RIGHT">32bpp</TD><TD>グレイスケール化されます(パレットをグレイスケールと見なします)。アルファ値は無視します。</TD></TR>
+<TR><TD ALIGN="RIGHT">24bpp</TD><TD>グレイスケール化されます(パレットをグレイスケールと見なします)。</TD></TR>
+<TR><TD ALIGN="RIGHT">16bpp</TD><TD>グレイスケール化されます(パレットをグレイスケールと見なします)。</TD></TR>
+<TR><TD ALIGN="RIGHT">8bpp</TD><TD>そのまま転送されます。</TD></TR>
+<TR><TD ALIGN="RIGHT">4bpp</TD><TD>8bpp へ拡張します。インデックス自体は変化しません。ピクセルの値は、転送後も 0x00 〜 0x0f です。</TD></TR>
+<TR><TD ALIGN="RIGHT">1bpp</TD><TD>8bpp へ拡張します。インデックス自体は変化しません。ピクセルの値は、転送後も 0x00 〜 0x01 です。</TD></TR>
+</TABLE>
+<BR>
+
+
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+<A NAME="member"><H3>CNxSurface クラスメンバ</H3></A>
+
+<A HREF="#member.construct">構築、消滅</A><BR>
+<A HREF="#member.widthheight">幅と高さ</A><BR>
+<A HREF="#member.memory">サーフェスメモリの操作</A><BR>
+<A HREF="#member.colortable">カラーテーブルの操作</A><BR>
+<A HREF="#member.draw">描画</A><BR>
+<A HREF="#member.misc">その他</A><BR>
+
+<A NAME="member.construct"><P><FONT SIZE=+1>構築、消滅</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.CNxSurface">CNxSurface()</A></TD><TD>　コンストラクタ</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.Create">Create()</A></TD><TD>　初期化</TD></TR>
+</TABLE>
+
+<A NAME="member.widthheight"><P><FONT SIZE=+1>幅と高さ</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetWidth">GetWidth()</A></TD><TD>　サーフェスの幅を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetHeight">GetHeight()</A></TD><TD>　サーフェスの高さを取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetRect">GetRect()</A></TD><TD>　サーフェスの矩形を取得</TD></TR>
+</TABLE>
+
+<A NAME="member.memory"><P><FONT SIZE=+1>サーフェスメモリの操作</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetBits">GetBits()</A></TD><TD>　サーフェスメモリへのポインタを取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetPitch">GetPitch()</A></TD><TD>　サーフェスメモリの幅を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetBitCount">GetBitCount()</A></TD><TD>　サーフェスのピクセルビット数を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetDIBits">SetDIBits()</A></TD><TD>　DIB をサーフェスへ転送</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetDIBits">GetDIBits()</A></TD><TD>　サーフェスを DIB へ転送</TD></TR>
+</TABLE>
+
+<A NAME="member.colortable"><P><FONT SIZE=+1>カラーテーブルの操作</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetColorTable">GetColorTable()</A></TD><TD>　カラーテーブルへのポインタを取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.UpdateDIBColorTable">UpdateDIBColorTable()</A></TD><TD>　現在のカラーテーブルを DIBSection へ設定</TD></TR>
+</TABLE>
+
+<A NAME="member.draw"><P><FONT SIZE=+1>描画</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.Blt">Blt()</A></TD><TD>　サーフェス間のブロック転送</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.TileBlt">TileBlt()</A></TD><TD>　ブロック転送(転送元をタイル状に敷き詰める)</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.FillRect">FillRect()</A></TD><TD>　純色で塗り潰し</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.FilterBlt">FilterBlt()</A></TD><TD>　フィルタ適用伴うサーフェス間のブロック転送</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.LoadImage">LoadImage()</A></TD><TD>　イメージを読み込む</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.DrawText">DrawText()</A></TD><TD>　テキストを描画</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetTextExtent">GetTextExtent()</A></TD><TD>　テキストのサイズを返す</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetTextSmoothing">SetTextSmoothing()</A></TD><TD>　テキスト描画の際のスムージングの有無を設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetTextSmoothing">GetTextSmoothing()</A></TD><TD>　テキスト描画の際のスムージングの有無を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetFont">SetFont()</A></TD><TD>　DrawText() 関数で使用するフォントを設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetFont">GetFont()</A></TD><TD>　現在設定されているフォントを取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetDC">GetDC()</A></TD><TD>　サーフェスへの HDC を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.ReleaseDC">ReleaseDC()</A></TD><TD>　GetDC() 関数で取得した HDC を開放する</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetHandle">GetHandle()</A></TD><TD>　DIBSection ハンドルを取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetClipRect">SetClipRect()</A></TD><TD>　クリッピング矩形を設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetClipRect">GetClipRect()</A></TD><TD>　クリッピング矩形を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetOrg">SetOrg()</A></TD><TD>　原点座標を設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetOrg">GetOrg()</A></TD><TD>　原点座標を取得</TD></TR>
+</TABLE>
+
+<A NAME="member.misc"><P><FONT SIZE=+1>その他</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetDIBImage">GetDIBImage()</A></TD><TD>　CNxDIBImage オブジェクトへの参照を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SaveImage">SaveImage()</A></TD><TD>　サーフェスの内容をファイルへ保存</TD></TR>
+</TABLE>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+<!-- CNxSurface::CNxSurface() -->
+<A NAME="member.CNxSurface"><H3>CNxSurface::CNxSurface()</H3></A>
+<H4>概要</H4>
+<P>　CNxSurface クラスのコンストラクタです。</P>
+<H4>書式</H4>
+CNxSurface::CNxSurface(UINT <EM>uBitCount = 32</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD NOWRAP>UINT <EM>uBitCount</EM></TD><TD>　サーフェスのビット深度</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　<EM>uBitCount</EM> 引数へは、サーフェスのビット深度を 32 又は 8 で指定します。</P>
+<P>　コンストラクタ内では画像メモリを作成していないため、そのままではオブジェクトは使用できません。使用する前に <A HREF="#member.Create">CNxSurface::Create()</A> 関数を呼び出してください。</P>
+<H4>関連項目</H4>
+<A HREF="#member.Create">CNxSurface::Create()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurface::Create() -->
+<A NAME="member.Create"><H3>CNxSurface::Create()</H3></A>
+<H4>概要</H4>
+<P>　サーフェスの為のメモリを確保して、CNxSurface オブジェクトを使用可能な状態にします。</P>
+<H4>書式</H4>
+virtual BOOL CNxSurface::Create(int <EM>nWidth</EM>, int <EM>nHeight</EM>)<BR>
+<BR>
+BOOL CNxSurface::Create(CNxFile&amp; <EM>nxfile</EM>)<BR>
+<BR>
+BOOL CNxSurface::Create(const BITMAPINFO* <EM>lpbmi</EM>, LPCVOID <EM>lpvBits = NULL</EM>)<BR>
+<BR>
+BOOL CNxSurface::Create(const CNxDIBImage* <EM>pDIBImage</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>nWidth</EM></TD><TD>　作成するサーフェスの幅</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>nHeight</EM></TD><TD>　作成するサーフェスの高さ</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const BITMAPINFO* <EM>lpbmi</EM></TD><TD>　DIB の情報を示す BITMAPINFO 構造体へのポインタ</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>LPCVOID <EM>lpvBits</EM></TD><TD>　DIB のビットデータへのポインタ</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>CNxFile&amp; <EM>nxfile</EM></TD><TD>　読込元を示す CNxFile オブジェクトへの参照</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>CNxDIBImage* <EM>pDIBImage</EM></TD><TD>　CNxDIBImage オブジェクトへのポインタ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功ならば TRUE</P>
+<H4>解説</H4>
+<P>　1番目の関数は、指定された幅と高さ、形式でサーフェスを作成し、すべてのピクセルを RGBA = 0, 0, 0, 0 (8bpp ならば A = 0) へ初期化します。</P>
+<P>　2番目の関数は、指定された画像を CNxFile オブジェクトから読み込み、その画像のサイズでサーフェスを作成します。サーフェスと画像の形式が異なる場合は、自動的にサーフェスの形式へ変換されます。8bpp 形式サーフェスの場合、カラーテーブル(<A HREF="#summary">概要</A>又は、<A HREF="#member.GetColorTable">CNxSurface::GetColorTable()</A> 関数の参照)の設定を行います。この関数は、<A HREF="CNxDraw.html#member.LoadImage">CNxDraw::LoadImage()</A> 関数を使用して画像を読み込みます。詳細については CNxImageLoader クラスの解説を参照して下さい。</P>
+
+<P>　3番目の関数は、指定された DIB のサイズでサーフェスを作成し、内容をコピーします。サーフェスと DIB の形式(コンストラクタで指定されたビット深度)が異なる場合は、自動的にサーフェスと同じ形式へ変換されます。8bpp 形式サーフェスの場合、カラーテーブルも設定されます。内部では、1番目の関数呼び出した後、<A HREF="#member.SetDIBits">CNxSurface::SetDIBits()</A> 関数を呼び出しています。<EM>lpvBits</EM> 引数の意味については、CNxSurfae::SetDIBits() 関数の解説を参照して下さい。</P>
+
+<P>　4番目の関数は、指定された <A HREF="CNxDIBImage.html">CNxDIBImage</A> オブジェクトのサイズでサーフェスを作成し、内容をコピーします。</P>
+
+<P><STRONG>　高さ(<EM>nHeight</EM> 引数又は BITMAPINFOHEADER 構造体の biHeight メンバの値)が正の値の場合 bottom-up 形式の DIB を、負の値ならば tom-down 形式の DIB を作成します。CNxSurface クラスのメンバ関数はどちらの形式にも対応しています。</STRONG></P>
+
+<H4>関連項目</H4>
+<A HREF="#member.LoadImage">CNxSurface::LoadImage()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetDIBits">CNxSurface::SetDIBits()</A>&nbsp;/&nbsp;
+<A HREF="../NxStorage/index.html">NxStorage ライブラリ</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurface::GetWidth() -->
+<A NAME="member.GetWidth"><H3>CNxSurface::GetWidth()</H3></A>
+<H4>概要</H4>
+<P>　サーフェスの幅を取得します。</P>
+<H4>書式</H4>
+UINT CNxSurface::GetWidth() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　サーフェスの幅</P>
+<H4>関連項目</H4>
+<A HREF="#member.GetHeight">CNxSurface::GetHeight()</A>&nbsp;/&nbsp;
+<A HREF="#member.GetRect">CNxSurface::GetRect()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurface::GetHeight() -->
+<A NAME="member.GetHeight"><H3>CNxSurface::GetHeight()</H3></A>
+<H4>概要</H4>
+<P>　サーフェスの高さを取得します。</P>
+<H4>書式</H4>
+UINT CNxSurface::GetHeight() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　サーフェスの高さ</P>
+<H4>解説</H4>
+<P>　サーフェスの高さは、bottom-up, top-down 形式には関係なく、常に正の値です。</P>
+<H4>関連項目</H4>
+<A HREF="#member.GetWidth">CNxSurface::GetWidth()</A>&nbsp;/&nbsp;
+<A HREF="#member.GetRect">CNxSurface::GetRect()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurface::GetRect() -->
+<A NAME="member.GetRect"><H3>CNxSurface::GetRect()</H3></A>
+<H4>概要</H4>
+<P>　サーフェスの矩形を取得します。</P>
+<H4>書式</H4>
+void CNxSurface::GetRect(LPRECT lpRect) const<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>LPRECT <EM>lpRect</EM></TD><TD>　矩形を受けとる RECT 構造体へのポインタ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　サーフェスの矩形を取得します。RECT 構造体の left および top メンバは 0 になり、right と bottom メンバへはそれぞれ幅と高さが返されます。</P>
+<H4>参照</H4>
+<A HREF="#member.GetWidth">CNxSurface::GetWidth()</A>&nbsp;/&nbsp;
+<A HREF="#member.GetHeight">CNxSurface::GetHeight()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurface::GetBits() -->
+<A NAME="member.GetBits"><H3>CNxSurface::GetBits()</H3></A>
+<H4>概要</H4>
+<P>　サーフェスメモリへのポインタを取得します。</P>
+<H4>書式</H4>
+LPVOID CNxSurface::GetBits()<BR>
+<BR>
+LPCVOID CNxSurface::GetBits() const<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　サーフェスメモリへのポインタ。失敗なら NULL</P>
+<H4>解説</H4>
+<P>　左上(X = 0, Y = 0)のピクセルを示すポインタを返します。この関数は bottom-up, top-down 形式とは無関係に、常に画像上の左上へのポインタを返します。top-down 形式の場合は、ビットデータの先頭アドレスを示します。クリッピング矩形と原点座標は考慮されません。</P>
+<P>　以下の例は、32bpp サーフェスのアルファチャンネルを除く、全てのピクセルを反転します。</P>
+
+<PRE>
+    LPDWORD lpdwSurface = <FONT COLOR="BLUE">static_cast</FONT>&lt;LPDWORD&gt;(pSurface-><STRONG>GetBits()</STRONG>);
+    LONG lPitch = pSurface-><A HREF="#member.GetPitch">GetPitch()</A> / 4;
+    <FONT COLOR="BLUE">for</FONT> (UINT v = 0; v &lt; pSurface-&gt;<A HREF="#member.GetHeight">GetHeight()</A>; v++)
+    {
+        for (UINT u = 0; u &lt; pSurface-&gt;<A HREF="#member.GetWidth">GetWidth()</A>; u++)
+        {
+            *(lpdwSurface + u) ^= 0x00ffffff;
+        }
+        lpdwSurface += lPitch;
+    }
+</PRE>
+
+<H4>関連項目</H4>
+<A HREF="#member.GetPitch">CNxSurface::GetPtich()</A>&nbsp;/&nbsp;
+<A HREF="#member.GetBitCount">CNxSurface::GetBitCount()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurface::GetPitch() -->
+<A NAME="member.GetPitch"><H3>CNxSurface::GetPitch()</H3></A>
+<H4>概要</H4>
+<P>　サーフェスメモリの行の送り幅を取得します。</P>
+<H4>書式</H4>
+LONG CNxSurface::GetPtich() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　行の送り幅を返します</P>
+<H4>解説</H4>
+<P>　サーフェスメモリ上で、すぐ下の行へ移動する為のポインタの差(行の送り幅)をバイト単位で返します。bottom-up 形式 DIB では、負の値が返されます。</P>
+<H4>関連項目</H4>
+<A HREF="#member.GetBits">CNxSurface::GetBits()</A>&nbsp;/&nbsp;
+<A HREF="#member.GetBitCount">CNxSurface::GetBitCount()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurface::GetBitCount() -->
+<A NAME="member.GetBitCount"><H3>CNxSurface::GetBitCount()</H3></A>
+<H4>概要</H4>
+<P>　サーフェスのピクセルビット数を取得します。</P>
+<H4>書式</H4>
+UINT CNxSurface::GetBitCount() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　サーフェスのピクセル当たりのビット数</P>
+<H4>解説</H4>
+<P>　サーフェスの1ドットを占めるビット数を取得します。例えば、ピクセルビット数に係らずサーフェスメモリ上の任意の座標へのポインタを取得するには以下の様に行ないます。</P>
+<PRE>    LPVOID lpSurface = (LPBYTE)<A HREF="#member.GetBits">GetBits()</A> + (y * <A HREF="#member.GetPitch">GetPitch()</A>) + x * (GetBitCount() / 8);</PRE>
+<H4>関連項目</H4>
+<A HREF="#member.GetBits">CNxSurface::GetBits()</A>&nbsp;/&nbsp;
+<A HREF="#member.GetPitch">CNxSurface::GetPtich()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurface::GetColorTable() -->
+<A NAME="member.GetColorTable"><H3>CNxSurface::GetColorTable()</H3></A>
+<H4>概要</H4>
+<P>　カラーテーブルへのポインタを取得します。</P>
+<H4>書式</H4>
+NxColor* CNxSurface::GetColorTable()<BR>
+<BR>
+const NxColor* CNxSurface::GetColorTable() const<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　カラーテーブルへのポインタ。又は NULL</P>
+<H4>解説</H4>
+<P>　カラーテーブルの最初のエントリへのポインタを返します。この関数は、256個分の NxColor 型へのポインタを返しますが、実体は (CNxSurface が持っている )CNxDIBImage オブジェクト内の BITMAPINFO のカラーテーブル(bmiColors メンバ)です。<STRONG>なお、書き込む NxColor 値のアルファは必ずゼロにして下さい。</STRONG>アルファ値がゼロ以外の NxColor 値を書き込んでしまうと、RGBQUAD 構造体の rgbReserved メンバもゼロでない値になってしまいます(Win32API マニュアルによれば、rgbReserved メンバは予約済みで、値は必ずゼロでなければなりません)。</P>
+
+<P>　32bpp 形式のサーフェスに対して使用された場合は NULL を返します。</P>
+<H4>関連項目</H4>
+<A HREF="#member.UpdateDIBColorTable">CNxSurface::UpdateDIBColorTable()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurface::UpdateDIBColorTable() -->
+<A NAME="member.UpdateDIBColorTable"><H3>CNxSurface::UpdateDIBColorTable()</H3></A>
+<H4>概要</H4>
+<P>　現在のカラーテーブルの内容を DIBSection へ設定します。</P>
+<H4>書式</H4>
+BOOL CNxSurface::UpdateDIBColorTable()<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　成功ならば TRUE</P>
+<H4>解説</H4>
+<P>　カラーテーブルのアルファ値は無視されます。</P>
+<P>　この関数は、8bpp 形式のサーフェスに対してのみ有効です。32bpp サーフェスに対して使用された場合、関数は FALSE を返します。</P>
+<H4>関連項目</H4>
+<A HREF="#member.GetColorTable">CNxSurface::GetColorTable()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurface::SetDIBits() -->
+<A NAME="member.SetDIBits"><H3>CNxSurface::SetDIBits()</H3></A>
+<H4>概要</H4>
+<P>　DIB をサーフェスへ転送します。</P>
+<H4>書式</H4>
+<TABLE>
+<TR><TD NOWRAP>BOOL CNxSurface::SetDIBits(</TD><TD NOWRAP>int <EM>dx</EM>, int <EM>dy</EM>, const BITMAPINFO* <EM>lpbmi</EM>, LPCVOID <EM>lpvBits = NULL</EM>,</TD></TR>
+<TR><TD><BR></TD><TD NOWRAP>const RECT* <EM>lpSrcRect = NULL</EM>)</TD></TR>
+<TR><TD NOWRAP>BOOL CNxSurface::SetDIBits(</TD><TD NOWRAP>int <EM>dx</EM>, int <EM>dy</EM>, const CNxDIBImage* <EM>pDIBImage</EM>, const RECT* <EM>lpSrcRect = NULL</EM>)</TD></TR>
+</TABLE>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>dx</EM></TD><TD>　転送先 X 座標</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>dy</EM></TD><TD>　転送先 Y 座標</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const BITMAPINFO* <EM>lpbmi</EM></TD><TD>　転送元 DIB を示す BITMAPINFO 構造体へのポインタ</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>LPCVOID <EM>lpvBits = NULL</EM></TD><TD>　転送元 DIB のビットデータへのポインタ</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const RECT* <EM>lpSrcRect = NULL</EM></TD><TD>　転送元矩形(NULL ならば全体)</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const CNxDIBImage* <EM>pDIBImage</EM></TD><TD>　<A HREF="CNxDIBImage.html">CNxDIBImage</A> オブジェクトへのポインタ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功なら TRUE を返します。</P>
+<H4>解説</H4>
+<P>　指定された矩形を DIB からサーフェスへ転送します。<EM>lpvBits</EM> 引数へは、転送される DIB のビットデータの左上隅へのポインタを指定します。bottom-up 形式(標準的な BMP ファイルの形式)ならば最下ライン、top-down 形式ならば最上ラインの左上を示します。NULL が指定されると、BITMAPINFO 構造体の内容から <EM>lpvBits</EM> を計算します。この場合は、BITMAPINFO 構造体の直後にビットデータ等が連続していなければなりません。</P>
+
+<P>　対応している DIB 形式は無圧縮の 1bpp、4bpp、8bpp、16bpp, 24bpp および 32bpp です。bottom-up, top-down 形式の両方に対応しています。未対応の DIB が渡されると、関数は FALSE を返します。</P>
+
+<P><FONT COLOR="RED">　この関数は、8bpp 形式サーフェスのカラーテーブルを更新しません。</FONT></P>
+
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+
+<!-- CNxSurface::GetDIBits() -->
+<A NAME="member.GetDIBits"><H3>CNxSurface::GetDIBits()</H3></A>
+<H4>概要</H4>
+<P>　サーフェスを DIB へ転送します。</P>
+<H4>書式</H4>
+<TABLE>
+<TR><TD NOWRAP>BOOL CNxSurface::GetDIBits(</TD><TD NOWRAP>int <EM>dx</EM>, int <EM>dy</EM>, LPBITMAPINFO <EM>lpbmi</EM>, LPVOID <EM>lpvBits = NULL</EM>,</TD></TR>
+<TR><TD><BR></TD><TD NOWRAP>const RECT* <EM>lpSrcRect = NULL</EM>) const</EM></TD></TR>
+</TABLE>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>dx</EM></TD><TD>　DIB 上の転送先 X 座標</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>dy</EM></TD><TD>　DIB 上の転送先 Y 座標</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>LPBITMAPINFO <EM>lpbmi</EM></TD><TD>　転送先 DIB を示す BITMAPINFO 構造体へのポインタ</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>LPCVOID <EM>lpvBits = NULL</EM></TD><TD>　転送先 DIB のビットデータへのポインタ</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const RECT* <EM>lpSrcRect = NULL</EM></TD><TD>　転送元矩形を示す RECT 構造体へのポインタ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功なら TRUE を返します。</P>
+<H4>解説</H4>
+<P>　この関数は、互換性の為に残されています。新しく作成するアプリケーションでは、<A HREF="#member.GetDIBImage">CNxDIBImage::GetDIBImage()</A> 関数で <A HREF="CNxDIBImage.html">CNxDIBImage</A> オブジェクトへの参照を得た後、<A HREF="CNxDIBImage.html#member.Blt">CNxDIBImage::Blt()</A> 関数等を使用して下さい。</P>
+
+<FONT COLOR="RED"><P>　この関数は 8bpp 形式サーフェスのカラーテーブルを取得しません。</P></FONT>
+
+<P><EM>x</EM> および <EM>y</EM> 引数へは、DIB への転送先座標を指定します。</P>
+
+<P>　<EM>lpbmi</EM> 引数が示す BITMAPINFO 構造体の最初から 6 個のメンバは初期化が必要です。BITMAPINFO 構造体の bmiHeader.biBitCount メンバは、取得する DIB の形式を指定します。このメンバに従って必要ならば変換が行われます。サポートしていない形式が指定されると、関数は失敗します。bmiHeader.biWidth と、bmiHeader.biHeight メンバへは DIB の大きさを指定します。bmiHeader.biHeight の値を負にすると、top-down 形式と見なします。</P>
+
+<P>　<EM>lpvBits</EM> 引数へは、DIB のビットデータを取得する為のバッファを指定します。bmiHeader.biHeight メンバが負の値の場合、ビットデータは top - down 形式で取得されます(通常の BITMAP は bottom - up 形式です)。NULL を指定すると、ビットデータの取得は行われませんが、BITMAPINFO 構造体の更新は行います。ビットデータを取得する前に、必要なメモリを確保する場合などに使用できます。</P>
+
+<P>　<EM>lpSrcRect</EM> 引数へは、サーフェス上の転送元矩形を指定します。この引数が NULL ならば、サーフェス全体と見なされます。</P>
+
+<P>　転送元と転送先は必要ならばクリップが行われます。クリップによって、実際に DIB へ転送される矩形は BITMAPINFO 構造体の幅と高さよりも小さくなる場合がありますが、<EM>lpvBits</EM> 引数で示すバッファへの転送は、常に BITMAPINFO 構造体の内容で示されるサイズに必要なメモリが用意されている見なします。特に、bottom-up 形式の場合、バッファの最後の方から転送されるため、少なくとも bmiHeader.biWidth * (ピクセルあたりのバイト数) * bmiHeader.biHeight 以上のサイズが必要です。必要なメモリは、BITMAPINFO 構造体の bmiHeader.biSizeImage メンバから取得できます(この値は常に DIB 全体のサイズを示します)。クリップの結果、矩形が空になった場合は、何も転送せずに TRUE を返します。</P>
+
+<P>　以下は、サーフェスの内容をクリップボードへコピーする例です。最初に BITMAPINFO 構造体だけを受け取ります。次に、ビットデータの為に必要なサイズ(+ BITMAPINFO 構造体)のメモリを確保し、BITMAPINFO 構造体と連続する様に、ビットデータを取得しています。</P>
+
+<PRE>
+    RECT rect;
+    pSurface-&gt;<A HREF="#member.GetRect">GetRect</A>(&amp;rect);
+
+
+    BITMAPINFO bmi;
+    bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    bmi.bmiHeader.biWidth = rect.right - rect.left;
+    bmi.bmiHeader.biHeight = rect.bottom - rect.top;
+    bmi.bmiHeader.biPlanes = 1;
+    bmi.bmiHeader.biBitCount = 24;
+    bmi.bmiHeader.biCompression = BI_RGB;
+    <FONT COLOR="GREEN">// BITMAPINFO 構造体を得る</FONT>
+    <FONT COLOR="BLUE">if</FONT> (pSurface-&gt;<STRONG>GetDIBits(0, 0, &amp;bmi, NULL, &amp;rect)</STRONG>)
+    {
+        <FONT COLOR="GREEN">// BITMAPINFO 構造体と、ビットデータを連続して保存するためのメモリを確保</FONT>
+        HGLOBAL hGlobal = ::GlobalAlloc(GHND | GMEM_DDESHARE, bmi.bmiHeader.biSizeImage + bmi.bmiHeader.biSize);
+        <FONT COLOR="BLUE">if</FONT> (hGlobal != NULL)
+        {
+            LPVOID lpvGlobal = ::GlobalLock(hGlobal);
+            <FONT COLOR="GREEN">// 確保したメモリの先頭へ、BITMAPINFO 構造体を転送</FONT>
+            memcpy(lpvGlobal, &amp;bmi, bmi.bmiHeader.biSize);
+            <FONT COLOR="GREEN">// BITMAPINFO 構造体の直後へ、ビットデータを取得</FONT>
+            <FONT COLOR="BLUE">if</FONT> (pSurface-&gt;<STRONG>GetDIBits(0, 0, &amp;bmi, <FONT COLOR="Blue">static_cast</FONT>&lt;LPBYTE&gt;(lpvGlobal) + bmi.bmiHeader.biSize, &amp;rect)</STRONG>)
+            {
+                ::GlobalUnlock(hGlobal);
+                <FONT COLOR="GREEN">// クリップボードへデータを設定</FONT>
+                ::EmptyClipboard();
+                ::SetClipboardData(CF_DIB, hGlobal);
+            }
+            <FONT COLOR="BLUE">else</FONT>
+            {
+                <FONT COLOR="GREEN">// エラー</FONT>
+                ::GlobalUnlock(hGlobal);
+                ::GlobalFree(hGlobal);
+            }
+        }
+    }
+</PRE>
+
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+<!-- CNxSurface::Blt() -->
+<A NAME="member.Blt"><H3>CNxSurface::Blt()</H3></A>
+<H4>概要</H4>
+<P>　サーフェス間のブロック転送を行ないます。</P>
+<H4>書式</H4>
+<TABLE>
+<TR><TD VALIGN="TOP" NOWRAP>BOOL CNxSurface::Blt(</TD><TD VALIGN="TOP" NOWRAP>int <EM>dx</EM>, int <EM>dy</EM>,const CNxSurface* <EM>pSrcSurface</EM>,<BR> const RECT* <EM>lpSrcRect</EM>, const NxBlt* <EM>pNxBlt = NULL</EM>)<BR><BR></TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>BOOL CNxSurface::Blt(</TD><TD VALIGN="TOP" NOWRAP>const RECT* <EM>lpDestRect</EM>, const CNxSurface* <EM>pSrcSurface</EM>,<BR> const RECT* <EM>lpSrcRect</EM>, const NxBlt* <EM>pNxBlt = NULL</EM>)</TD></TR>
+</TABLE>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>dx</EM></TD><TD>　転送先 X 座標</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>dy</EM></TD><TD>　転送先 Y 座標</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const RECT* <EM>lpDestRect</EM></TD><TD>　転送先矩形を示す RECT 構造体へのポインタ(NULL ならはサーフェス全体)</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const CNxSurface* <EM>pSrcSurface</EM></TD><TD>　転送元サーフェスへのポインタ(NULL ならば転送先と同じ)</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const RECT* <EM>lpSrcRect</EM></TD><TD>　転送元矩形を示す RECT 構造体へのポインタ(NULL ならばサーフェス全体)</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const NxBlt* <EM>pNxBlt</EM></TD><TD>　<A HREF="global.html#NxBlt">NxBlt</A> 構造体へのポインタ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功ならば TRUE</P>
+<H4>解説</H4>
+<P>　サーフェス間のブロック転送、および塗り潰しを行ないます。</P>
+<P>　最初の書式の場合、転送先矩形の左上は <EM>x</EM> および <EM>y</EM> で指定され、矩形の大きさは転送元矩形から計算されます。</P>
+<P>　転送元矩形と転送先が大きさが異なる場合、転送先の大きさに合う様に、転送元を拡大又は縮小して転送します。</P>
+
+<P>　<EM>pSrcSurface</EM> 引数へ NULL が指定されると、転送元サーフェスと転送元矩形は、転送先サーフェスおよび矩形と同じになります。<EM>lpSrcRect</EM> 引数は無視されます。</P>
+
+<P>　この関数の詳しい使用方法については、<A HREF="global.html#NxBlt">NxBlt</A> 構造体の解説を参照して下さい。</P>
+
+<H4>関連項目</H4>
+<A HREF="global.html#NxBlt">NxBlt</A> 構造体&nbsp;/&nbsp;
+<A HREF="#member.TileBlt">CNxSurface::TileBlt()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurface::TileBlt() -->
+<A NAME="member.TileBlt"><H3>CNxSurface::TileBlt()</H3></A>
+<H4>概要</H4>
+<P>　サーフェス間のブロック転送を行ないます。転送元矩形が転送先矩形より小さい場合は、転送元をタイル状に敷き詰めます。</P>
+<H4>書式</H4>
+<TABLE>
+<TR><TD VALIGN="TOP" NOWRAP>BOOL CNxSurface::TileBlt(</TD><TD VALIGN="TOP" NOWRAP>const RECT*<EM>lpDestRect</EM>, const CNxSurface* <EM>pSrcSurface</EM>, const RECT* <EM>lpSrcRect</EM>, <BR>int <EM>nSrcXOrg</EM>, int <EM>nSrcYOrg</EM>, const NxBlt* <EM>pNxBlt = NULL</EM>)</TD></TR>
+</TABLE>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>const RECT* <EM>lpDestRect</EM></TD><TD>　転送先矩形</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const CNxSurface* <EM>pSrcSurface</EM></TD><TD>　転送元サーフェスへのポインタ</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const RECT* <EM>lpSrcRect</EM></TD><TD>　転送元矩形</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>nSrcXOrg</EM></TD><TD>　転送元 X 原点座標</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>nSrcYOrg</EM></TD><TD>　転送元 Y 原点座標</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const NxBlt* <EM>pNxBlt</EM></TD><TD>　<A HREF="global.html#NxBlt">NxBlt 構造体</A>へのポインタ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功ならば TRUE</P>
+<H4>解説</H4>
+<P>　転送元矩形を繰り返し転送してタイル状に敷き詰めます。<EM>nSrcXOrg</EM> および <EM>nSrcYOrg</EM> 引数によって、転送元原点の座標が指定できます。転送が開始される転送元矩形は、原点座標と <EM>lpSrcRect</EM> 引数の矩形の左上を加えたものになります。</P>
+
+<P>　転送元と転送先のサイズが同じ場合、<EM>nSrcXOrg</EM> および <EM>nSrcYOrg</EM> 引数で指定される原点によって、転送元が回り込みます。例えば、<EM>nSrcXOrg</EM> 引数へ正の値を指定すると、転送元が全体的へ左へ移動し、それによって(左端へ)隠れる部分は、転送先の右側に転送されます。正面から見ると、絵を貼り付けた円筒を左へ回転した様なイメージになります。以下の図は、64x64 サイズの画像を、128x128 のサーフェスへ TileBlt() 関数によって転送した例です。</P>
+
+<CENTER>
+<TABLE BORDER>
+<TR><TH>転送元画像</TH><TH>原点(0, 0)</TH><TH>原点(10, 10)</TH></TR>
+<TR><TD><IMG SRC="images/TileBlt0.png" WIDTH=128 HEIGHT=128></TD><TD><IMG SRC="images/TileBlt1.png" WIDTH=128 HEIGHT=128></TD><TD><IMG SRC="images/TileBlt2.png" WIDTH=128 HEIGHT=128></TD></TR>
+</TABLE>
+</CENTER>
+
+<P>　なお、転送元の反転には対応していません。</P>
+
+<H4>関連項目</H4>
+<A HREF="#member.Blt">CNxSurface::Blt()</A>&nbsp;/&nbsp;
+<A HREF="global.html#NxBlt">NxBlt 構造体</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurface::FillRect() -->
+<A NAME="member.FillRect"><H3>CNxSurface::FillRect()</H3></A>
+<H4>概要</H4>
+<P>　矩形を指定された色で塗り潰します。</P>
+
+<H4>書式</H4>
+BOOL CNxSurface::FillRect(int <EM>dx</EM>, int <EM>dy</EM>, int <EM>cx</EM>, int <EM>cy</EM>, NxColor <EM>nxColor</EM>)<BR>
+<BR>
+BOOL CNxSurface::FillRect(const RECT* <EM>lpRect</EM>, NxColor <EM>nxColor</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>dx</EM></TD><TD>　塗り潰し矩形の開始 X 座標</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>dy</EM></TD><TD>　塗り潰し矩形の開始 Y 座標</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>cx</EM></TD><TD>　塗り潰し矩形の幅</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>cy</EM></TD><TD>　塗り潰し矩形の高さ</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const RECT* <EM>lpRect</EM></TD><TD>　塗り潰し矩形 (NULL ならばサーフェス全体)</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP><A HREF="global.html#NxColor">NxColor</A> <EM>nxColor</EM></TD><TD>　塗り潰し色</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功ならば TRUE</P>
+<H4>解説</H4>
+<P>　サーフェス矩形を純色で塗り潰します。塗り潰し前のピクセルは一切無視され、アルファ値も含めて、そのまま塗り潰しに使用されます。8bpp 形式サーフェスでは、アルファ値のみが有効です。</P>
+<P>　この関数と <A HREF="#member.Blt">CNxSurface::Blt()</A> 関数とでは、アルファ値の扱いが異なります。Blt() 関数では、NxBlt 構造体の dwFlags メンバへ NxBlt::colorFill を指定する事で、サーフェスの塗り潰しが可能ですが、実際に行われるのは単純な塗り潰しではなくブレンド塗り潰しです(通常ブレンドの場合、アルファ値が 255 ならば指定色で塗り潰され、0 では何も行ないません)。しかし、FillRect() 関数では、アルファ値を不透明度とは解釈せず、そのままサーフェスを塗り潰します。これは、サーフェス矩形を透明状態(アルファ値をゼロ)にしたい場合などに使用できます。Blt() 関数による塗り潰しでは、基本的にサーフェス上のアルファ値を直接操作する事はできません。</P>
+
+<H4>関連項目</H4>
+<A HREF="#member.Blt">CNxSurface::Blt()</A>&nbsp;/&nbsp;
+<A HREF="global.html#NxBlt">NxBlt 構造体</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurface::FilterBlt() -->
+<A NAME="member.FilterBlt"><H3>CNxSurface::FilterBlt()</H3></A>
+<H4>概要</H4>
+<P>　フィルタを適用しながら矩形を転送します。</P>
+
+<H4>書式</H4>
+<TABLE>
+<TR><TD VALIGN="TOP" NOWRAP>BOOL CNxSurface::FilterBlt(</TD><TD VALIGN="TOP" NOWRAP>int <EM>dx</EM>, int <EM>dy</EM>,const CNxSurface* <EM>pSrcSurface</EM>,<BR> const RECT* <EM>lpSrcRect</EM>, const NxFilterBlt* <EM>pNxFilterBlt</EM>)<BR><BR></TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>BOOL CNxSurface::FilterBlt(</TD><TD VALIGN="TOP" NOWRAP>const RECT* <EM>lpDestRect</EM>, const CNxSurface* <EM>pSrcSurface</EM>,<BR> const RECT* <EM>lpSrcRect</EM>, const NxFilterBlt* <EM>pNxFilterBlt</EM>)</TD></TR>
+</TABLE>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>dx</EM></TD><TD>　転送先 X 座標</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>dy</EM></TD><TD>　転送先 Y 座標</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const RECT* <EM>lpDestRect</EM></TD><TD>　転送先矩形を示す RECT 構造体へのポインタ(NULL ならはサーフェス全体)</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const CNxSurface* <EM>pSrcSurface</EM></TD><TD>　転送元サーフェスへのポインタ(NULL ならば転送先と同じ)</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const RECT* <EM>lpSrcRect</EM></TD><TD>　転送元矩形を示す RECT 構造体へのポインタ(NULL ならばサーフェス全体)</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const NxFilterBlt* <EM>pNxFilterBlt</EM></TD><TD>　<A HREF="global.html#NxFilterBlt">NxFilterBlt</A> 構造体へのポインタ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功ならば TRUE</P>
+<H4>解説</H4>
+<P>　フィルタの適用はピクセル単位で行われます。まず、転送元サーフェスのピクセルに対してフィルタが適用(例えばグレイスケール化)されます。次に、その結果をフィルタ適用前の転送元サーフェスのピクセルと通常ブレンドし、結果を転送先サーフェスへ書き込みます。<A HREF="#member.Blt">CNxSurface::Blt()</A> 関数と異なり、転送先サーフェス矩形のピクセルは全く参照しません。つまり、FilterBlt() で行われる通常ブレンドは、フィルタを適用する強さを意味します。転送元サーフェス矩形は(転送先と重なっていない限り)破壊する事はありません。</P>
+
+<P>　全てのフィルタは、あるピクセルの処理中に、他の座標のピクセルを参照する事はありません。また、アルファチャンネルはフィルタが意図的に操作しない限り、転送先へそのまま転送されます(現在、アルファチャンネル操作するフィルタはサポートしていません)。</P>
+
+<P>　<EM>pSurface</EM> 引数へ NULL を指定すると、<EM>lpSrcRect</EM> は無視され、転送先サーフェスと矩形が指定されたと見なします。ただし、クリップされた後の(最終的な)矩形が用いられます(CNxSurface::Blt() 関数の動作とは異なります)。この事を利用し、転送先のみを指定してフィルタを適用する事ができます。</P>
+
+<P>　この関数の詳細については、<A HREF="global.html#NxFilterBlt">NxFilterBlt 構造体</A> の解説を参照して下さい。</P>
+<H4>関連項目</H4>
+<A HREF="#member.Blt">CNxSurface::Blt()</A>&nbsp;/&nbsp;
+<A HREF="global.html#NxFilterBlt">NxFilterBlt 構造体</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurface::LoadImage() -->
+<A NAME="member.LoadImage"><H3>CNxSurface::LoadImage()</H3></A>
+<H4>概要</H4>
+<P>　サーフェスへイメージを読み込みます。</P>
+<H4>書式</H4>
+<TABLE>
+<TR><TD NOWRAP VALIGN="TOP">BOOL CNxSurface::LoadImage(</TD><TD NOWRAP VALIGN="TOP">int <EM>dx</EM>, int <EM>dy</EM>, CNxFile&amp; <EM>nxfile</EM>,</TD></TR>
+<TR><TD></TD><TD VALIGN="TOP" NOWRAP>const RECT* <EM>lpSrcRect = NULL</EM>, BOOL <EM>bUpdateColorTable = FALSE</EM>)</TD></TR>
+</TABLE>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>dx</EM></TD><TD>　読み込み先 X 座標</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>dy</EM></TD><TD>　読み込み先 Y 座標</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>CNxFile&amp; <EM>nxfile</EM></TD><TD>　読み込み元 CNxFile オブジェクトへの参照</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const RECT* <EM>lpSrcRect</EM></TD><TD>　イメージからの転送矩形(NULL ならば全体)</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>BOOL <EM>bUpdateColorTable</EM></TD><TD>　TRUE ならばカラーテーブルを更新(8bpp 形式のみ)</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功ならば TRUE</P>
+<H4>解説</H4>
+<P>　サーフェスの指定された座標(<EM>dx</EM>, <EM>dy</EM>)へ、読み込んだイメージの矩形(<EM>lpSrcRect</EM>)を転送します。サーフェスからはみ出した部分は切り捨てられます。</P>
+<P>　<EM>bUpdateColorTable</EM> が TRUE の場合、カラーテーブル(パレット)が読み込まれたイメージのカラーテーブルへ更新されます。この引数は、8bpp 形式サーフェスのみ有効です。32bpp 形式では無視されます。</P>
+
+<P>　この関数は、<A HREF="CNxDraw.html#member.LoadImage">CNxDraw::LoadImage()</A> 関数を使用して画像を読み込みます。詳細については CNxImageLoader クラスの解説を参照して下さい。</P>
+
+<H4>関連項目</H4>
+<A HREF="#member.Create">CNxSurface::Create()</A>&nbsp;/&nbsp;
+<A HREF="../NxStorage/index.html">NxStorage ライブラリ</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurface::DrawText() -->
+<A NAME="member.DrawText"><H3>CNxSurface::DrawText()</H3></A>
+<H4>概要</H4>
+<P>　テキストを描画します。</P>
+<H4>書式</H4>
+<TABLE>
+<TR><TD VALIGN="TOP" NOWRAP>BOOL CNxSurface::DrawText(</TD><TD VALIGN="TOP" NOWRAP>int <EM>dx</EM>, int <EM>dy</EM>, const RECT* <EM>lpRect</EM>,</TD></TR>
+<TR><TD></TD><TD VALIGN="TOP" NOWRAP>LPCTSTR <EM>lpString</EM>, NxColor <EM>nxColor</EM>)</TD></TR>
+</TABLE>
+<BR>
+<TABLE>
+<TR><TD VALIGN="TOP" NOWRAP>BOOL CNxSurface::DrawText(</TD><TD VALIGN="TOP" NOWRAP>int <EM>dx</EM>, int <EM>dy</EM>, const RECT* <EM>lpRect</EM>,</TD></TR>
+<TR><TD></TD><TD VALIGN="TOP" NOWRAP>LPCTSTR <EM>lpString</EM>, const NxBlt* <EM>pNxBlt</EM>)</TD></TR>
+</TABLE>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>dx</EM></TD><TD>　描画先 X 座標</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>dy</EM></TD><TD>　描画先 Y 座標</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const RECT* <EM>lpRect</EM></TD><TD>　描画矩形(NULL ならばサーフェス全体)</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>LPCTSTR <EM>lpString</EM></TD><TD>　描画する文字列へのポインタ</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP><A HREF="global.html#NxColor">NxColor</A> <EM>nxColor</EM></TD><TD>　文字色</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP><A HREF="global.html#NxBlt">NxBlt</A> <EM>pNxBlt</EM></TD><TD>　NxBlt 構造体へのポインタ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功ならば TRUE</P>
+<H4>解説</H4>
+<P>　描画に使用するフォントは <A HREF="#member.SetFont">CNxSurface::SetFont()</A> 関数で設定します。デフォルトではフォントは設定されていません。<FONT COLOR="RED">CNxSurface::DrawText() 関数を呼び出す前に、必ずフォントを設定して下さい。</FONT>フォントが未指定の場合、関数は失敗します。</P>
+
+<P>　最初の書式の関数は、指定された色と不透明度で文字列をサーフェスへ描画します。不透明度は <EM>nxColor</EM> 引数のアルファ値で指定します。この形式は 32bpp 形式のサーフェス以外へは描画できません。</P>
+
+<P>　2番目の関数は、文字列を内部サーフェスへ描画した後、指定された NxBlt 構造体の内容に従って内部サーフェスから転送します。最初の関数も内部ではこの関数を呼び出し、<A HREF="global.html#NxBlt.srcAlpha">NxBlt::srcAlpha</A> | <A HREF="global.html#NxBlt.color">NxBlt::colorFill</A> | <A HREF="global.html#NxBlt.destAlpha">NxBlt::destAlpha</A> | <A HREF="global.html#NxBlt.blendNormal">NxBlt::blendNormal</A> によって目的のサーフェスへ転送しています。内部サーフェスは 8bpp 形式で、描画されたドットが 255、描画されないドットは 0 です。スムージング描画(<A HREF="#member.SetTextSmoothing">CNxSurface::SetTextSmoothing()</A> 関数を参照)では、この中間の値もあります。</P>
+
+<P>　以下は緑色の文字を表示する例です。アルファチャンネル付き塗り潰しの転送元として使用しています。</P>
+
+<PRE>
+	<A HREF="global.html#NxBlt">NxBlt</A> nxb;
+	nxb.dwFlags = <A HREF="global.html#NxBlt.color">NxBlt::colorFill</A> | <A HREF="global.html#NxBlt.srcAlpha">NxBlt::srcAlpha</A> | <A HREF="global.html#NxBlt.blendNormal">NxBlt::blendNormal</A>;
+	nxb.nxbColor = <A HREF="CNxColor.html">CNxColor</A>(0, 255, 0);
+	pSurface-&gt;DrawText(0, 0, NULL, &quot;文字列&quot;, &amp;nxb);
+</PRE>
+
+<H4>関連項目</H4>
+<A HREF="#member.SetFont">CNxSurface::SetFont()</A>&nbsp;/&nbsp;<A HREF="#member.SetTextSmoothing">CNxSurface::SetTextSmoothing()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurface::GetTextExtent() -->
+<A NAME="member.GetTextExtent"><H3>CNxSurface::GetTextExtent()</H3></A>
+<H4>概要</H4>
+<P>　テキストを完全に覆う矩形を取得します。</P>
+<H4>書式</H4>
+BOOL CNxSurface::GetTextExtent(LPCTSTR <EM>lpszString</EM>, LPRECT <EM>lpRect</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>LPCTSTR <EM>lpszString</EM></TD><TD>　NULL で終わる文字列へのポインタ</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>LPRECT <EM>lpRect</EM></TD><TD>　テキストの矩形を受けとる RECT 構造体へのポインタ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功ならば TRUE</P>
+<H4>解説</H4>
+<P>　サーフェスに設定されているフォント(<A HREF="#member.SetFont">CNxSurface::SetFont()</A> 関数を参照)を用いてテキストを描画した時の矩形を取得します。デフォルトではフォントは設定されていません。<FONT COLOR="RED">この関数を呼び出す前に、必ずフォントを設定して下さい。</FONT>フォントが未指定の場合、関数は失敗します。スムージングが指定されている場合は、整数へ切り上げた(4倍角ではない)実サイズの矩形が返されます。</P>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurface::SetTextSmoothing() -->
+<A NAME="member.SetTextSmoothing"><H3>CNxSurface::SetTextSmoothing()</H3></A>
+<H4>概要</H4>
+<P>　テキスト描画の際のスムージングの有無を設定します。</P>
+<H4>書式</H4>
+BOOL CNxSurface::SetTextSmoothing(BOOL <EM>bSmoothing</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>BOOL <EM>bSmoothing</EM></TD><TD>　スムージング描画を行うならば TRUE</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　以前の状態</P>
+<H4>解説</H4>
+<P>　<EM>bSmoothing</EM> 引数を TRUE にして、この関数を呼び出すと、<A HREF="#member.DrawText">CNxSurface::DrawText()</A> 関数でテキストを描画する際にスムージングを行います。スムージング描画の際には、実際に描画されるフォントの 4倍角サイズの物が使用されます。フォントの作成は CNxSurface クラスと <A HREF="CNxFont.html">CNxFont</A> クラスが自動的に行います。</P>
+
+<H4>関連項目</H4>
+<A HREF="#member.GetTextSmoothing">CNxSurface::GetTextSmoothing()</A>&nbsp;/&nbsp;
+<A HREF="CNxFont.html">CNxFont クラス</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+<!-- CNxSurface::GetTextSmoothing() -->
+<A NAME="member.GetTextSmoothing"><H3>CNxSurface::GetTextSmoothing()</H3></A>
+<H4>概要</H4>
+<P>　テキスト描画の際のスムージングの有無を取得します。</P>
+<H4>書式</H4>
+BOOL CNxSurface::GetTextSmoothing() const<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　スムージングを行うならば TRUE</P>
+<H4>関連項目</H4>
+<A HREF="#member.SetTextSmoothing">CNxSurface::SetTextSmoothing()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurface::SetFont() -->
+<A NAME="member.SetFont"><H3>CNxSurface::SetFont()</H3></A>
+<H4>概要</H4>
+<P>　テキスト描画関数で使用されるフォントを設定します。</P>
+<H4>書式</H4>
+CNxFont* CNxSurface::SetFont(CNxFont* <EM>pFont</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>CNxFont* <EM>pFont</EM></TD><TD>　テキスト描画に使用する <A HREF="CNxFont.html">CNxFont</A> オブジェクトへのポインタ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功ならば以前のフォント。初めてフォントが設定されたならば NULL を返します。</P>
+<H4>解説</H4>
+<P>　テキスト描画時に使用されるフォントを設定します。CNxSurface クラスは、CNxFont オブジェクトへのポインタのみを持ちます(実体はコピーしません)。フォントは、CNxSurface:::DrawText() 関数でテキストを描画する度に参照される為、設定後も削除しない様にして下さい。<EM>pFont</EM> 引数へ NULL を指定する事で、フォントの設定を解除できます。</P>
+
+<H4>関連項目</H4>
+<A HREF="#member.DrawText">CNxSurface::DrawText()</A>&nbsp;/&nbsp;
+<A HREF="#member.GetDC">CNxSurface::GetDC()</A>&nbsp;/&nbsp;
+<A HREF="#member.GetFont">CNxSurface::GetFont()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurface::GetFont() -->
+<A NAME="member.GetFont"><H3>CNxSurface::GetFont()</H3></A>
+<H4>概要</H4>
+<P>　テキスト描画関数で使用されるフォントを取得します。</P>
+<H4>書式</H4>
+CNxFont* CNxSurface::GetFont() const<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　<A HREF="CNxFont.html">CNxFont</A> オブジェクトへのポインタ</P>
+<H4>関連項目</H4>
+<A HREF="#member.SetFont">CNxSurface::SetFont()</A>&nbsp;/&nbsp;
+<A HREF="#member.DrawText">CNxSurface::DrawText()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurface::GetDC() -->
+<A NAME="member.GetDC"><H3>CNxSurface::GetDC()</H3></A>
+<H4>概要</H4>
+<P>　サーフェスのデバイスコンテキストハンドルを取得します。</P>
+<H4>書式</H4>
+HDC CNxSurface::GetDC()<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　成功ならばデバイスコンテキストハンドル。失敗ならば NULL</P>
+<H4>解説</H4>
+<P>　メモリデバイスコンテキストを作成して、GDI Object (DIBSection) を選択します。この関数は参照カウンタを持っており、デバイスコンテキストの作成と GDI オブジェクトの選択は、初回呼出し時のみ行われます。二度目以後はカウンタを増加するだけです。<A HREF="#member.ReleaseDC">CNxSurface::ReleaseDC()</A> 関数によって参照カウンタが減らされ、ゼロになるとデバイスコンテキストの削除が行われます。</P>
+
+<P>　<FONT COLOR="RED">以前のバージョンと異なり、デバイスコンテキストへフォントは選択されません。</FONT></P>
+
+<P>　デバイスコンテキストへ対して描画を行う場合は注意が必要です。サーフェスの原点座標(<A HREF="#member.SetOrg">CNxSurface::SetOrg()</A> 関数を参照)と、クリッピング矩形(<A HREF="#member.SetClipRect">CNxSurface::SetClipRect()</A> 関数を参照)は考慮されません。サーフェスのクリッピング状態を完全に把握している場合のみ使用して下さい。</P>
+
+<H4>関連項目</H4>
+<A HREF="#member.SetFont">CNxSurface::SetFont()</A>&nbsp;/&nbsp;
+<A HREF="#member.GetClipRect">CNxSurface::GetClipRect()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetClipRect">CNxSurface::SetClipRect()</A>&nbsp;/&nbsp;
+<A HREF="#member.ReleaseDC">CNxSurface::ReleaseDC()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurface::ReleaseDC -->
+<A NAME="member.ReleaseDC"><H3>CNxSurface::ReleaseDC()</H3></A>
+<H4>概要</H4>
+<P>　<A HREF="#member.GetDC">CNxSurface::GetDC()</A> で取得したデバイスコンテキストを開放します。</P>
+<H4>書式</H4>
+UINT CNxSurface::ReleaseDC()<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　デバイスコンテキストの参照カウント数。ゼロならば、デバイスコンテキストは開放済み。</P>
+<H4>解説</H4>
+<P>　この関数は <A HREF="#member.GetDC">CNxSurface::GetDC()</A> 関数によって増加したデバイスコンテキストの参照カウンタから１を減じ、その結果がゼロになった時、実際にデバイスコンテキストの削除を行ないます。</P>
+<H4>関連項目</H4>
+<A HREF="#member.GetDC">CNxSurface::GetDC()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurface::GetHandle() -->
+<A NAME="member.GetHandle"><H3>CNxSurface::GetHandle()</H3></A>
+<H4>概要</H4>
+<P>　DIBSection へのハンドル(HBITMAP 型)を返します。</P>
+
+<H4>書式</H4>
+HBITMAP CNxSurface::GetHandle() const<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　DIBSection へのハンドル</P>
+<H4>注意</H4>
+<P>　この関数は常に正しいハンドルを返しますが、<A HREF="CNxSurface.html#member.GetDC">CNxSurface::GetDC()</A> 関数によって、サーフェスのデバイスコンテストを使用している時には、返されたハンドルをメモリデバイスコンテキストへ選択する事はできません。これは、<STRONG>HBITMAP オブジェクトは同時に複数のデバイスコンテキストへ選択できない</STRONG>という GDI の制約によるものです。</P>
+
+<H4>関連項目</H4>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurface::SetClipRect() -->
+<A NAME="member.SetClipRect"><H3>CNxSurface::SetClipRect()</H3></A>
+<H4>概要</H3
+<P>　クリッピング矩形を設定します。</P>
+<H4>書式</H4>
+void CNxSurface::SetClipRect(cosnt RECT* <EM>lpClipRect = NULL</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP">const RECT* <EM>lpClipRect</EM></TD><TD>　設定するクリッピング矩形を示す RECT 構造体へのポインタ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　サーフェスに対する全ての描画は、クリッピング矩形の影響を受けます。設定されているクリッピング矩形の外側に描画する事はできません。<EM>lpClipRect</EM> 引数へは、新しいクリッピング矩形を指定します。NULL を指定すると、サーフェス全体(デフォルト)になります。。クリッピング矩形は NxDraw ライブラリのクラスやメンバ関数によって一時的に変更される事はありますが、基本的には再度設定しない限り保持されます。<A HREF="CNxSprite.html">CNxSprite</A> クラスでは <A HREF="CNxSprite.html#member.Draw">CNxSprtie::Draw()</A> 関数を呼び出す直前に、描画先サーフェスに対して適切なクリッピング矩形を設定します。</P>
+
+<P><STRONG>　サーフェスへ設定できるクリッピング矩形は一つだけです。新しい矩形を設定すると以前の矩形は無効になります。</STRONG></P>
+<H4>関連項目</H4>
+<A HREF="#member.GetClipRect">CNxSurface::GetClipRect()</A>&nbsp;/&nbsp;
+<A HREF="CNxSprite.html#member.Draw">CNxSprite::Draw()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurface::GetClipRect() -->
+<A NAME="member.GetClipRect"><H3>CNxSurface::GetClipRect()</H3></A>
+<H4>概要</H4>
+<P>　クリッピング矩形を取得します。</P>
+<H4>書式</H4>
+void CNxSurface::GetClipRect(LPRECT <EM>lpClipRect</EM>) const<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP">LPRECT <EM>lpClipRect</EM></TD><TD>　クリッピング矩形を受けとる RECT 構造体へのポインタ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　サーフェスに設定されている現在のクリッピング矩形を取得します。</P>
+<H4>関連項目</H4>
+<A HREF="#member.SetClipRect">CNxSurface::SetClipRect()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurface::SetOrg() -->
+<A NAME="member.SetOrg"><H3>CNxSurface::SetOrg()</H3></A>
+<H4>概要</H3
+<P>　原点座標を設定します。</P>
+<H4>書式</H4>
+void CNxSurface::SetOrg(int <EM>nXOrg</EM>, int <EM>nYOrg</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP">int <EM>nXOrg</EM></TD><TD>　原点 X 座標</TD></TR>
+<TR><TD VALIGN="TOP">int <EM>nYOrg</EM></TD><TD>　原点 Y 座標</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　サーフェスに対する全ての描画は、原点座標とクリッピング矩形の影響を受けます。原点座標のデフォルトは X = 0, Y = 0 です。原点座標は NxDraw ライブラリのクラスやメンバ関数によって一時的に変更される事はありますが、基本的には再度設定しない限り保持されます。<A HREF="CNxSprite.html">CNxSprite</A> クラスでは <A HREF="CNxSprite.html#member.Draw">CNxSprtie::Draw()</A> 関数を呼び出す直前に、描画先サーフェスに対して適切な原点座標を設定します。</P>
+
+<P><STRONG>　サーフェスへ設定できる原点座標は一つだけです。新しい座標を設定すると以前の座標は無効になります。</STRONG></P>
+<H4>関連項目</H4>
+<A HREF="#member.GetClipRect">CNxSurface::GetOrg()</A>&nbsp;/&nbsp;
+<A HREF="CNxSprite.html#member.Draw">CNxSprite::Draw()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurface::GetOrg() -->
+<A NAME="member.GetOrg"><H3>CNxSurface::GetOrg()</H3></A>
+<H4>概要</H4>
+<P>　原点座標を取得します。</P>
+<H4>書式</H4>
+void CNxSurface::GetOrg(LPPOINT <EM>lpPoint</EM>) const<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP">LPPOINT <EM>lpPoint</EM></TD><TD>　原点座標を受けとる POINT 構造体へのポインタ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　サーフェスに設定されている現在の原点座標を取得します。</P>
+<H4>関連項目</H4>
+<A HREF="#member.SetClipRect">CNxSurface::SetOrg()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurface::GetDIBImage() -->
+<A NAME="member.GetDIBImage"><H3>CNxSurface::GetDIBImage()</H3></A>
+<H4>概要</H4>
+<P>　<A HREF="CNxDIBImage.html">CNxDIBImage</A> オブジェクトへの参照を取得します。</P>
+<H4>書式</H4>
+CNxDIBImage& CNxSurface::GetDIBImage() const<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　CNxDIBImage オブジェクトへの参照。</P>
+<H4>解説</H4>
+<P>　CNxSurface クラスは DIBSection の DIB 部の操作を CNxDIBImage クラスによって行う為、メンバ変数として 一つの CNxDIBImage オブジェクトを持っています。返された CNxDIBImage オブジェクトのビットイメージを操作すると、CNxSurface のビットイメージも影響を受けます(8bpp 形式のサーフェスの場合、カラーテーブルも同様です)。</P>
+
+<P>　画像を保存する際、<A HREF="CNxDIBImageSaver.html">CNxDIBImageSaver</A> 派生クラスへ、保存元 CNxDIBImage オブジェクトとして渡す事ができます。</P>
+
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+
+<!-- CNxSurface::SaveImage() -->
+<A NAME="member.SaveImage"><H3>CNxSurface::SaveImage()</H3></A>
+<H4>概要</H4>
+<P>　サーフェスの内容をファイルへ保存します。</P>
+<H4>書式</H4>
+BOOL CNxSurface::SaveImage(LPCTSTR <EM>lpszFileName</EM>, const RECT* <EM>lpRect = NULL</EM>) const<BR>
+<BR>
+BOOL CNxSurface::SaveImage(CNxFile&amp; <EM>nxfile</EM>, const RECT* <EM>lpRect = NULL</EM>) const<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>LPCTSTR <EM>lpszFileName</EM></TD><TD>　ファイル名</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>CNxFile&amp; <EM>nxfile</EM></TD><TD>　CNxFile クラスへの参照</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const RECT* <EM>lpRect</EM></TD><TD>　保存される矩形(NULL ならば全体)</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功ならば TRUE</P>
+<H4>解説</H4>
+<P>　32bpp の形式のサーフェスは 24bpp BMP で、8bpp 形式のサーフェスはカラーテーブル付きの 8bpp BMP で保存します。</P>
+<P>　この関数は、従来のライブラリとの互換性の為に残されています。新しいアプリケーションでは、<A HREF="#member.GetDIBImage">CNxSurface::GetDIBImage()</A> メンバ関数と、<A HREF="CNxBMPImageSaver.html">CNxBMPImageSaver</A> クラスを使用して下さい。この関数の実装を以下に示します。</P>
+
+
+<PRE>    BOOL CNxSurface::SaveImage(CNxFile&amp; nxfile, const RECT* lpRect) const
+    {
+        CNxBMPImageSaver saver(CNxBMPImageSaver::stripAlpha);
+        return saver.<A HREF="CNxDIBImageSaver.html#member.SaveDIBImage">SaveDIBImage</A>(nxfile, <A HREF="#member.GetDIBImage">GetDIBImage()</A>, lpRect);
+    }</PRE>
+
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+</BODY>
+</HTML>

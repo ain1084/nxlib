@@ -1,0 +1,643 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+	<LINK REV="Made" HREF="mailto:ain@da.airnet.ne.jp">
+	<LINK REL="Contents" HREF="./index.html">
+	<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-2022-jp">
+	<META NAME="Author" CONTENT="Seiji Ainoguchi">
+	<META NAME="Subject" CONTENT="グローバル関数、構造体等">
+	<TITLE>グローバル関数、構造体等</TITLE>
+</HEAD>
+<BODY>
+<A NAME="top"><H1>グローバル関数、構造体等</H1></A>
+<P>　グローバルスコープで宣言されている、NxDraw 関係の関数や構造体を示します。ここで示しているのは<STRONG>NxDraw 関係のみです</STRONG>。スタティックリンクライブラリのため、jpeglib, libpng および zlib が宣言している関数もグローバルスコープに導入されます。大体は接頭語(png_ 等)が付きますし、クラスを用いてプログラミングを行うのであれば、名前の衝突に神経質になる必要はないと思います。が、一応気に留めておいて下さい。</P>
+
+<TABLE CELLPADDING=4>
+<TR><TD><A HREF="#macro">マクロ一覧</A></TD><TD>　src/NxDraw/Config.h 等で定義、使用されるマクロ</TD></TR>
+<TR><TD><A HREF="#NxColor">NxColor</A></TD><TD>　RGBA カラーの型</TD></TR>
+<TR><TD><A HREF="#NxBlt">NxBlt</A></TD><TD>　CNxSurface::Blt() 関数においてオプション等の指定の為に使用する構造体</TD></TR>
+<TR><TD><A HREF="#NxFilterBlt">NxFilterBlt</A></TD><TD>　CNxSurface::FilterBlt() 関数においてフィルタ指定の為に使用する構造体</TD></TR>
+</TABLE>
+<BR>
+<A HREF="#top">ページの最初</A><BR>
+<A HREF="index.html">NxDraw グラフィック描画ライブラリ目次</A><BR>
+<A HREF="../index.html">NxLib Reference Manual 目次</A><BR>
+<HR>
+
+
+<!-- macro -->
+<A NAME="macro"><H2>マクロ一覧</H2></A>
+<A NAME="macro.NXDRAW_LOADIMAGE_NO_PNG"><STRONG>NXDRAW_LOADIMAGE_NO_PNG</STRONG><BR></A>
+<A NAME="macro.NXDRAW_LOADIMAGE_NO_JPEG"><STRONG>NXDRAW_LOADIMAGE_NO_JPEG</STRONG><BR></A>
+<A NAME="macro.NXDRAW_LOADIMAGE_NO_MAG"><STRONG>NXDRAW_LOADIMAGE_NO_MAG</STRONG><BR></A>
+<P>　nxlib/src/NxDraw/Config.h で定義します。これらのマクロが定義されていれば、<A HREF="CNxDraw.html#member.LoadImage">CNxDraw::LoadImage()</A> 関数で、その画像フォーマットの読み込みを行わなくなくなります。無関係なコードが取り込まれなくなる為、実行ファイルのサイズを縮小できます。特に NXDRAW_LOADIMAGE_NO_PNG, NXDRAW_LOADIMAGE_NO_JPEG の両方を定義すると、100KB 以上縮小できます。</P>
+<A NAME="macro.NXDRAW_LOADIMAGE_NO_SUSIE_SPI"><STRONG>NXDRAW_LOADIMAGE_NO_SUSIE_SPI</STRONG><BR></A>
+<P>　nxlib/src/NxDraw/Config.h で定義します。このマクロを定義すると、<A HREF="CNxDraw.html#member.LoadImage">CNxDraw::LoadImage()</A> 関数で susie 32bit plug-in を介した画像の読み込み行わなくなります。<A HREF="CNxSurface.html#member.Create">CNxSurface::Create()</A> 関数等で画像を読み込み際に plug-in の検索は行いません。また、susie 32bit plug-in 関係の全ての関数(例えば <A HREF="CNxDraw.html#member.SetSPIDirectory">CNxDraw::SetSPIDirectory()</A>) が宣言、定義されなくなります。</P>
+<A NAME="macro.NXDRAW_MMX_ONLY"><STRONG>NXDRAW_MMX_ONLY</STRONG><BR></A>
+<P>　nxlib/src/NxDraw/Config.h で定義します。このマクロを定義すると、非 MMX CPU 用のコードが取り除かれ(ただし、サイズ縮小効果は僅かです)、MMX 命令をサポートする CPU 専用のライブラリが作成されます。<A HREF="CNxDraw.html#member.IsMMXEnabled">CNxDraw::IsMMXEnabled()</A> 関数は常に TRUE を返し、<A HREF="CNxDraw.html#member.EnableMMX">CNxDraw::EnableMMX()</A> 関数で状態を変更する事はできなくなります。非 MMX CPU (i486 等)で描画を行うと、無効命令例外等で強制終了しますので、<A HREF="CNxDraw.html#member.IsMMXSupported">CNxDraw::IsMMXSupported()</A> 関数を用いて、エラーを表示する様にした方が良いでしょう。</P>
+<BR>
+<A HREF="#top">ページの最初</A><BR>
+<A HREF="index.html">NxDraw グラフィック描画ライブラリ目次</A><BR>
+<A HREF="../index.html">NxLib Reference Manual 目次</A><BR>
+<HR>
+
+
+
+<!-- NxColor -->
+<A NAME="NxColor"><H2>NxColor</H2></A>
+<H3>概要</H3>
+<P>　NxColor は RGBA カラーを表わす 32bit の型です。GDI で使用する COLORREF と同じく実体は DWORD (unsigned int)型ですが、COLORREF とは形式が異なります(COLORREF では下位バイトから R,G,B の順で使用されますが、NxColor では B,G,R,A 順です)。<A HREF="CNxSurface.html">CNxSurface</A> クラスの描画関数で使用する色は全て NxColor 型です。</P>
+<P>　NxColor 値を生成するには、<A HREF="CNxColor.html">CNxColor</A> 又は <A HREF="CNxHLSColor.html">CNxHLSColor</A> クラスを使用して下さい。</P>
+
+<H3>関連項目</H3>
+<A HREF="CNxColor.html">CNxColor クラス</A>&nbsp;/&nbsp;
+<A HREF="CNxHLSColor.html">CNxHLSColor クラス</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A><BR>
+<A HREF="index.html">NxDraw グラフィック描画ライブラリ目次</A><BR>
+<A HREF="../index.html">NxLib Reference Manual 目次</A><BR>
+<HR>
+
+
+
+<!-- NxBlt -->
+<A NAME="NxBlt"><H2>NxBlt</H2></A>
+<H3>概要</H3>
+<P>　NxBlt 構造体はブレンド等の特殊転送を指定する際に、<A HREF="CNxSurface.html#member.Blt">CNxSurface::Blt()</A> 関数で使用されます。Blt 関数に於いて、NxBlt を省略(NULL を指定)すると単純な矩形転送が行われます。</P>
+<PRE>struct NxBlt
+{
+    enum Flag
+    {
+        <A HREF="#NxBlt.opacity">opacity</A>,
+        <A HREF="#NxBlt.color">color</A>,
+        <A HREF="#NxBlt.fill">fill</A>,
+        <A HREF="#NxBlt.colorFill">colorFill</A>,
+        <A HREF="#NxBlt.srcAlpha">srcAlpha</A>,
+        <A HREF="#NxBlt.destAlpha">destAlpha</A>,
+        <A HREF="#NxBlt.rgbaMask">rgbaMask</A>,
+        <A HREF="#NxBlt.rule">rule</A>,
+        <A HREF="#NxBlt.linearFilter">linearFilter</A>
+        <A HREF="#NxBlt.mirrorLeftRight">mirrorLeftRight</A>
+        <A HREF="#NxBlt.mirrorTopDown">mirrorTopDown</A>
+        <A HREF="#NxBlt.blendNormal">blendNormal</A>,
+        <A HREF="#NxBlt.blendAdd">blendAdd</A>,
+        <A HREF="#NxBlt.blendSub">blendSub</A>,
+        <A HREF="#NxBlt.blendMulti">blendMulti</A>,
+        <A HREF="#NxBlt.blendScreen">blendScreen</A>,
+        <A HREF="#NxBlt.blendBrighten">blendBrighten</A>,
+        <A HREF="#NxBlt.blendDarken">blendDarken</A>,
+        <A HREF="#NxBlt.blendTypeMask">blendTypeMask</A>,
+        <A HREF="#NxBlt.constDestAlpha">constDestAlpha</A>,
+        <A HREF="#NxBlt.blurHorz">blurHorz</A>,
+        <A HREF="#NxBlt.grayscale">grayscale</A>,
+        <A HREF="#NxBlt.dynamic">dynamic</A>
+   };
+
+    DWORD <A HREF="#NxBlt.dwFlags">dwFlags</A>;
+
+    union
+    {
+        DWORD dwRGBAMask;
+        struct NxRGBAMask
+        {
+            BYTE byBlue;
+            BYTE byGreen;
+            BYTE byRed;
+            BYTE byAlpha;
+        } <A HREF="#NxBlt.nxbRGBAMask">nxbRGBAMask</A>;
+    };
+
+    struct NxRule
+    {
+        UINT  uLevel;<BR>        UINT  uVague;
+        POINT ptOffset;
+        const <A HREF="CNxSurface.html">CNxSurface</A>* pSurface;
+    };
+
+    union
+    {
+        NxColor <A HREF="#NxBlt.nxbColor">nxbColor</A>;
+        NxRule <A HREF="#NxBlt.nxbRule">nxbRule</A>;
+    };
+    UINT <A HREF="#NxBlt.uBlurRange">uBlurRange</A>;
+    UINT <A HREF="#NxBlt.uOpacity">uOpacity</A>;
+};</PRE>
+<H3>メンバ</H3>
+<DL>
+	<DT><A NAME="NxBlt.dwFlags"><STRONG>DWORD dwFlags</STRONG></A>
+		<DD>　以下のフラグを指定します。
+		<DL>
+			<DT><A NAME="NxBlt.opacity"><STRONG>opacity</STRONG></A>
+			<DD>　<EM><A HREF="#NxBlt.uOpacity">uOpacity</A></EM> メンバが有効です。ブレンド転送の際、転送元の不透明度を指定します。このフラグを指定しない場合、<EM><A HREF="#NxBlt.uOpacity">uOpacity</A></EM> メンバは 255 として扱われます。
+<!-- NxBlt.color -->
+			<DT><A NAME="NxBlt.color"><STRONG>color</STRONG></A>
+			<DD>　<EM><A HREF="#NxBlt.nxbColor">nxbColor</A></EM> メンバが有効です。
+<!-- NxBlt.fill -->
+			<DT><A NAME="NxBlt.fill"><STRONG>fill</STRONG></A>
+			<DD>　塗り潰しを行います。単独での使用はできません。
+<!-- NxBlt.colorFill -->
+			<DT><A NAME="NxBlt.colorFill"><STRONG>colorFill</STRONG></A>
+			<DD>サーフェスの矩形を指定された色で塗り潰します。color と fill の or です。<EM><A HREF="#NxBlt.nxbColor">nxbColor</A></EM> メンバへ塗り潰し色を指定します。ブレンド塗り潰しの際には、<A HREF="#NxBlt.srcAlpha">srcAlpha</A> を使用して、8bpp 形式のサーフェスを転送元アルファとして使用できます。srcAlpha を使用しない場合、転送元は省略できます。
+<!-- NxBlt.rgbaMask -->
+			<DT><A NAME="NxBlt.rgbaMask"><STRONG>rgbaMask</STRONG></A>
+			<DD>　<EM><A HREF="#NxBlt.nxbRGBAMask">nxbRGBAMask</A></EM> メンバが有効です。RGBA 要素をマスクして転送します。転送後の結果は、(転送元 AND <EM>nxbRGBAMask</EM>) OR (転送先 AND (NOT <EM>nxbRGBAMask</EM>)) です。つまり、ビットが立っている部分のみが転送されます。
+<!-- NxBlt.ruleBlend -->
+			<DT><A NAME="NxBlt.rule"><STRONG>rule</STRONG></A>
+			<DD>　ルール画像を使用した通常ブレンド転送を行ないます。<EM><A HREF="#NxBlt.nxbRule">nxbRule</A></EM> メンバが有効になります。必要に応じて、<A HREF="#NxBlt.srcAlpha">srcAlpha</A> と、<A HREF="#NxBlt.uOpacity">opacity</A> を併用できます。詳しくは、<A HREF="#NxBlt.examples.rule">使用例</A> を参照して下さい。
+<!-- NxBlt.srcAlpha -->
+			<DT><A NAME="NxBlt.srcAlpha"><STRONG>srcAlpha</STRONG></A>
+			<DD>　ブレンド転送(塗り潰し)の際に、転送元サーフェスのアルファチャンネルを参照します。転送先サーフェス 32bpp 形式でなければなりません。<A HREF="#NxBlt.color">color</A> フラグが指定された場合は転送元として 8bpp 形式のサーフェスを、それ以外は 32bpp 形式のサーフェスを指定する必要があります。
+<!-- NxBlt.destAlpha -->
+			<DT><A NAME="NxBlt.destAlpha"><STRONG>destAlpha</STRONG></A>
+			<DD>　ブレンド転送(塗り潰し)の際に、転送先サーフェスのアルファチャンネルを参照します。転送先サーフェス 32bpp 形式でなければなりません。
+<!-- NxBlt.linearFilter -->
+			<DT><A NAME="NxBlt.linearFilter"><STRONG>linearFilter</STRONG></A>
+			<DD>　拡大縮小の際にバイリニアフィルタによる補完を行ないます。補完が行われるのは、基本的に拡大だけです。
+<!-- NxBlt.mirrorLeftRight -->
+			<DT><A NAME="NxBlt.mirrorLeftRight"><STRONG>mirrorLeftRight</STRONG></A>
+			<DD>　転送元の左右反転して転送します。転送元矩形の left と right メンバを入れ換えるのと同じです。<A HREF="#NxBlt.explanation">解説</A>も参照して下さい。
+<!-- NxBlt.mirrorTopDown -->
+			<DT><A NAME="NxBlt.mirrorTopDown"><STRONG>mirrorTopDown</STRONG></A>
+			<DD>　転送元の上下反転して転送します。転送元矩形の top と bottom メンバを入れ換えるのと同じです。<A HREF="#NxBlt.explanation">解説</A>も参照して下さい。
+<!-- NxBlt.constDestAlpha -->
+			<DT><A NAME="NxBlt.constDestAlpha"><STRONG>constDestAlpha</STRONG></A>
+			<DD>　「通常ブレンド、不透明度 255、転送元アルファチャンネル参照無し」の場合における、転送方法の自動切り替えを禁止し、転送先アルファチャンネルを保護します。<A HREF="#NxBlt.explanation">解説</A>も参照して下さい。
+<!-- NxBlt.grayscale -->
+			<DT><A NAME="NxBlt.grayscale"><STRONG>grayscale</STRONG></A>
+			<DD>ピクセルに対する演算前にグレイスケール化を行います。<A HREF="#NxBlt.dynamic">dynamic</A> 併用時のみ有効です。
+<!-- NxBlt.dynamic -->
+			<DT><A NAME="NxBlt.dynamic"><STRONG>dynamic</STRONG></A>
+			<DD>描画コードを動的に生成します。<A HREF="#NxBlt.exp.dynamic">NxBlt::dynamic について</A>を参照して下さい。
+<!-- NxBlt.blurHorz -->
+			<DT><A NAME="NxBlt.blurHorz"><STRONG>blurHorz</STRONG></A>
+			<DD>　転送又は塗り潰し時に、水平方向へピクセルをぼかします。対象ピクセルと両端の <A HREF="#NxBlt.uBlurRange">uBlurRange</A> 個分のピクセルの平均を取ります。uBlurRange メンバへは、ぼかしの強さを 1 〜 127 の範囲で指定します。
+<!-- NxBlt.blendNormal -->
+			<DT><A NAME="NxBlt.blendNormal"><STRONG>blendNormal</STRONG></A>
+			<DD>　転送元と転送先の通常ブレンド(いわゆる普通の半透明)を行ないます。デフォルトです。
+<!-- NxBlt.blendAdd -->
+			<DT><A NAME="NxBlt.blendAdd"><STRONG>blendAdd</STRONG></A>
+			<DD>　転送元と転送先の加算ブレンドを行ないます。転送先へ転送元の RGB を加算します。
+<!-- NxBlt.blendSub -->
+			<DT><A NAME="NxBlt.blendSub"><STRONG>blendSub</STRONG></A>
+			<DD>　転送元と転送先の減算ブレンドを行ないます。転送先から転送元の RGB を減算します。
+<!-- NxBlt.blendMulti -->
+			<DT><A NAME="NxBlt.blendMulti"><STRONG>blendMulti</STRONG></A>
+			<DD>　転送元と転送先の乗算ブレンドを行ないます。転送元と転送先を R,G,B 毎に乗算します。
+<!-- NxBlt.blendScreen -->
+			<DT><A NAME="NxBlt.blendScreen"><STRONG>blendScreen</STRONG></A>
+			<DD>　転送元と転送先のスクリーン(photoshop 等での表記)ブレンドを行ないます。
+<!-- NxBlt.blendBrighten -->
+			<DT><A NAME="NxBlt.blendBrighten"><STRONG>blendBrighten</STRONG></A>
+			<DD>　転送元と転送先の Brighten ブレンドを行ないます。R,G,B 要素毎に明度が高い方を選択します。
+<!-- NxBlt.blendDarken -->
+			<DT><A NAME="NxBlt.blendDarken"><STRONG>blendDarken</STRONG></A>
+			<DD>　転送元と転送先の Darken ブレンドを行ないます。R,G,B 要素毎に明度が低い方を選択します。
+<!-- NxBlt.blendTypeMask -->
+			<DT><A NAME="NxBlt.blendTypeMask"><STRONG>blendTypeMask</STRONG></A>
+			<DD>　このフラグは機能の指定には用いません。dwFlags メンバから、ブレンド種類を取り出す為に使用します。
+		</DL>
+<!-- NxBlt.nxbColor -->
+	<DT><A NAME="NxBlt.nxbColor"><STRONG>NxColor nxbColor</STRONG></A>
+	<DD>　<A HREF="#NxBlt.color">color</A> フラグが指定された際に矩形を塗り潰す色又は、転送元とブレンドする色を指定します。8bpp サーフェスではアルファ値のみが有効です。
+<!-- NxBlt.nxbRGBAMask -->
+	<DT><A NAME="NxBlt.nxbRGBAMask"><STRONG>NxRGBAMask nxbRGBAMask</STRONG></A>
+	<DD>　<A HREF="#NxBlt.rgbaMask">rgbaMask</A> フラグが指定された際に、転送元をマスクするビットを指定します。
+<!-- NxBlt.nxbRule -->
+	<DT><A NAME="NxBlt.nxbRule"><STRONG>NxRule nxbRule</STRONG></A>
+	<DD>　<A HREF="#NxBlt.rule">rule</A> フラグが指定された際に使用されます。詳しくは、<A HREF="#NxBlt.examples.rule">使用例</A> を参照して下さい。
+<!-- NxBlt.uOpacity -->
+	<DT><A NAME="NxBlt.uOpacity"><STRONG>UINT uOpacity</STRONG></A>
+	<DD>　転送元の不透明度を 0 〜 255 の範囲で指定します。255 で完全不透明を意味しますが、転送先サーフェスが全く透過しない(本当の意味での)不透明となるのは、ブレンド方法として <STRONG>blendNormal</STRONG> が指定された時だけです。他のブレンド方法では、<STRONG>転送元の濃度</STRONG>という意味の指定になります。
+<!-- NxBlt.uBlurRange -->
+	<DT><A NAME="NxBlt.uBlurRange"><STRONG>UINT uBlurRange</STRONG></A>
+	<DD>　水平ぼかし転送(塗り潰し)時に対象となるピクセルの範囲を 1 〜 127 で指定します。
+</DL>
+<!-- 解説 -->
+<A NAME="NxBlt.explanation"><H3>解説</H3></A>
+<P>　<A HREF="CNxSurface.html#member.Blt">CNxSurface::Blt()</A> 関数による、サーフェス間ブロック転送時のオプションを指定する構造体です。<A HREF="CNxSurface.html">CNxSurface</A> クラスのほとんどの描画関数は、この関数を間接的に呼び出しています。<A HREF="CNxSurfaceSprite.html">CNxSurfaceSprite</A> クラスではこの構造体を渡す事により、様々な方法でスプライトを表示できます。</P>
+
+<P>　主な動作は <EM>dwFlags</EM> メンバで指定します。指定されたフラグによっては、他のメンバの設定も必要になります。<EM>dwFlags</EM> で指定可能なフラグが全て併用できる訳ではなく、使用できないフラグの組み合わせが(沢山)あります。また、転送元と転送先サーフェスの形式によっても制限があります。これは、ほとんどの転送が、(高速化の為)個別の専用ルーチンによって処理されているからです。</P>
+
+<P>　転送元と転送先サーフェスには同じサーフェスを指定する事もできますが、矩形が重なり合った時の動作は不定です。基本的に左上から右下へ処理されますが、必ずしもピクセル単位ではなく、処理の内容によって異なります。</P>
+
+<P>　反転転送を行なう場合は、転送元矩形の left, right メンバ、または top, bottom メンバをそのまま逆にして渡して下さい。例えば、転送元矩形 (0, 0) - (50, 60) の上下反転を行なう場合、left = 0, top = 60, right = 50, bottom = 0 の矩形を渡します。<A HREF="#NxBlt.mirrorLeftRight">mirrorLeftRight</A> と、<A HREF="#NxBlt.mirrorTopDown">mirrorTopDown</A> を使用する事もできます。それぞれ、左右反転と上下反転を行ないます。<FONT COLOR="RED">なお、現在のところ、反転に対応しているのは、単純転送のみです。</FONT></P>
+
+<P>　<FONT COLOR="RED">CNxSurface::Blt() 関数の <EM>pSrcSurface</EM> 引数へ NULL が渡されると、転送元サーフェスには転送先サーフェスが指定されたと見なされます。</FONT></P>
+
+<P>転送元矩形と転送先が大きさが異なる場合、転送先の大きさに合う様に、転送元を拡大又は縮小して転送します。現在のところ、拡大縮小転送が可能なのは以下の転送のみです。未対応の転送の場合、Blt() 関数はエラーを返します。</P>
+
+<UL>
+	<LI>単純転送(NxBlt 構造体指定無し。又は dwFlags メンバがゼロ)
+	<LI>転送元アルファを参照しない通常ブレンド(<A HREF="#NxBlt.blendNormal">blendNormal</A> と <A HREF="#NxBlt.opacity">opacity</A>)
+	<LI>転送元アルファを参照する通常ブレンド(<A HREF="#NxBlt.blendNormal">blendNormal</A> と <A HREF="#NxBlt.srcAlpha">srcAlpha</A>。必要ならば <A HREF="#NxBlt.opacity">opacity</A>)
+	<LI>上記にバイリニアフィルタ(<A HREF="#NxBlt.linearFilter">linearFilter</A>) を組み合わせた転送
+</UL>
+
+<P>　バイリニアフィルタを指定している場合は、補完を行います。ただし、アルゴリズム上、補完縮小が可能なのは 0.5 倍未満までです。それ以下の場合、補完は行われません。拡大は特に制限はありません(縦横共に、INT_MAX / 4 程度までは対応しているはずです)。</P>
+
+<P>　<A HREF="#NxBlt.srcAlpha">srcAlpha</A> は、ブレンド転送における、転送元アルファチャンネルの扱いを指定します。<A HREF="#NxBlt.srcAlpha">srcAlpha</A> が使用されると、転送元のアルファチャンネルが参照され、ピクセルの不透明度 = <EM>転送元ピクセルのアルファチャンネル</EM> * <EM>不透明度(<A HREF="#NxBlt.opacity">uOpacity</A></EM> で指定) / 255 とします。このフラグが指定されない場合、転送元のアルファ値は全て 255 であると見なされます(つまり ピクセルの不透明度 = uOpacity)。</P>
+<P>　<A HREF="#NxBlt.destAlpha">destAlpha</A> が使用されると、転送先のアルファチャンネルが参照され、転送後は適切な値へ書換えられます。逆に使用されないと、転送先のアルファチャンネルは参照しません(結果として、透明部分を保護する様に働きます)。destAlpha は、一部のブレンド転送のみでしかサポートしていません。また、srcAlpha のみと比べて速度が低下します。転送先アルファチャンネルの更新が必要な場合を除き、使用しないで下さい。後述の使用例で、destAlpha が必要になるケースを示しています。</P>
+
+<P>　なお、「不透明度が 255、通常ブレンド、転送元アルファ参照無し」の場合、転送先アルファを除き RGB の結果は全く同じである為、より高速な転送(単純転送又は単純塗り潰し)へ自動的に切り替えます。この為、転送先アルファチャンネルは転送元のアルファチャンネル(又は塗り潰し色のアルファ)で置き換えられます。不透明度が 255 の場合でも、転送先アルファチャンネルを保護する場合は、<A HREF="#NxBlt.constDestAlpha">constDestAlpha</A> を指定して下さい。</P>
+
+<P>　<A HREF="#NxBlt.srcAlpha">srcAlpha</A> と <A HREF="#NxBlt.destAlpha">destAlpha</A> は任意に組み合わせて使用できます。塗り潰し時に <A HREF="#NxBlt.srcAlpha">srcAlpha</A> を使用した場合、転送元は 8bpp 形式のサーフェスでなければなりません。ピクセルの値が、そのままアルファ値を示します。</P>
+
+<P>　ブレンドが行われない転送(単純な矩形転送、<A HREF="#NxBlt.rgbaMask">rgbaMask</A> によるマスク転送、および単純な矩形塗り潰し)を行なうと、転送先アルファチャンネルは転送元サーフェス(又は塗り潰し色)で上書きされます。</P>
+
+
+
+<P>　バイリニアフィルタ(<A HREF="#NxBlt.linearFilter">linearFilter</A>)を使用する場合、転送元アルファチャンネルも演算の対象となります。</P>
+
+<P>　複数のブレンドを同時に行なう事はできません。<A HREF="#NxBlt.blendNormal">blendNormal</A>, <A HREF="#NxBlt.blendAdd">blendAdd</A>, <A HREF="#NxBlt.blendSub">blendSub</A>, <A HREF="#NxBlt.blendSub">blendMulti</A>, <A HREF="#NxBlt.blendSub">blendScreen</A>, <A HREF="#NxBlt.blendSub">blendDarken</A>, および <A HREF="#NxBlt.blendSub">blendBrighten</A>　のうち、どれか一つだけを指定して下さい。ブレンド方法の指定が行われない時は、通常ブレンド(<A HREF="#NxBlt.blendNoraml">blendNormal</A>)が指定されたと見なされます。</P>
+
+
+<!-- 使用例 -->
+<A NAME="NxBlt.examples"><H3>使用例</H3></A>
+<P>　以下にいくつかの例を示します。</P>
+
+<A NAME="NxBlt.explain.blend1"><H4>50% の通常ブレンド(転送元サーフェスのアルファチャンネルを参照しない)</H4></A>
+<P>　転送元と転送先サーフェスは両方共 32bpp です。転送元のアルファチャンネルは参照されず、全てのピクセルのアルファ値は 255 であると見なされます。転送先のアルファチャンネルは変化しません。NxBlt::blendNormal の部分を変更すると、他のブレンド方法も使用できます。</P>
+<P>　<A HREF="#NxBlt.opacity">NxBlt::opacity</A> を併用する事で、転送元の不透明度を指定できます。NxBlt::opacity を指定しない場合は転送元の不透明度は 255 です。通常ブレンドでは結果として、転送元のピクセルで置き換えられます(アルファチャンネルが保存される事を除き、単純な転送と同じです)。</P>
+<PRE>
+	NxBlt nxb;
+	nxb.dwFlags = <A HREF="#NxBlt.blendNormal">NxBlt::blendNormal</A> | NxBlt::opacity;
+	nxb.uOpacity = 128;
+	pDestSurface-&gt;<A HREF="CNxSurface.html#member.Blt">Blt</A>(NULL, pSrcSurface, NULL, &amp;nxb);
+</PRE>
+<CENTER>
+<TABLE BORDER>
+<TR><TH>転送先</TH><TH>転送元</TH><TH>結果</TH></TR>
+<TR><TD><IMG WIDTH=64 HEIGHT=64 SRC="images/NxBltExampleBlend0.png"></TD><TD><IMG WIDTH=64 HEIGHT=64 SRC="images/NxBltExampleBlend1.png"></TD><TD><IMG WIDTH=64 HEIGHT=64 SRC="images/NxBltExampleBlend2.png"></TD></TR>
+</TABLE>
+
+</CENTER>
+
+<H4>50% の通常ブレンド(転送元サーフェスのアルファチャンネル参照)</H4>
+<P>　上の例と同じくサーフェスは両方共 32 bpp です。転送元のアルファチャンネルが参照されますので、NxBlt::blendNormal において <A HREF="#NxBlt.opacity">NxBlt::opacity</A> を省略しても、上の例の様に必ずしも転送先が見えなくなる事はありません。上の例と同じく、転送先のアルファチャンネルは変化しません。</P>
+<P>　NxBlt::blendNormal の部分を変更すると、他のブレンド方法も使用できます。</P>
+<PRE>
+	NxBlt nxb;
+	nxb.dwFlags = <A HREF="#NxBlt.blendNormal">NxBlt::blendNormal</A> | NxBlt::opacity | <A HREF="#NxBlt.srcAlpha">NxBlt::srcAlpha</A>;
+	nxb.uOpacity = 255;
+	pDestSurface-&gt;<A HREF="CNxSurface.html#member.Blt">Blt</A>(NULL, pSrcSurface, NULL, &amp;nxb);
+</PRE>
+<CENTER>
+<TABLE BORDER>
+<TR><TH>転送先</TH><TH>転送元</TH></TR>
+<TR><TD><IMG WIDTH=64 HEIGHT=64 SRC="images/NxBltExampleBlend0.png"></TD><TD><IMG WIDTH=64 HEIGHT=64 SRC="images/NxBltExampleBlend3.png"></TD></TR>
+</TABLE>
+<TABLE BORDER>
+<TR><TH>通常<BR>(<A HREF="#NxBlt.blendNormal">blendNormal</A>)</TH><TH>加算<BR>(<A HREF="#NxBlt.blendAdd">blendAdd</A>)</TH><TH>減算<BR>(<A HREF="#NxBlt.blendSub">blendSub</A>)</TH><TH>乗算<BR>(<A HREF="#NxBlt.blendMulti">blendMulti</A>)</TH><TH>Screen<BR>(<A HREF="#NxBlt.blendScreen">blendScreen</A>)</TH><TH>Darken<BR>(<A HREF="#NxBlt.blendDarken">blendDarken</A>)</TH><TH>Brighten<BR>(<A HREF="#NxBlt.blendBrighten">blendBrighten</A>)</TH></TR>
+<TR>
+	<TD><CENTER><IMG WIDTH=64 HEIGHT=64 SRC="images/NxBltExampleBlend4.png" ALT="blendNormal"></CENTER></TD>
+	<TD><CENTER><IMG WIDTH=64 HEIGHT=64 SRC="images/NxBltExampleBlend5.png" ALT="blendAdd"></CENTER></TD>
+	<TD><CENTER><IMG WIDTH=64 HEIGHT=64 SRC="images/NxBltExampleBlend6.png" ALT="blendSub"></CENTER></TD>
+	<TD><CENTER><IMG WIDTH=64 HEIGHT=64 SRC="images/NxBltExampleBlend7.png" ALT="blendMulti"></CENTER></TD>
+	<TD><CENTER><IMG WIDTH=64 HEIGHT=64 SRC="images/NxBltExampleBlend8.png" ALT="blendScreen"></CENTER></TD>
+	<TD><CENTER><IMG WIDTH=64 HEIGHT=64 SRC="images/NxBltExampleBlend9.png" ALT="blendDarken"></CENTER></TD>
+	<TD><CENTER><IMG WIDTH=64 HEIGHT=64 SRC="images/NxBltExampleBlendA.png" ALT="blendBrighten"></CENTER></TD>
+</TR>
+</TABLE>
+</CENTER>
+
+<H4>50% の通常ブレンド(転送元と転送先のアルファチャンネルを参照)</H4>
+<P>　結果として転送先サーフェスを表示する限り、見た目は上の例と全く同じです。しかし上の例では、転送元のアルファチャンネルを書換えずに保存している為、重ねた画像を更にアルファチャンネル参照の転送で使用した場合に正しい結果が得られません。例えば、球体の画像(球以外は透明)へ、アルファが全ピクセル不透明の画像を<STRONG>NxBlt::blendNoraml | NxBlt::srcAlpha</STRONG> で重ねた後、その結果を同じく <STRONG>NxBlt::blendNormal | NxBlt::srcAlpha</STRONG> で転送すると、重なりあった球体の部分しか見えなくなります。転送先のアルファチャンネルは球体のまま変化していないからです。この例では、転送先のアルファ値が更新されるため、重ねた画像を更にアルファチャンネル参照の転送で使用しても正しい結果が得られます。</P>
+<P>　NxBlt::destAlpha を使用すると NxBlt::blendNormal 以外は指定できません。</P>
+
+<PRE>
+	NxBlt nxb;
+	nxb.dwFlags = <A HREF="#NxBlt.blendNormal">NxBlt::blendNormal</A> | NxBlt::opacity | <A HREF="#NxBlt.srcAlpha">NxBlt::srcAlpha</A> | <A HREF="#NxBlt.destAlpha">NxBlt::destAlpha</A>;
+	nxb.uOpacity = 128;
+	pDestSurface-&gt;<A HREF="CNxSurface.html#member.Blt">Blt</A>(NULL, pSrcSurface, NULL, &amp;nxb);
+</PRE>
+
+<P>　NxBlt::destAlpha だけでも使用できます。転送先のアルファ値が書換えられる点を除き、<A HREF="#NxBlt.explain.blend1">50% の通常ブレンド(転送元サーフェスのアルファチャンネルを参照しない</A> と同じです。</P>
+
+<H4>ブレンド塗り潰し</H4>
+<P>　矩形を指定された色とブレンドします。ブレンド方法には、<A HREF="#NxBlt.blendNormal">blendNormal</A>, <A HREF="#NxBlt.blendAdd">blendAdd</A>, <A HREF="#NxBlt.blendSub">blendSub</A>, <A HREF="#NxBlt.blendSub">blendMulti</A>, <A HREF="#NxBlt.blendSub">blendScreen</A>, <A HREF="#NxBlt.blendSub">blendDarken</A>, および <A HREF="#NxBlt.blendSub">blendBrighten</A> の全てが使用できます。不透明度の指定も可能ですが、サーフェス間転送とは異なり、塗り潰し色のアルファ値で指定します。下の例では、128 (50%) を指定しています。</P>
+<P>　転送元サーフェスは必要ないので NULL を渡します。</P>
+<PRE>
+	NxBlt nxb;
+	nxb.dwFlags = <A HREF="#NxBlt.colorFill">NxBlt::colorFill</A> | <A HREF="#NxBlt.blendAdd">NxBlt::blendAdd</A>;
+	nxb.nxbColor = <A HREF="CNxColor.html">CNxColor</A>(255, 0, 0).SetAlpha(128);
+	pDestSurface-&gt;<A HREF="CNxSurface.html#member.Blt">Blt</A>(NULL, NULL, NULL, &amp;nxb);
+</PRE>
+
+<P>　単純な塗り潰しには、<A HREF="CNxSurface.html#member.FillRect">CNxSurface::FillRect()</A> 関数を使用して下さい。</P>
+
+
+<H4>アルファチャンネル付きブレンド塗り潰し</H4>
+<P>　矩形を指定された色で塗り潰します。転送元として 8bpp 形式のサーフェスが必要です。このサーフェスはピクセルがそのままアルファ値として扱われます。これによって、塗り潰し時にピクセル単位で不透明度を変化させた塗り潰しができます。</P>
+<PRE>
+	NxBlt nxb;
+	nxb.dwFlags = <A HREF="#NxBlt.colorFill">NxBlt::colorFill</A> | <A HREF="#NxBlt.blendAdd">NxBlt::blendNormal</A> | <A HREF="#NxBlt.srcAlpha">NxBlt::srcAlpha</A>;
+	nxb.nxbColor = <A HREF="CNxColor.html">CNxColor</A>(255, 0, 255);
+	pDestSurface-&gt;<A HREF="CNxSurface.html#member.Blt">Blt</A>(NULL, NULL, pSrcSurface, &amp;nxb);
+</PRE>
+
+<P>　ブレンド塗り潰しには、サーフェス間転送と同じ様に <A HREF="#NxBlt.destAlpha">NxBlt::destAlpha</A> も使用できます。サーフェス間転送と異なるのは、</P>
+
+<UL>
+<LI><A HREF="#NxBlt.srcAlpha">NxBlt::srcAlpha</A> を使用する場合は、転送元として 8bpp 形式のサーフェスが必要
+<LI><A HREF="#NxBlt.nxbColor">nxbColor</A> メンバで色を指定する
+<LI>不透明度は <A HREF="#NxBlt.uOpacity">uOpacity</A> メンバではなく、nxbColor のアルファ値で指定する
+</UL>
+
+<P>　という点です。転送先アルファチャンネルの扱いも同じです。</P>
+
+<A NAME="NxBlt.examples.rule"><H4>ルール画像を使用するブレンド転送</H4></A>
+<P>　<A HREF="#NxBlt.rule">rule</A> フラグを使用すると、ルール画像を使用したブレンド転送を行ないます。これは、W.Dee 氏が開発されている「吉里吉里」(<A HREF="http://www.din.or.jp/~glit/TheOddStage/TVP/">http://www.din.or.jp/~glit/TheOddStage/TVP/</A>)に実装されているユニバーサルトランジション機能から、時間の概念を外した感じの物です。吉里吉里のユニバーサルトランジション用のルール画像をそのまま利用する事ができます。NxDraw では、時間に従って自動的に転送が行なわれる訳ではありません。構造体メンバの値を自分で更新する必要があります(「トランジション」ではなく、「ルール画像を使用するブレンド転送」という名前なのはこの為です)。</P>
+
+<P>　二枚の画像の切り替えを目的とした物ですので、通常ブレンド以外は使用できません。</P>
+
+<P>　この転送を使用するには、<A HREF="#NxBlt.nxbRule">nxbRule</A>メンバ(NxRule 構造体) を設定する必要があります。NxRule 構造体は NxBlt の入れ子構造体として宣言されています。内容は以下の通りです。</P>
+
+<PRE>
+    struct NxRule
+    {
+        UINT uLevel;
+        UINT uVague;
+        POINT ptOffset;
+        const <A HREF="CNxSurface.html">CNxSurface</A>* pSurface;
+    };
+</PRE>
+
+<P>　<EM>pSurface</EM> メンバへは、ルール画像サーフェスへのポインタを指定します。ルール画像とは 8bpp 形式のグレイスケール画像です。通常、黒から白い方へ転送が進行する様に作成します。画像のサイズは、転送元サーフェスと同じか、それより大きくなくてはなりません。この引数が NULL の場合、転送元サーフェスのアルファチャンネルをルール画像として参照します。</P>
+<P>　<EM>ptOffset</EM> メンバへは、ルール画像のオフセット座標を指定します。このメンバが (0, 0) の場合、ルール画像から使用される矩形は、転送元矩形と同じです。例えば、転送元矩形が (320, 240) - (640, 480) の時、<EM>ptOffset</EM> メンバが (-320, -120) ならば、ルール画像の (0, 120) - (320, 360) が使用されます。オフセットを加算した結果、ルール画像の範囲外が参照されない様に注意して下さい。</P>
+
+<P>　<EM>uLevel</EM> メンバへは、転送元と転送先の(転送する/しないの)境界を 0 〜 256 または 257 〜 512 の範囲で指定します。値が 0 〜 256 の場合、ルール画像のピクセル値が <EM>uLevel</EM> - 1 メンバ以下であれば、転送元からの転送が行われます。257 以上では、0 〜 256 の時の、転送されるピクセルと、転送されないピクセルが逆転します(値が大きくなる程、転送元が消えて行きます)。なお、0 と 512 の場合は、何も転送しません。256 の場合は、ルール画像を無視して転送元がそのまま転送されます。</P>
+<P>　<EM>uVague</EM> メンバへは、<EM>uLevel</EM> メンバの曖昧さを 1 〜 511 の範囲で指定します。値が大きい程、転送元と転送先の境界が曖昧になり、半透明の(転送元、転送先のどちらでもない)領域が増加します。</P>
+<P>　実際のコードの記述例については、rule サンプルプログラムを参照して下さい。</P>
+
+
+
+<!-- NxBlt::dynamic について -->
+<A NAME="NxBlt.exp.dynamic"><H3>NxBlt::dynamic について</H3></A>
+<P>　NxBlt::dynamic を使用すると、描画コードを動的に生成して描画を行います。コード生成の為のオーバーヘッドは多少ありますが、これらのフラグを任意に組み合わせる事で、NxBlt::dynamic を使用しないコード(以後、静的描画コードと記します)では不可能な描画も行う事ができます。なお、<FONT COLOR="RED">現在のところ、MMX 命令をサポートしない CPU (以後、「非 MMX CPU」と記します)では使用できません。</FONT></P>
+
+<P>　以下のフラグの組み合わせが可能です。</P>
+
+任意のブレンド方法(blendNormal, blendAdd, blendSub, blendMulti, blendScreen, blendBrighten, blendDarken)<BR>
+<A HREF="#NxBlt.grayscale">NxBlt::grayscale</A><BR>
+<A HREF="#NxBlt.color">NxBlt::color</A><BR>
+<A HREF="#NxBlt.opacity">NxBlt::rgbaMask</A><BR>
+<A HREF="#NxBlt.opacity">NxBlt::opacity</A><BR>
+<A HREF="#NxBlt.opacity">NxBlt::linearFilter</A><BR>
+<A HREF="#NxBlt.opacity">NxBlt::srcAlpha</A><BR>
+<A HREF="#NxBlt.opacity">NxBlt::destAlpha</A>(blendNormal 時のみ)<BR>
+<A HREF="#NxBlt.opacity">NxBlt::mirrorLeftRight</A><BR>
+<A HREF="#NxBlt.opacity">NxBlt::mirrorTopDown</A><BR>
+
+<P>　例えば、blendNormal, srcAlpha, linearFilter, mirrorLeftRight を組み合わせると、「リニアフィルタ + 左右反転 + 転送元アルファ参照通常ブレンド」となります。<A HREF="#NxBlt.color">NxBlt::color</A> を指定すると、転送元と nxbColor メンバへ指定された色が通常ブレンドされます。</P>
+
+例:<BR>
+<PRE>    NxBlt nxb;
+    nxb.dwFlags = NxBlt::blendNormal | NxBlt::srcAlpha | NxBlt::linearFilter | NxBlt::mirrorLeftRight | <STRONG>NxBlt::dynamic</STRONG>;
+    pDestSurface-&gt;Blt(lpDestRect, pSrcSurface, lpSrcRect, &amp;nxb);
+
+    nxb.dwFlags = NxBlt::color | NxBlt::blendAdd | NxBlt::opacity | <STRONG>NxBlt::dynamic</STRONG>;
+    nxb.nxbColor = CNxColor(0, 0, 255, 128);
+    nxb.uOpacity = 220;
+    pDestSurface-&gt;Blt(lpDestRect, pSrcSurface, lpSrcRect, &amp;nxb);
+</PRE>
+
+<P>　全く同じ結果が得られるのであれば、動的描画コードよりも静的描画コードの方を使用して下さい。静的描画コードは、ほとんど場合、動的描画コードよりも高速に動作しますし、全て 非 MMX CPU に対応しています。</P>
+
+<!-- 機能一覧表 -->
+<A NAME="NxBlt.function"><H3>機能一覧表</H3></A>
+<P>　<A HREF="#NxBlt.explanation">解説</A> でも述べていますが、Blt() 関数のほとんどの転送は個別の専用ルーチンによって処理されている為、フラグの組み合わせには制限があります。例えば、NxBlt::rgbaMask|NxBlt::opacity は<STRONG>RGBAマスク + 通常ブレンド転送</STRONG>と解釈できますが、処理ルーチンが無いので動作しません(ただし、<A HREF="#NxBlt.dynamic">NxBlt::dynamic</A> の場合は可能です)。</P>
+
+<P>　現状では 8bpp と 32bpp 間の転送には多くの制限があります。今後、必要な物から実装して行く予定です。</P>
+
+<P>　以下の表の、赤字で示されるフラグは、その機能を使用するのに必須である事を意味します。基本的に、フラグへ opacity が書かれていない機能は、ブレンド転送を行えません。また、一部のブレンド転送は通常ブレンドのみのサポートです(例えば拡大縮小等)。</P>
+
+<P>　「BLF」は、バイリニアフィルタを意味します。</P>
+
+<P>8bpp サーフェスが転送元で「◎」となっている場合は、カラーテーブル(<A HREF="CNxSurface.html">CNxSurface</A> クラスの概要を参照して下さい)を参照して、ピクセルを実際の色へ変換しながら転送されます。「○」の場合は、カラーテーブルを参照しません。8bpp サーフェス間の転送では、カラーテーブルの参照や書き換えは行いません。カラーテーブルを別のサーフェスへコピーするには、<A HREF="CNxSurface.html#member.GetColorTable">CNxSurface::GetColorTable()</A> 関数でポインタを取得して、memcpy 関数等で行って下さい。</P>
+
+<H4>8bpp サーフェスへの転送</H4>
+<TABLE BORDER>
+<TR><TH>機能</TH><TH NOWRAP>32bpp から</TH><TH NOWRAP>8bpp から</TH><TH>フラグ</TH></TR>
+<TR><TD>単純矩形転送</TD><TD ALIGN="CENTER">×</TD><TD ALIGN="CENTER">○</TD><TD>なし</TD></TR>
+<TR><TD>拡大縮小転送</TD><TD ALIGN="CENTER">×</TD><TD ALIGN="CENTER">○</TD><TD>なし</TD></TR>
+<TR><TD>拡大縮小転送(with BLF)</TD><TD ALIGN="CENTER">×</TD><TD ALIGN="CENTER">○</TD><TD><FONT COLOR="RED">linearFilter</FONT></TD></TR>
+<TR><TD>単純塗り潰し</TD><TD ALIGN="CENTER">−</TD><TD ALIGN="CENTER">−</TD><TD><FONT COLOR="RED">colorFill</FONT></TD></TR>
+<TR><TD>RGBA マスク転送</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">○</TD><TD><FONT COLOR="RED">rgbaMask</FONT></TD></TR>
+</TABLE>
+
+<H4>32bpp サーフェスへの転送</H4>
+<TABLE BORDER>
+<TR><TH>機能</TH><TH NOWRAP>32bpp から</TH><TH NOWRAP>8bpp から</TH><TH>フラグ</TH></TR>
+<TR><TD>単純矩形転送</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">◎</TD><TD>なし</TD></TR>
+<TR><TD>拡大縮小転送</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">◎</TD><TD>なし</TD></TR>
+<TR><TD>拡大縮小転送(with BLF)</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">◎</TD><TD><FONT COLOR="RED">linearFilter</FONT></TD></TR>
+<TR><TD>通常ブレンド転送</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">◎</TD><TD><FONT COLOR="RED">opacity</FONT> | blendNormal</TD></TR>
+<TR><TD>通常ブレンド拡大縮小転送</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">◎</TD><TD><FONT COLOR="RED">opacity</FONT> | blendNormal</TD></TR>
+<TR><TD>通常ブレンド拡大縮小転送(with BLF)</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">◎</TD><TD><FONT COLOR="RED">linearFilter</FONT> | <FONT COLOR="RED">opacity</FONT> | blendNormal</TD></TR>
+<TR><TD>転送元アルファ参照通常ブレンド転送</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">◎</TD><TD><FONT COLOR="RED">srcAlpha</FONT> | opacity | blendNormal</TD></TR>
+<TR><TD>転送元アルファ参照通常ブレンド拡大縮小転送</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">◎</TD><TD><FONT COLOR="RED">srcAlpha</FONT> | opacity | blendNormal</TD></TR>
+<TR><TD>転送元アルファ参照通常ブレンド拡大縮小転送(with BLF)</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">×</TD><TD><FONT COLOR="RED">linearFilter</FONT> | <FONT COLOR="RED">srcAlpha</FONT> | opacity | blendNormal</TD></TR>
+<TR><TD>転送先アルファ参照通常ブレンド転送</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">×</TD><TD><FONT COLOR="RED">destAlpha</FONT> | blendNormal</TD></TR>
+<TR><TD>転送元と転送先アルファ参照通常ブレンド転送</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">×</TD><TD><FONT COLOR="RED">destAlpha</FONT> | <FONT COLOR="RED">srcAlpha</FONT> | opacity</TD></TR>
+<TR><TD>加算ブレンド転送</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">×</TD><TD><FONT COLOR="RED">blendAdd</FONT> | opacity</TD></TR>
+<TR><TD>転送元アルファ参照加算ブレンド転送</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">×</TD><TD><FONT COLOR="RED">blendAdd</FONT> | <FONT COLOR="RED">srcAlpha</FONT> | opacity</TD></TR>
+<TR><TD>減算ブレンド転送</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">×</TD><TD><FONT COLOR="RED">blendSub</FONT> | opacity</TD></TR>
+<TR><TD>転送元アルファ参照減算ブレンド転送</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">×</TD><TD><FONT COLOR="RED">blendSub</FONT> | <FONT COLOR="RED">srcAlpha</FONT> | opacity</TD></TR>
+<TR><TD>乗算ブレンド転送</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">×</TD><TD><FONT COLOR="RED">blendMulti</FONT> | opacity</TD></TR>
+<TR><TD>転送元アルファ参照乗算ブレンド転送</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">×</TD><TD><FONT COLOR="RED">blendMulti</FONT> | <FONT COLOR="RED">srcAlpha</FONT> | opacity</TD></TR>
+<TR><TD>スクリーンブレンド転送</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">×</TD><TD><FONT COLOR="RED">blendScreen</FONT> | opacity</TD></TR>
+<TR><TD>転送元アルファ参照スクリーンブレンド転送</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">×</TD><TD><FONT COLOR="RED">blendScreen</FONT> | <FONT COLOR="RED">srcAlpha</FONT> | opacity</TD></TR>
+<TR><TD>明度比較(明)ブレンド転送</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">×</TD><TD><FONT COLOR="RED">blendBrighten</FONT> | opacity</TD></TR>
+<TR><TD>転送元アルファ参照明度比較(明)ブレンド転送</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">×</TD><TD><FONT COLOR="RED">blendBrighten</FONT> | <FONT COLOR="RED">srcAlpha</FONT> | opacity</TD></TR>
+<TR><TD>明度比較(暗)ブレンド転送</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">×</TD><TD><FONT COLOR="RED">blendDarken</FONT> | opacity</TD></TR>
+<TR><TD>転送元アルファ参照明度比較(暗)ブレンド転送</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">×</TD><TD><FONT COLOR="RED">blendDarken</FONT> | <FONT COLOR="RED">srcAlpha</FONT> | opacity</TD></TR>
+<TR><TD>ルール画像使用通常ブレンド</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">×</TD><TD><FONT COLOR="RED">rule</FONT> | opacity</TD></TR>
+<TR><TD>転送元アルファ参照ルール画像使用通常ブレンド</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">×</TD><TD><FONT COLOR="RED">rule</FONT> | <FONT COLOR="RED">srcAlpha</FONT> | opacity</TD></TR>
+<TR><TD>RGBA マスク転送</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">○</TD><TD><FONT COLOR="RED">rgbaMask</FONT></TD></TR>
+<TR><TD>RGBA マスク転送塗り潰し</TD><TD ALIGN="CENTER">−</TD><TD ALIGN="CENTER">−</TD><TD><FONT COLOR="RED">rgbaMask</FONT> | <FONT COLOR="RED">colorFill</FONT></TD></TR>
+<TR><TD>単純塗りつぶし</TD><TD ALIGN="CENTER">−</TD><TD ALIGN="CENTER">−</TD><TD><FONT COLOR="RED">colorFill</FONT></TD></TR>
+<TR><TD>通常ブレンド塗りつぶし</TD><TD ALIGN="CENTER">−</TD><TD ALIGN="CENTER">−</TD><TD><FONT COLOR="RED">colorFill</FONT> | <FONT COLOR="RED">opacity</FONT></TD></TR>
+<TR><TD>転送元アルファ参照通常ブレンド塗りつぶし</TD><TD ALIGN="CENTER">×</TD><TD ALIGN="CENTER">○</TD><TD><FONT COLOR="RED">colorFill</FONT> | <FONT COLOR="RED">srcAlpha</FONT> | opacity</TD></TR>
+<TR><TD>転送先アルファ参照通常ブレンド塗りつぶし</TD><TD ALIGN="CENTER">−</TD><TD ALIGN="CENTER">−</TD><TD><FONT COLOR="RED">colorFill</FONT> | <FONT COLOR="RED">destAlpha</FONT> | opacity</TD></TR>
+<TR><TD>転送元と転送先アルファ参照通常ブレンド塗りつぶし</TD><TD ALIGN="CENTER">×</TD><TD ALIGN="CENTER">○</TD><TD><FONT COLOR="RED">colorFill</FONT> | <FONT COLOR="RED">srcAlpha</FONT> | <FONT COLOR="RED">destAlpha</FONT> | opacity</TD></TR>
+<TR><TD>加算ブレンド塗りつぶし</TD><TD ALIGN="CENTER">−</TD><TD ALIGN="CENTER">−</TD><TD><FONT COLOR="RED">colorFill</FONT> | opacity | <FONT COLOR="RED">blendAdd</FONT> | opacity</TD></TR>
+<TR><TD>転送元アルファ参照加算ブレンド塗りつぶし</TD><TD ALIGN="CENTER">×</TD><TD ALIGN="CENTER">○</TD><TD><FONT COLOR="RED">colorFill</FONT> | <FONT COLOR="RED">srcAlpha</FONT> | <FONT COLOR="RED">blendAdd</FONT> | opacity</TD></TR>
+<TR><TD>減算ブレンド塗りつぶし</TD><TD ALIGN="CENTER">−</TD><TD ALIGN="CENTER">−</TD><TD><FONT COLOR="RED">colorFill</FONT> | <FONT COLOR="RED">blendSub</FONT> | opacity</TD></TR>
+<TR><TD>転送元アルファ参照減算ブレンド塗りつぶし</TD><TD ALIGN="CENTER">×</TD><TD ALIGN="CENTER">○</TD><TD><FONT COLOR="RED">colorFill</FONT> | <FONT COLOR="RED">srcAlpha</FONT> | <FONT COLOR="RED">blendSub</FONT> | opacity</TD></TR>
+<TR><TD>乗算ブレンド塗りつぶし</TD><TD ALIGN="CENTER">−</TD><TD ALIGN="CENTER">−</TD><TD><FONT COLOR="RED">colorFill</FONT> | <FONT COLOR="RED">blendMulti</FONT> | opacity</TD></TR>
+<TR><TD>転送元アルファ参照乗算ブレンド塗りつぶし</TD><TD ALIGN="CENTER">×</TD><TD ALIGN="CENTER">○</TD><TD><FONT COLOR="RED">colorFill</FONT> | <FONT COLOR="RED">srcAlpha</FONT> | <FONT COLOR="RED">blendMulti</FONT> | opacity</TD>
+</TR>
+<TR><TD>スクリーンブレンド塗りつぶし</TD><TD ALIGN="CENTER">−</TD><TD ALIGN="CENTER">−</TD><TD><FONT COLOR="RED">colorFill</FONT> | <FONT COLOR="RED">blendScreen</FONT> | opacity</TD></TR>
+<TR><TD>転送元アルファ参照スクリーンブレンド塗りつぶし</TD><TD ALIGN="CENTER">×</TD><TD ALIGN="CENTER">○</TD><TD><FONT COLOR="RED">colorFill</FONT> | <FONT COLOR="RED">srcAlpha</FONT> | <FONT COLOR="RED">blendScreen</FONT> | opacity</TD></TR>
+<TR><TD>明度比較(明)ブレンド塗りつぶし</TD><TD ALIGN="CENTER">−</TD><TD ALIGN="CENTER">−</TD><TD><FONT COLOR="RED">colorFill</FONT> | <FONT COLOR="RED">blendBrighten</FONT> | opacity</TD></TR>
+<TR><TD>転送元アルファ参照明度比較(明)ブレンド塗りつぶし</TD><TD ALIGN="CENTER">×</TD><TD ALIGN="CENTER">○</TD><TD><FONT COLOR="RED">colorFill</FONT> | <FONT COLOR="RED">srcAlpha</FONT> | <FONT COLOR="RED">blendBrighten</FONT> | opacity</TD></TR>
+<TR><TD>明度比較(暗)ブレンド塗りつぶし</TD><TD ALIGN="CENTER">−</TD><TD ALIGN="CENTER">−</TD><TD><FONT COLOR="RED">colorFill</FONT> | <FONT COLOR="RED">blendDarken</FONT> | opacity</TD></TR>
+<TR><TD>転送元アルファ参照明度比較(暗)ブレンド塗りつぶし</TD><TD ALIGN="CENTER">×</TD><TD ALIGN="CENTER">○</TD><TD><FONT COLOR="RED">colorFill</FONT> | <FONT COLOR="RED">srcAlpha</FONT> | <FONT COLOR="RED">blendDarken</FONT> | opacity</TD></TR>
+<TR><TD>水平ぼかし転送</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">×</TD><TD><FONT COLOR="RED">blurHorz<FONT></TD></TR>
+<TR><TD>水平ぼかし通常ブレンド転送</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">×</TD><TD><FONT COLOR="RED">blurHorz<FONT> | <FONT COLOR="RED">opacity</FONT> | blendNormal</TD></TR>
+<!-- 一応動きますが...アルファの扱いに難あり
+<TR><TD>転送元アルファ参照水平ぼかし通常ブレンド転送</TD><TD ALIGN="CENTER">○</TD><TD ALIGN="CENTER">×</TD><TD><FONT COLOR="RED">blurHorz</FONT> | <FONT COLOR="RED">srcAlpha</FONT> | blendNormal | opacity</TD></TR>
+-->
+<TR><TD>転送元アルファ参照水平ぼかし通常ブレンド塗りつぶし</TD><TD ALIGN="CENTER">×</TD><TD ALIGN="CENTER">○</TD><TD><FONT COLOR="RED">blurHorz</FONT> | <FONT COLOR="RED">srcAlpha</FONT> | <FONT COLOR="RED">colorFill</FONT> | blendNormal | opacity</TD></TR>
+</TABLE>
+
+<!-- 関連項目 -->
+<H3>関連項目</H3>
+<A HREF="CNxSurface.html#member.Blt">CNxSurface::Blt()</A>&nbsp;/&nbsp;
+<A HREF="CNxSurface.html#member.DrawText">CNxSurface::DrawText()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A><BR>
+<A HREF="index.html">NxDraw グラフィック描画ライブラリ目次</A><BR>
+<A HREF="../index.html">NxLib Reference Manual 目次</A><BR>
+<HR>
+
+
+
+<!-- NxFilterBlt -->
+<A NAME="NxFilterBlt"><H2>NxFilterBlt</H2></A>
+<H3>概要</H3>
+<P>　NxFilterBlt 構造体は、フィルタの効果指定する為に <A HREF="CNxSurface.html#member.FilterBlt">CNxSurface::FilterBlt()</A> 関数で使用されます。<A HREF="CNxSurface.html#member.Blt">CNxSurface::Blt()</A> 関数で使用される、<A HREF="#NxBlt">NxBlt 構造体</A>とは異なり、省略する(NULL を渡す)事はできません。</P>
+<PRE>struct NxFilterBlt
+{
+    enum Flag
+    {
+        <A HREF="#NxFilterBlt.grayscale">grayscale</A>,
+        <A HREF="#NxFilterBlt.hueTransform">hueTransform</A>,
+        <A HREF="#NxFilterBlt.rgbColorBalance">rgbColorBalance</A>,
+
+        <A HREF="#NxFilterBlt.negative">negative</A>,
+        <A HREF="#NxFilterBlt.opacity">opacity</A>,
+    };
+    DWORD dwFlags;
+    UINT  uOpacity;
+
+    union
+    {
+        // for rgbColorBalance
+        struct
+        {
+            struct
+            {
+                WORD wBlue;
+                WORD wGreen;
+                WORD wRed;
+                WORD wDummy;
+            } Multiplier;
+            struct
+            {
+                short sBlue;
+                short sGreen;
+                short sRed;
+                short wDummy;
+            } Adder;
+        } nxfRGBColorBalance;
+        // for hueTransform
+        struct
+        {
+            int  nHue;
+            int  nSaturation;
+            int  nLightness;
+            BOOL bSingleness;
+        } nxfHueTransform;
+    };
+};</PRE>
+<H3>メンバ</H3>
+<DL>
+	<DT><A NAME="NxFilterBlt.dwFlags"><STRONG>DWORD dwFlags</STRONG></A>
+		<DD>　以下のフラグを指定します。
+		<DL>
+			<DT><A NAME="NxFilterBlt.opacity"><STRONG>opacity</STRONG></A>
+			<DD>　<EM><A HREF="#NxFilterBlt.uOpacity">uOpacity</A></EM> メンバが有効です。フィルタ適用結果の不透明度を指定します。このフラグを指定しない場合、<EM><A HREF="#NxBlt.uOpacity">uOpacity</A></EM> メンバは 255 として扱われます。全てのフィルタに対して使用できます。</A>
+<!-- NxFilterBlt.grayscale -->
+			<DT><A NAME="NxFilterBlt.grayscale"><STRONG>grayscale</STRONG></A>
+			<DD>　グレイスケール化フィルタを使用します。
+<!-- NxFilterBlt.rgbColorBalance -->
+			<DT><A NAME="NxFilterBlt.rgbColorBalance"><STRONG>rgbColorBalance</STRONG></A>
+			<DD>　<EM><A HREF="#NxFilterBlt.nxbRGBColorBalance">nxfRGBColorBalance</A></EM> メンバが有効です。RGB バランス調整フィルタを使用します。例えば青ならば、Adder.sBlue + (転送元 * Multiplier.wBlue) / 128 が転送後の結果となります。
+<!-- NxFilterBlt.hueTransform -->
+			<DT><A NAME="NxFilterBlt.hueTransform"><STRONG>hueTransform</STRONG></A>
+			<DD>　色相変換フィルタを使用します。<EM><A HREF="#NxFilterBlt.nxfHueTransform">nxfHueTransform</A></EM> メンバが有効になります。NxHueTransform 構造体の、nHue へは色相、nLightness は明度、nSaturation は彩度、それぞれの変位を指定します。メンバ bSingleness を TRUE にすると、nHue は変位ではなく色相そのものを示す様になり、画像全体の色相が同じになります。このフィルタは RGB を HLS へ一度変換して、再度 RGB へ書き戻す事で処理するため、<STRONG>非常に遅い</STRONG>です。HLS については、<A HREF="CNxHLSColor.html">CNxHLSColor</A> クラスを参照して下さい。
+<!-- NxFilterBlt.negative -->
+			<DT><A NAME="NxFilterBlt.negative"><STRONG>negative</STRONG></A>
+			<DD>　ネガ反転フィルタを使用します。
+	</DL>
+<!-- NxFilterBlt.nxfRGBColorBalance -->
+	<DT><A NAME="NxFilterBlt.nxfRGBColorBalance"><STRONG>NxRGBColorBalance nxfRGBColorBalance</STRONG></A>
+	<DD>　<A HREF="#NxFilterBlt.rgbColorBalance">rgbColorBalance</A> フラグが指定された際の RGB 要素の調整値を指定します。Multiplier メンバは、RGB への乗算値を 0 〜 256 (128 が中間)の範囲で指定します。Adder メンバは、RGB へ加算する値を -255 〜 255 の範囲で指定します。それぞれのデフォルト値は 128 と 0 です。
+<!-- NxFilterBlt.nxfHueTransform -->
+	<DT><A NAME="NxFilterBlt.nxfHueTransform"><STRONG>NxHueTransform nxfHueTransform</STRONG></A>
+	<DD>　<A HREF="#NxFilterBlt.hueTransform">hueTransform</A> フラグが指定された際に使用されます。nHue メンバは -359 〜 359 (bSingleness メンバが TRUE の場合は 0 〜 359)、nLightness メンバは -255 〜 255、nSaturation メンバは -255 〜 255 の範囲です。
+<!-- NxFilterBlt.uOpacity -->
+	<DT><A NAME="NxFilterBlt.uOpacity"><STRONG>UINT uOpacity</STRONG></A>
+	<DD>　フィルタ適用結果の不透明度を 0 〜 255 の範囲で指定します。255 は完全不透明を意味します。
+</DL>
+<!-- 使用例 -->
+<A NAME="NxFilterBlt.examples"><H3>使用例</H3></A>
+<P>　以下にいくつかの例を示します。<A HREF="CNxSurface.html#member.FilterBlt">CNxSurface::FilterBlt()</A> 関数の、転送元サーフェスと矩形へ NULL を指定していますので、転送元矩形を破壊します。</P>
+
+<A NAME="NxFilterBlt.explain.grayscale"><H4>グレイスケール化</H4></A>
+<P>　<EM>dwFlags</EM> メンバへ NxFilterBlt::grayscale フラグを指定します。その他のメンバの指定は不要です。</P>
+<PRE>
+	NxFilterBlt nxf;
+	nxf.dwFlags = <A HREF="#NxFilterBlt.grayscale">NxFilterBlt::grayscale</A>;
+	pSurface-&gt;<A HREF="CNxSurface.html#member.FilterBlt">FilterBlt</A>(NULL, NULL, NULL, &amp;nxf);
+</PRE>
+<CENTER>
+<TABLE BORDER>
+<TR><TH>元画像</TH><TH>結果</TH></TR>
+<TR>
+<TD><CENTER><IMG SRC="images/NxFilterBltExample0.png" WIDTH=80 HEIGHT=60 ALT="Source"></CENTER></TD>
+<TD><CENTER><IMG SRC="images/NxFilterBltExample1.png" WIDTH=80 HEIGHT=60 ALT="Grayscale"></CENTER></TD>
+</TR>
+</TABLE>
+</CENTER>
+
+<P>　また以下の様に NxFilterBlt::opacity フラグを併用する事で、カラー要素が残る曖昧なグレイスケール化を行えます。</P>
+<PRE>
+	NxFilterBlt nxf;
+	nxf.dwFlags = NxFilterBlt::grayscale | <A HREF="#NxFilterBlt.opacity">NxFilterBlt::opacity</A>;
+	nxf.uOpacity = 128;
+	pSurface-&gt;<A HREF="CNxSurface.html#member.FilterBlt">FilterBlt</A>(NULL, NULL, NULL, &amp;nxf);
+</PRE>
+<CENTER>
+<TABLE BORDER>
+<TR><TH>元画像</TH><TH>結果</TH></TR>
+<TR>
+<TD><CENTER><IMG SRC="images/NxFilterBltExample0.png" WIDTH=80 HEIGHT=60 ALT="Source"></CENTER></TD>
+<TD><CENTER><IMG SRC="images/NxFilterBltExample2.png" WIDTH=80 HEIGHT=60 ALT="Grayscale(50%)"></CENTER></TD>
+</TR>
+</TABLE>
+</CENTER>
+
+<A NAME="NxFilterBlt.explain.sepia"><H4>セピアカラー化</H4></A>
+<P>　画像をセピア調にする方法は色々ありますが、ここでは、グレイスケール化した後に RGB 要素のバランスを変える方法を示します。ただし、一度に複数のフィルタは使用できませんので、2 回に分けてフィルタを適用します。転送元サーフェスと矩形へ NULL を指定しているのは、「フィルタを重ねて適用する」為です。</P>
+<P>　なお、いわゆる「セピア調」には様々な種類がありますので、ここで示す数値は一例として見て下さい。</P>
+
+<PRE>
+	NxFilterBlt nxf;
+	nxf.dwFlags = <A HREF="#NxFilterBlt.grayscale">NxFilterBlt::grayscale</A>;
+	pSurface-&gt;<A HREF="CNxSurface.html#member.FilterBlt">FilterBlt</A>(NULL, NULL, NULL, &amp;nxf);
+	nxf.dwFlags = <A HREF="#NxFilterBlt.rgbColorBalance">NxFilterBlt::rgbColorBalance</A>;
+	nxf.<A HREF="#NxFilterBlt.nxfRGBColorBalance">nxfRGBColorBalance</A>.Multiplier.wRed = 152;
+	nxf.nxfRGBColorBalance.Multiplier.wGreen = 128;
+	nxf.nxfRGBColorBalance.Multiplier.wBlue = 107;
+	nxf.nxfRGBColorBalance.Adder.sRed = 24;
+	nxf.nxfRGBColorBalance.Adder.sGreen = 0;
+	nxf.nxfRGBColorBalance.Adder.sBlue = -4;
+	pSurface-&gt;<A HREF="CNxSurface.html#member.FilterBlt">FilterBlt</A>(NULL, NULL, NULL, &amp;nxf);
+</PRE>
+<CENTER>
+<TABLE BORDER>
+<TR><TH>元画像</TH><TH>結果</TH></TR>
+<TR>
+<TD><CENTER><IMG SRC="images/NxFilterBltExample0.png" WIDTH=80 HEIGHT=60 ALT="Source"></CENTER></TD>
+<TD><CENTER><IMG SRC="images/NxFilterBltExample3.png" WIDTH=80 HEIGHT=60 ALT="Sepia"></CENTER></TD>
+</TR>
+</TABLE>
+</CENTER>
+<BR>
+<A HREF="#top">ページの最初</A><BR>
+<A HREF="index.html">NxDraw グラフィック描画ライブラリ目次</A><BR>
+<A HREF="../index.html">NxLib Reference Manual 目次</A><BR>
+</BODY>
+</HTML>

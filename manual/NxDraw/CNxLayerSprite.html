@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+	<LINK REV="Made" HREF="mailto:ain@da.airnet.ne.jp">
+	<LINK REL="Contents" HREF="./index.html">
+	<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-2022-jp">
+	<META NAME="Author" CONTENT="Seiji Ainoguchi">
+	<META NAME="Subject" CONTENT="CNxLayerSprite">
+	<TITLE>CNxLayerSprite クラス</TITLE>
+</HEAD>
+<BODY>
+<A NAME="top"><H1>CNxLayerSprite クラス</H1></A>
+
+<PRE>
+<A HREF="CNxSprite.html">CNxSprite</A>        <A HREF="CNxSurface.html">CNxSurface</A>
+  |                    |
+  +--<A HREF="CNxSurfaceSprite.html">CNxSurfaceSprite</A>  |
+      |                |
+      +--<STRONG>CNxLayerSprite</STRONG>
+</PRE>
+
+<A HREF="#summary">概要</A><BR>
+<A HREF="#member">クラスメンバ</A><BR>
+<BR>
+<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<A NAME="summary"><H2>概要</H2></A>
+<P>　CNxLayerSprite クラスは、<A HREF="CNxSurfaceSprite.html">CNxSurfaceSprite</A> クラスと、<A HREF="CNxSurface.html">CNxSurface</A> クラスを多重継承したクラスです。CNxLayerSprite クラス自身がサーフェスを持つ為、スプライトとサーフェスを同一のオブジェクトとして扱う事ができます。</P>
+
+<P>　CNxSurfaceSprite クラスの <A HREF="CNxSurfaceSprite.html#member.SetSrcSurface">SetSrcSurface()</A> 関数でサーフェスの変更を行なう事はできません。Create() 関数によって、サーフェスが作成される前は NULL を、サーフェスが作成されていれば自分自身のサーフェス部へのポインタを返します。</P>
+
+<P>　CNxLayerSprite クラスは、内部にサーフェス(CNxSurface クラス)とスプライト(CNxSpriteSprite クラス)両方の矩形(サイズ)情報を持ちます。これらは、Create() 関数によってサーフェスが作成された直後は同じ(スプライト矩形の左上は (0, 0)、右下はサーフェスの幅と高さ)に設定されます。</P>
+
+<P>　CNxLayerSprite クラスの、<A HREF="#member.GetWidth">GetWidth()</A>, <A HREF="#member.GetHeight">GetHeight()</A> および <A HREF="#member.GetRect">GetRect()</A> メンバ関数は、全て CNxSprite クラスの同名のメンバ関数を呼び出します。CNxLayerSprite クラスでは、サーフェスとスプライトの矩形が常に同じであると見なしています。スプライト矩形はいつでも変更可能ですが、CNxLayerSprite クラスでは変更される事を意図していません。スプライト矩形の変更を行うと、これらの関数が返す矩形と、サーフェスの矩形が一致しなくなります(変更自体は禁止していません)。スプライト矩形の変更が必要な場合は、できるだけ単独の CNxSurfaceSprite と CNxSurface クラスを使用して下さい。</P>
+
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+<A NAME="member"><H2>CNxLayerSprite クラスメンバ</H2></A>
+
+<TABLE BORDER=0 CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.CNxLayerSprite">CNxLayerSprite()</A></TD><TD>　コンストラクタ</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetWidth">GetWidth()</A></TD><TD>　幅を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetHeight">GetHeight()</A></TD><TD>　高さを取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetRect">GetRect()</A></TD><TD>　矩形を取得</TD></TR>
+</TABLE>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxLayerSprite::CNxLayerSprite() -->
+<A NAME="member.CNxLayerSprite"><H3>CNxLayerSprite::CNxLayerSprite()</H3></A>
+<H4>概要</H4>
+<P>　CNxLayerSprite クラスのコンストラクタ</P>
+<H4>書式</H4>
+CNxLayerSprite::CNxLayerSprite(CNxSprite* <EM>pParent</EM>, UINT <EM>uBitCount = 32</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP">CNxSprite* <EM>pParent</EM></TD><TD>　親スプライトへのポインタ</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>UINT <EM>uBitCount</EM></TD><TD>　サーフェスのビット深度</TD></TR>
+</TABLE>
+<H4>解説</H4>
+<P>　引数の意味については、それぞれのクラスのコンストラクタの解説を参照して下さい。</P>
+
+<P>　コンストラクタではスプライトの初期化が行われるだけで、サーフェスは生成されません。サーフェスを使用可能にするために、Create() 関数を呼び出して下さい。</P>
+<H4>関連項目</H4>
+<A HREF="CNxSurfaceSprite.html#member.CNxSurfaceSprite">CNxSurfaceSprite::CNxSurfaceSprite()</A>&nbsp;/&nbsp;
+<A HREF="CNxSurface.html#member.CNxSurface">CNxSurface::CNxSurface()</A>&nbsp;/&nbsp;
+<A HREF="CNxSurface.html#member.Create">CNxSurface::Create()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+<!-- CNxLayerSprite::GetWidth() -->
+<A NAME="member.GetWidth"><H3>CNxLayerSprite::GetWidth()</H3></A>
+<H4>概要</H4>
+<P>　CNxLayerSprite の幅を返します。</P>
+<H4>書式</H4>
+int CNxLayerSprite::GetWidth() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　幅を返します。</P>
+<H4>解説</H4>
+<P>　この関数は、<A HREF="CNxSprite.html#member.GetWidth">CNxSprite::GetWidth()</A> を呼び出して、スプライトの幅を返します。</P>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+<!-- CNxLayerSprite::GetHeight -->
+<A NAME="member.GetHeight"><H3>CNxLayerSprite::GetHeight()</H3></A>
+<H4>概要</H4>
+<P>　CNxLayerSprite の高さを返します。</P>
+<H4>書式</H4>
+int CNxLayerSprite::GetHeight() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　高さを返します。</P>
+<H4>解説</H4>
+<P>　この関数は、<A HREF="CNxSprite.html#member.GetHeight">CNxSprite::GetHeight()</A> を呼び出して、スプライトの高さを返します。</P>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxLayerSprite::GetRect -->
+<A NAME="member.GetRect"><H3>CNxLayerSprite::GetRect()</H3></A>
+<H4>概要</H4>
+<P>　CNxLayerSprite の矩形を取得します。</P>
+<H4>書式</H4>
+void CNxLayerSprite::GetRect(LPRECT <EM>lpRect</EM>) const<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP">LPRECT <EM>lpRect</EM></TD><TD>　矩形を受けとる RECT 構造体へのポインタ。</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　この関数は、<A HREF="CNxSprite.html#member.GetRect">CNxSprite::GetRect()</A> を呼び出して、スプライトの矩形を返します。</P>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+</BODY>
+</HTML>
+

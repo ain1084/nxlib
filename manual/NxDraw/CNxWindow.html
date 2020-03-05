@@ -1,0 +1,333 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+	<LINK REV="Made" HREF="mailto:ain@da.airnet.ne.jp">
+	<LINK REL="Contents" HREF="./index.html">
+	<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-2022-jp">
+	<META NAME="Author" CONTENT="Seiji Ainoguchi">
+	<META NAME="Subject" CONTENT="CNxWindow">
+	<TITLE>CNxWindow クラス</TITLE>
+</HEAD>
+<BODY>
+
+<A NAME="top"><H1>CNxWindow クラス</H1></A>
+<PRE>
+<A HREF="CNxSprite.html">CNxSprite</A>
+  |
+  +--<A HREF="CNxTrackingSprite.html">CNxTrackingSprite</A>
+      |
+      +--<STRONG>CNxWindow</STRONG>
+</PRE>
+
+<A HREF="#summary">概要</A><BR>
+<A HREF="#member">クラスメンバ</A><BR>
+<BR>
+<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+<A NAME="summary"><H2>概要</H2></A>
+<P>　CNxWindow クラスは <A HREF="CNxTrackingSprite.html">CNxTrackingSprite</A> の派生クラスです。Windows のウィンドウへ結び付けて、クライアント領域へスプライトの描画を行ないます。CNxWindow クラスを最上位の親に持つ CNxSprite クラスのオブジェクトは、ウィンドウのクライアント領域へ表示できる様になります。しかし、CNxWindow クラスはウィンドウへの描画を自動的には行ないません。例えば WM_PAINT メッセージ応答時には、メンバ関数を呼び出さなければウィンドウには何も表示されません。</P>
+
+<P>　CNxWindow クラスは、主にクライアントウィンドウ(メニューや枠を持たないウィンドウ)に対して使用します。フレームウィンドウにも使用できますが、クライアント領域は他のウィンドウによって隠されている事が多いため、意味はあまりありません(CNxWindow クラスは、クライアント領域全体への描画を前提にしています)。複数のクライアントウィンドウが作成されている場合、個別に CNxWindow オブジェクト作成して、それぞれのウィンドウへ結び付ける事ができ、複数のウィンドウで異なるスプライトを使用した表示も可能です。</P>
+
+<P>　CNxWindow クラスは常に最上位スプライトです。<A HREF="CNxSprite.html#member.SetParent">SetParnet()</A> メンバ関数で親を指定する事はできません。</P>
+
+<P>　CNxWindow クラスは、画面への描画に最適化されていますが、CNxWindow クラスにとっての「画面」とは、単にウィンドウクライアント領域を示すデバイスコンテキストです。その他のデバイスコンテキスト(メモリデバイスコンテキスト等)への描画を行う事も可能です。なお、CNxTrackingSprite クラスの機能である差分追跡は、デフォルトで有効になっています。</P>
+
+<P>　CNxWindow クラスは、他のスプライトが描画される前に背景を塗り潰します。例えば、スプライトが移動すると移動前の痕跡が残ります。当然この痕跡を消去しなければなりませんが、この処理は移動したスプライト自身で行なうのではなく、痕跡に他のスプライトを重ね書する事で実現しています。しかし、他のスプライトが無い(或いはあって描画しない)様な状況では、痕跡は消去されずに残ってしまう場合があります。背景の塗り潰しが必要な理由はこの為で、前もって描画矩形を塗り潰す事で、他に痕跡を削除する様なスプライトが表示されていない場合でも、確実に痕跡を消去できます。しかしながら、CNxWindow 全体を覆うサイズで、不透明描画を行なうスプライトが表示されているのであれば、この動作は不要です。また、背景を塗り潰さない様にする事で、多少パフォーマンスを改善できます。背景色は<A HREF="#member.SetBkColor">CNxWindow::SetBkColor()</A> 関数で指定します。</P>
+
+<P>　CNxWindow クラスを使用するには、new でピープ上へ作成した後、<A HREF="#member.Attach">CNxWindow::Attach()</A> 関数を呼び出し、作成済みのウィンドウと結び付けます。CNxWindow クラスでは、結び付けられたウィンドウのサイズが変更されると、スプライトのサイズもそれに合わせて自動的に変更します。ただし、逆は行いません。スプライトとウィンドウサイズを一致させるには、スプライトの <A HREF="CNxSprite.html#member.SetRect">CNxSprite::SetRect()</A> 関数ではなく、::SetWindowPos(), ::MoveWindow() 関数等でウィンドウのサイズを変更して下さい。</P>
+
+<P>　CNxWindow::Attach() 関数の呼び出しは必須ではありません。呼び出さない場合でも、ウィンドウのサイズが自動的に変更されない点と、<A HREF="#member.Refresh">CNxWindow::Refresh() </A>関数の第一引数へ NULL を指定できない点を除き、機能制限はありません。</P>
+
+<P>　結び付けたウィンドウが破棄される前(WM_DESTROY メッセージ応答時等)には、必ずウィンドウと CNxWindow オブジェクトを切り離して下さい。切り離すには、<A HREF="#member.Detach">CNxWindow::Detach()</A> 関数を呼び出すか、C++ の delete 演算子で CNxWindow オブジェクト自体を消滅させます。前者はウィンドウを切り離すだけですが、後者では子スプライトも破棄されます。MFC では、CWnd::OnDestroy() 又は、CWnd::DestroyWindow() 仮想関数をオーバーライドすると良いでしょう(ただし後者は CView 派生クラスからは呼び出されません)。</P>
+
+<P>　ウィンドウへ最新の状態を描画するには、<A HREF="#member.Refresh">CNxWindow::Refresh()</A> 関数を呼び出します。この関数によって、全てのスプライトの描画が行われます。</P>
+
+<P>　CNxWindow クラスを使用して、ウィンドウのクライアント領域へ描画を行う場合、デスクトップの色数は high color 以上でなければなりません。256 色モード等でもエラーにはなりませんが、多分正しい表示にはならないでしょう。NxDraw 側では画面モードに合わせる為の処理は何も行いません。また、CNxWindow クラス自身も現在のデスクトップ色数のチェックは行いません。必要であれば、アプリケーション側でチェックを行って下さい。</P>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+<A NAME="member"><H2>CNxWindow クラスメンバ</H2></A>
+
+<A HREF="#construct">構築、消滅</A><BR>
+<A HREF="#draw">描画</A><BR>
+<A HREF="#override">オーバーライド可能な関数</A><BR>
+<A HREF="#misc">その他</A><BR>
+
+<A NAME="construct"><P><FONT SIZE=+1>構築、消滅</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.CNxWindow">CNxWindow()</A></TD><TD>　コンストラクタ</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.Attach">Attach()</A></TD><TD>　ウィンドウを結び付ける</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.Detach">Detach()</A></TD><TD>　ウィンドウを切り離す</TD></TR>
+</TABLE>
+
+<A NAME="draw"><P><FONT SIZE=+1>描画</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.Refresh">Refresh()</A></TD><TD>　ウィンドウへ描画する</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetBkColor">SetBkColor()</A></TD><TD>　背景色を設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetBkColor">GetBkColor()</A></TD><TD>　背景色を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetBrightness">SetBrightness()</A></TD><TD>　ウィンドウの明るさを設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetBrightness">GetBrightness()</A></TD><TD>　ウィンドウの明るさを取得</TD></TR>
+</TABLE>
+
+<A NAME="override"><P><FONT SIZE=+1>オーバーライド可能な関数 (protected)</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.OnWndMessage">OnWndMessage()</A></TD><TD>　ウィンドウメッセージを処理</TD></TR>
+</TABLE>
+
+<A NAME="misc"><P><FONT SIZE=+1>その他</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetCursorPos">GetCursorPos()</A></TD><TD>　マウスカーソルの座標を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetCursorPos">SetCursorPos()</A></TD><TD>　マウスカーソルの座標を設定</TD></TR>
+</TABLE>
+<P></P>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxWindow::CNxWindow() -->
+<A NAME="member.CNxWindow"><H3>CNxWindow::CNxWindow()</H3></A>
+<H4>概要</H4>
+<P>　CNxWindow クラスのコンストラクタ</P>
+<H4>書式</H4>
+CNxWindow::CNxWindow()<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　CNxWindow クラスの構築を行ないます。明るさ(<A HREF="#member.SetBrightness">CNxWindow::SetBrightness()</A> 参照)は 255、背景色(<A HREF="#member.SetBkColor">CNxWindow::SetBkColor()</A> 参照)はシステムのウィンドウ背景色(::GetSysColor(COLOR_WINDOW);)が設定されます。</P>
+<H4>関連項目</H4>
+<P><A HREF="#member.SetBrightness">CNxWindow::SetBrightness()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetBkColor">CNxWindow::SetBkColor()</A></P>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxWindow::Attach() -->
+<A NAME="member.Attach"><H3>CNxWindow::Attach()</H3></A>
+<H4>概要</H4>
+<P>　CNxWindow オブジェクトとウィンドウを結び付けます。</P>
+<H4>書式</H4>
+virtual BOOL CNxWindow::Attach(HWND <EM>hWnd</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP">HWND <EM>hWnd</EM></TD><TD>　ウィンドウのハンドル</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功なら TRUE</P>
+<H4>解説</H4>
+<P>　ウィンドウを結び付け、クライアント領域へスプライトを描画できるようにします。既にウィンドウが結び付けられていると、関数は失敗します。</P>
+<H4>関連項目</H4>
+<P><A HREF="#member.Detach">CNxWindow::Detach()</A></P>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxWindow::Detach() -->
+<A NAME="member.Detach"><H3>CNxWindow::Detach()</H3></A>
+<H4>概要</H4>
+<P>　CNxWindow オブジェクトとウィンドウとを切り離します。</P>
+<H4>書式</H4>
+virtual HWND CNxWindow::Detach()<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　切り離されたウィンドウハンドル</P>
+<H4>解説</H4>
+<P>　<A HREF="#member.Attach">CNxWindow::Attach()</A> 関数によって結び付けたウィンドウを切り離します。内部で使用しているリソースもほとんど開放されます。子スプライトには影響を与えません。</P>
+<H4>関連項目</H4>
+<P><A HREF="#member.Attach">CNxWindow::Attach()</A></P>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxWindow::Refresh() -->
+<A NAME="member.Refresh"><H3>CNxWindow::Refresh()</H3></A>
+<H4>概要</H4>
+<P>　ウィンドウへスプライトの描画を行ないます。</P>
+<H4>書式</H4>
+BOOL CNxWindow::Refresh(HDC <EM>hDC = NULL</EM>, BOOL <EM>bForce = FALSE</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD NOWRAP VALIGN="TOP">HDC <EM>hDC</EM></TD><TD>　描画先のデバイスコンテキストハンドル。</TD></TR>
+<TR><TD NOWRAP VALIGN="TOP">BOOL <EM>bForce</EM></TD><TD>　TRUE にすると、全てのスプライトを強制的に再描画します。</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功なら TRUE</P>
+<H4>解説</H4>
+<P>　<A HREF="#member.Attach">CNxWindow::Attach()</A> 関数によって、結び付けられているウィンドウのクライアント領域へ、スプライトの描画を行ないます。この関数は内部で、基本クラスの <A HREF="CNxTrackingSprite.html#member.Refresh">CNxTrackingSprite::Refresh()</A> 関数を呼び出します。</P>
+
+<P>　<EM>hDC</EM> 引数へは、描画先のデバイスコンテキストハンドルを指定します。NULL を指定すると、ウィンドウのクライアント領域へのデバイスコンテキストを自動的に取得します。ただし Attach() 関数によってウィンドウが結び付けられいない場合、NULL を指定する事はできません。WM_PAINT メッセージに応答する場合、Win32 API の ::BeginPaint() 関数によって得られた HDC を渡して下さい。</P>
+
+<P>　<EM>bForce</EM> 引数が FALSE (デフォルト) の場合、前回の描画からクライアント領域が破壊されていないと見なし、Refresh() 関数は(移動等によって)再描画の必要があるスプライト矩形のみを描画します。WM_PAINT メッセージに応答する際に <EM>bForce</EM> 引数を FALSE にして Refresh() 関数を呼び出した場合、CNxWindow クラス内部の情報によって必要な部分のみが描画されるだけで、ウィンドウにとっての正しい再描画は行われません。これを防ぐ為に WM_PAINT メッセージ応答時は <EM>bForce</EM> 引数へ TRUE を指定し、全てのスプライトが再描画される様にして下さい。</P>
+
+<P>　なお <EM>bForce</EM> 引数へ TRUE を指定した場合、スプライトの <A HREF="CNxSprite.html#member.PreUpdate">CNxSprite::PreUpdate()</A> 関数は呼び出されません。これは、例えば CNxSprite::PreUpdate() 関数内でスプライトの移動を行なっている場合に、強制的な描画によってスプライトが勝手に移動してしまうのを防ぐためです(<A HREF="CNxTrackingSprite.html#member.Refresh">CNxTrackingSprite::Refresh()</A> 関数の解説も参照して下さい)。</P>
+<P>　MFC 環境下の OnPaint() 関数例:</P>
+<PRE>
+    void CMainFrame::OnPaint()
+    {
+        CPaintDC dc(this);
+        m_pScreen-&gt;Refresh(dc.m_hDC, TRUE);
+    }
+</PRE>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxWindow::SetBkColor() -->
+<A NAME="member.SetBkColor"><H3>CNxWindow::SetBkColor()</H3></A>
+<H4>概要</H4>
+<P>　背景色を設定します。</P>
+<H4>書式</H4>
+NxColor CNxWindow::SetBkColor(NxColor <EM>nxColor</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD NOWRAP VALIGN="TOP"><A HREF="global.html#NxColor">NxColor</A> <EM>nxColor</EM></TD><TD>　背景色</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　以前の背景色</P>
+<H4>解説</H4>
+<P>　スプライトの描画前に背景を消去する色を指定します。A(アルファ) の要素をゼロにすると、背景色は無効になり、塗り潰しは行われません。CNxWindow クラスを完全に覆うスプライトが表示されている場合は、塗り潰しを行なう必要はありません。塗り潰しを行なわない方がパフォーマンスは良くなります。</P>
+<H4>関連項目</H4>
+<P><A HREF="#member.GetBkColor">CNxWindow::GetBkColor()</A></P>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxWindow::GetBkColor() -->
+<A NAME="member.GetBkColor"><H3>CNxWindow::GetBkColor()</H3></A>
+<H4>概要</H4>
+<P>　現在の背景色を取得します。</P>
+<H4>書式</H4>
+<A HREF="global.html#NxColor">NxColor</A> CNxWindow::GetBkColor() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　現在の背景色</P>
+<H4>解説</H4>
+<P>　スプライトの描画前に背景を消去する色を取得します。A (アルファ) 要素がゼロの場合は塗り潰しは行われません。</P>
+<H4>関連項目</H4>
+<P><A HREF="#member.SetBkColor">CNxWindow::SetBkColor()</A></P>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxWindow::SetBrightness() -->
+<A NAME="member.SetBrightness"><H3>CNxWindow::SetBrightness()</H3></A>
+<H4>概要</H4>
+<P>　ウィンドウのスプライト領域の明るさを設定します。</P>
+<H4>書式</H4>
+UINT CNxWindow::SetBrightness(UINT <EM>uBrightness</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD NOWRAP VALIGN="TOP">UINT <EM>uBrightness</EM></TD><TD>　画面の明るさ(0 〜 511)</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　以前の設定値</P>
+<H4>解説</H4>
+<P>　明るさの初期値は 255 です。値を 255 から減らすと表示されるスプライトは暗くなり、増やすと明るく(白っぽく)なります。</P>
+<H4>関連項目</H4>
+<P><A HREF="#member.GetBrightness">CNxWindow::GetBirghtness()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetBkColor">CNxWindow::SetBkColor()</A></P>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxWindow::GetBrightness() -->
+<A NAME="member.GetBrightness"><H3>CNxWindow::GetBrightness()</H3></A>
+<H4>概要</H4>
+<P>　ウィンドウのスプライト領域の明るさを取得します。</P>
+<H4>書式</H4>
+UINT CNxWindow::GetBrightness() const <BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　画面の明るさ</P>
+<H4>解説</H4>
+<P>　現在の明るさ(ブライトネス)を取得します。明るさの初期値は 255 です。</P>
+<H4>関連項目</H4>
+<P><A HREF="#member.SetBrightness">CNxWindow::SetBirghtness()</A></P>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxWindow::OnWndMessage() -->
+<A NAME="member.OnWndMessage"><H3>CNxWindow::OnWndMessage()</H3></A>
+<H4>概要</H4>
+<P>　ウィンドウメッセージを処理する為の、protected 仮想関数です。</P>
+<H4>書式</H4>
+virtual void CNxWindow::OnWndMessage(UINT <EM>uMsg</EM>, WPARAM <EM>wParam</EM>, LPARAM <EM>lParam</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD NOWRAP VALIGN="TOP">UINT <EM>uMsg</EM></TD><TD>　メッセージ</TD></TR>
+<TR><TD NOWRAP VALIGN="TOP">WPARAM <EM>wParam</EM></TD><TD>　メッセージの追加情報1</TD></TR>
+<TR><TD NOWRAP VALIGN="TOP">LPARAM <EM>lParam</EM></TD><TD>　メッセージの追加情報1</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+
+<H4>関連項目</H4>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxWindow::GetCursorPos() -->
+<A NAME="member.GetCursorPos"><H3>CNxWindow::GetCursorPos()</H3></A>
+<H4>概要</H4>
+<P>　マウスカーソルの座標を取得します。</P>
+<H4>書式</H4>
+BOOL CNxWindow::GetCursorPos(LPPOINT <EM>lpPoint</EM>) const<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD NOWRAP VALIGN="TOP">LPPOINT <EM>lpPoint</EM></TD><TD>　座標を受けとる POINT 構造体へのポインタ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功ならば TRUE。ウィンドウが Attch() されていない場合は FALSE を返します。</P>
+<H4>解説</H4>
+<P>　座標は、結び付けられているウィンドウのクライアント座標で返されます。通常は CNxWindow クラス内の座標と同じです。</P>
+<H4>関連項目</H4>
+<P><A HREF="#member.GetCursorPos">CNxWindow::GetCursorPos()</A></P>
+<P></P>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxWindow::SetCursorPos() -->
+<A NAME="member.SetCursorPos"><H3>CNxWindow::SetCursorPos()</H3></A>
+<H4>概要</H4>
+<P>　マウスカーソルの座標を設定します。</P>
+<H4>書式</H4>
+virtual BOOL CNxWindow::SetCursorPos(int <EM>x</EM>, int <EM>y</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD NOWRAP VALIGN="TOP">int <EM>x</EM></TD><TD>　X 座標</TD></TR>
+<TR><TD NOWRAP VALIGN="TOP">int <EM>y</EM></TD><TD>　Y 座標</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功ならば TRUE。ウィンドウが Attch() されていない場合は FALSE を返します。</P>
+<H4>解説</H4>
+<P>　座標は、CNxWindow クラス内の座標(通常はウィンドウのクライアント座標と同じ)で指定します。</P>
+<H4>関連項目</H4>
+<P><A HREF="#member.SetCursorPos">CNxWindow::SetCursorPos()</A></P>
+<P></P>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+
+</BODY>
+</HTML>

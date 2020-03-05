@@ -1,0 +1,242 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+	<LINK REV="Made" HREF="mailto:ain@da.airnet.ne.jp">
+	<LINK REL="Contents" HREF="./index.html">
+	<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charなし
+set=iso-2022-jp">
+	<META NAME="Author" CONTENT="Seiji Ainoguchi">
+	<META NAME="Subject" CONTENT="CNxSurfaceSprite">
+	<TITLE>CNxSurfaceSprite クラス</TITLE>
+</HEAD>
+<BODY>
+<A NAME="top"><H1>CNxSurfaceSprite クラス</H1></A>
+
+<PRE>
+<A HREF="CNxSprite.html">CNxSprite</A>
+  |
+  +--<STRONG>CNxSurfaceSprite</STRONG>
+</PRE>
+
+<A HREF="#summary">概要</A><BR>
+<A HREF="#member">クラスメンバ</A><BR>
+<A HREF="#drawimp">CNxSurfaceSprite::Draw() 関数について</A><BR>
+<BR>
+<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<A NAME="summary"><H2>概要</H2></A>
+<P>　CNxSurfaceSprite クラスは、<A HREF="CNxSprite.html">CNxSprite</A> から派生した、単一のサーフェスの任意の矩形を表示するスプライトです。しかし、CNxSurfaceSprite クラス自体は、表示する内容(サーフェス等)を持ちません。サーフェスの内容を表示する場合は、別に <A HREF="CNxSurface.html">CNxSurface</A> オブジェクトを作成しておく必要があります。スプライトとサーフェスを別々に管理しなければならないため若干面倒ですが、スプライト間で同じサーフェスを共有できるという利点があります。また、サーフェスが示しているメモリの共有によって、(ハードウェアや CPU 内蔵の)キャッシュによるパフォーマンス向上が期待できます。</P>
+
+<P>　スプライトの中にサーフェスを持っていると、当然スプライトの数だけサーフェスのメモリが必要になります。スプライト自体のメモリ使用量は 200byte 以下です。一方サーフェスは、極小さい 32 * 32 程度でも 4KB 以上のメモリが必要です(32bpp の場合)。極端な例ですが、32 * 32 サイズのスプライト 300 個それぞれにサーフェスを持たせた場合、1.2MB 以上のメモリが必要です。しかしながら、サーフェスを一つのスプライトでしか使用しないのであれば、上記の様なメリットはなく、ただ手間が増えるだけです。この様な場合は、<A HREF="CNxLayerSprite.html">CNxLayerSprite</A> クラスを使用できます。CNxLayerSprite は CNxSurfaceSprite と、CNxSurface とを多重継承したクラスです。サーフェスとスプライトを一つのオブジェクトとして扱う事が可能です。</P>
+
+<P>　CNxSurfaceSprite クラスでは、サーフェスと共に、そのサーフェスのどの部分(矩形)を表示するのかを指定できます。この矩形はそのまま、スプライト矩形として設定されます。つまり、転送元サーフェスの矩形とスプライトの矩形は常に同じです。CNxSurfaceSprite は拡大(縮小)表示はサポートしません。拡大縮小等を行なう場合は、派生クラスを作成して下さい。stretch サンプルプログラムの CNxStretchSprite クラスでは簡単な例を示しています。</P>
+
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+<A NAME="drawimp"><H2>CNxSurfaceSprite::Draw() 関数について</H2></A>
+<P>　CNxSurfaceSprite クラスの Draw() 関数について解説します。CNxSprite 派生クラスを作成される際の参考にして下さい。</P>
+
+<P>　CNxSurfaceSprite クラスは、CNxSprite クラスの <A HREF="CNxSprite.html#member.Draw">Draw()</A> 仮想関数をオーバーライドしています。この関数は、以下の様に非常に単純です(実際はバージョンによって若干異なります。ソースコード(NxDraw/NxSurfaceSprite.h および NxDraw/NxSurfaceSprite.cpp) も参照して下さい)。</P>
+
+<PRE>
+	BOOL CNxSurfaceSprite::Draw(<A HREF="CNxSurface.html">CNxSurface</A>* pSurface, const RECT* lpRect) const
+	{
+	    NxBlt nxb;
+	    <A HREF="#member.GetNxBlt">GetNxBlt</A>(&amp;nxb);
+	    pSurface-&gt;<A HREF="CNxSurface.html#member.Blt">Blt</A>(lpRect, <A HREF="#member.GetSrcSurface">GetSrcSurface()</A>, lpRect, &amp;nxb);
+	    <FONT COLOR="BLUE">return</FONT> TRUE;
+	}
+</PRE>
+
+<P>　概要で前述していますが、CNxSurfaceSprite クラスでは、スプライトのサイズと転送元サーフェス矩形は常に同じてあると見なしています。この為、<EM>lpRect</EM> 引数をそのまま CNxSurface::Blt() 関数へ渡していますが、以下の様に、<EM>lpRect</EM> 引数ではなく、スプライト矩形をそのまま渡しても全く同じ結果になります。どちらの矩形を渡しても、CNxSurface::Blt() 関数によってクリップされるからです。</P>
+
+<PRE>
+	void CNxXXXXXSprite::Draw(<A HREF="CNxSurface.html">CNxSurface</A>* pSurface, const RECT* lpRect) const
+	{
+	    NxBlt nxb;
+	    <A HREF="#member.GetNxBlt">GetNxBlt</A>(&amp;nxb);
+	    RECT rect;
+	    <A HREF="CNxSprite.html#member.GetRect">GetRect</A>(&amp;rect);
+	    pSurface-&gt;<A HREF="CNxSurface.html#member.Blt">Blt</A>(&amp;rect, <A HREF="#member.GetSrcSurface">GetSrcSurface()</A>, &amp;rect, &amp;nxb);
+	    <FONT COLOR="BLUE">return</FONT> TRUE;
+	}
+</PRE>
+
+<P>　拡大縮小を行なう場合は、CNxSurface::Blt() 関数の転送先矩形へスプライトの全体の矩形を、転送元矩形へは別の矩形を与えます。下の例では、固定された転送元矩形(サイズ 160 * 120)を渡しています。(<A HREF="CNxSprite.html#member.GetRect">CNxSprite::GetRect()</A> 関数で取得される)スプライトのサイズが 640 * 480 の場合は、4倍に拡大されます。</P>
+
+<PRE>
+	void CNxXXXXXSprite::Draw(<A HREF="CNxSurface.html">CNxSurface</A>* pSurface, const RECT* lpRect) const
+	{
+	    NxBlt nxb;
+	    <A HREF="#member.GetNxBlt">GetNxBlt</A>(&amp;nxb);
+	    RECT rect;
+	    <A HREF="CNxSprite.html#member.GetRect">GetRect</A>(&amp;rect);
+	    RECT rcSrc;
+	    ::SetRect(&rcSrc, 0, 0, 160, 120);
+	    pSurface-&gt;<A HREF="CNxSurface.html#member.Blt">Blt</A>(&amp;rect, <A HREF="#member.GetSrcSurface">GetSrcSurface()</A>, &amp;rcSrc, &amp;nxb);
+	    <FONT COLOR="BLUE">return</FONT> TRUE;
+	}
+</PRE>
+
+<P>　実際に使用する際には、派生クラスを作成して下さい。メンバ変数(転送元矩形を示す RECT 構造体等)を追加すると良いでしょう。</P>
+
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<A NAME="member"><H2>CNxSurfaceSprite クラスメンバ</H2></A>
+<A HREF="#construct">構築、消滅</A><BR>
+<A HREF="#surface">転送元サーフェス操作</A><BR>
+<A HREF="#display">表示方法</A><BR>
+
+<A NAME="construct"><P><FONT SIZE=+1>構築、消滅</FONT></P></A>
+<TABLE BORDER=0 CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.CNxSurfaceSprite">CNxSurfaceSprite()</A></TD><TD>　コンストラクタ</TD></TR>
+</TABLE>
+
+<A NAME="surface"><P><FONT SIZE=+1>転送元サーフェス操作</FONT></P></A>
+<TABLE BORDER=0 CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetSrcSurface">SetSrcSurface()</A></TD><TD>　転送元サーフェスを指定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetSrcSurface">GetSrcSurface()</A></TD><TD>　転送元サーフェスを取得</TD></TR>
+</TABLE>
+
+<A NAME="display"><P><FONT SIZE=+1>表示方法</FONT></P></A>
+<TABLE BORDER=0 CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetNxBlt">SetNxBlt()</A></TD><TD>　サーフェス転送に使用する <A HREF="global.html#NxBlt">NxBlt 構造体</A>を設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetNxBlt">GetNxBlt()</A></TD><TD>　サーフェス転送に使用する NxBlt 構造体を取得</TD></TR>
+</TABLE>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurfaceSprite::CNxSurfaceSprite() -->
+<A NAME="member.CNxSurfaceSprite"><H3>CNxSurfaceSprite::CNxSurfaceSprite()</H3></A>
+<H4>概要</H4>
+<P>　CNxSurfaceSprite クラスのコンストラクタ</P>
+<H4>書式</H4>
+<TABLE>
+<TR><TD NOWRAP>CNxSurfaceSprite::CNxSurfaceSprite(</TD><TD NOWRAP>CNxSprite* <EM>pParent</EM>, CNxSurface* <EM>pSurface = NULL</EM>,</TD></TR>
+<TR><TD></TD><TD NOWRAP>const RECT* <EM>lpRect = NULL</EM>)</TD></TR>
+</TABLE>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP">CNxSprite* <EM>pParent</EM></TD><TD>　親スプライトへのポインタ</TD></TR>
+<TR><TD VALIGN="TOP">CNxSurface* <EM>pSurface</EM></TD><TD>　転送元として使用する <A HREF="CNxSurface.html">CNxSurface </A>クラスへのポインタ</TD></TR>
+<TR><TD VALIGN="TOP">const RECT* <EM>lpRect</EM></TD><TD>　転送元サーフェスから転送される矩形(NULL ならばサーフェス全体)</TD></TR>
+</TABLE>
+<H4>解説</H4>
+<P>　<EM>pParent</EM> 引数へは親とする CNxSprite クラスへのポインタを指定します。</P>
+<P>　<EM>pSurface</EM> 引数へは転送元として使用されるサーフェスへのポインタを、<EM>lpRect</EM> 引数へはそのサーフェス内の転送矩形を指定します。<EM>lpRect</EM> 引数へ指定された範囲がスプライトとして描画されます。この引数 NULL にすると、サーフェス全体が指定されたと見なされます。</P>
+<P>　参照しているサーフェスを削除する時は、<EM>pSurface</EM> 引数へ NULL を渡して <A HREF="#member.SetSrcSurface">CNxSurfaceSprite::SetSrcSurface()</A> 関数を呼び出し、スプライトとサーフェスの関連付けを解除して下さい。</P>
+<H4>関連項目</H4>
+<A HREF="CNxSprite.html#member.CNxSprite">CNxSprite::CNxSprite()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetSrcSurface">CNxSurfaceSprite::SetSrcSurface()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurfaceSprite::SetSrcSurface() -->
+<A NAME="member.SetSrcSurface"><H3>CNxSurfaceSprite::SetSrcSurface()</H3></A>
+<H4>概要</H4>
+<P>　転送元サーフェスを変更します。</P>
+<H4>書式</H4>
+virtual CNxSurface* CNxSurfaceSprite::SetSrcSurface(CNxSurface* <EM>pSurface</EM>, const RECT* <EM>lpRect = NULL</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP">CNxSurface* <EM>pSurface</EM></TD><TD>　転送元として使用する <A HREF="CNxSurface.html">CNxSurface </A>クラスへのポインタ</TD></TR>
+<TR><TD VALIGN="TOP">const RECT* <EM>lpRect</EM></TD><TD>　転送元サーフェスから転送される矩形(NULL ならばサーフェス全体)</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　以前のサーフェスへのポインタ。</P>
+<H4>解説</H4>
+<P>　参照しているサーフェスを削除する時は、<EM>pSurface</EM> 引数へ NULL を渡してスプライトとサーフェスの関連付けを解除して下さい。</P>
+<P>　この関数は、内部で <A HREF="CNxSprite.html#member.SetUpdate">CNxSprite::SetUpdate()</A> 関数を呼び出します。</P>
+<H4>関連項目</H4>
+<A HREF="#member.GetSrcSurface">CNxSurfaceSprite::GetSrcSurface()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurfaceSprite::GetSrcSurface() -->
+<A NAME="member.GetSrcSurface"><H3>CNxSurfaceSprite::GetSrcSurface()</H3></A>
+<H4>概要</H4>
+<P>　転送元サーフェスへのポインタを取得します。</P>
+<H4>書式</H4>
+CNxSurface* CNxSurfaceSprite::GetSrcSurface() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　転送元サーフェスへのポインタ。</P>
+<H4>関連項目</H4>
+<P><A HREF="#member.SetSrcSurface">CNxSurfaceSprite::SetSrcSurface()</A></P>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurfaceSprite::SetNxBlt() -->
+<A NAME="member.SetNxBlt"><H3>CNxSurfaceSprite::SetNxBlt()</H3></A>
+<H4>概要</H4>
+<P>　転送元サーフェスの転送方法を設定します。</P>
+<H4>書式</H4>
+void CNxSurfaceSprite::SetNxBlt(const NxBlt* <EM>pNxBlt</EM>, BOOL <EM>bUpdate = TRUE</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP">const NxBlt* <EM>pNxBlt</EM></TD><TD>　転送時に使用される <A HREF="global.html#NxBlt">NxBlt</A> 構造体へのポインタ</TD></TR>
+<TR><TD VALIGN="TOP">BOOL <EM>bUpdate</EM></TD><TD>　TRUE ならばスプライト全体を更新</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　指定されているサーフェス(および、その矩形)から転送を行なう際に使用する NxBlt 構造体の内容を設定します。デフォルトでは、この構造体のメンバは全てゼロで初期化されているため通常転送が行われます。<EM>pNxBlt</EM> 引数へ NULL を指定すると、構造体メンバはゼロで初期化されます。</P>
+<P>　<EM>bUpdate</EM> 引数が TRUE ならば、内部で <A HREF="CNxSprite.html#member.SetUpdate">CNxSprite::SetUpdate()</A> 関数を呼び出します。</P>
+<H3>関連項目</H3>
+<A HREF="#member.GetNxBlt">CNxSurfaceSprite::GetNxBlt()</A>&nbsp;&nbsp;
+<A HREF="global.html#NxBlt">NxBlt 構造体</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxSurfaceSprite::GetNxBlt() -->
+<A NAME="member.GetNxBlt"><H3>CNxSurfaceSprite::GetNxBlt()</H3></A>
+<H4>概要</H4>
+<P>　転送元サーフェスの転送方法を取得します。</P>
+<H4>書式</H4>
+void CNxSurfaceSprite::GetNxBlt(NxBlt* <EM>pNxBlt</EM>) const<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP">NxBlt* <EM>pNxBlt</EM></TD><TD>　転送方法を受けとる <A HREF="global.html#NxBlt">NxBlt 構造体</A>へのポインタ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　指定されているサーフェス(とその矩形)から転送を行なう際に使用する NxBlt 構造体の内容を取得します。デフォルトでは、この構造体のメンバは全てゼロで初期化されているため通常転送が行われます。</P>
+<H4>関連項目</H4>
+<A HREF="#member.SetNxBlt">CNxSurfaceSprite::SetNxBlt()</A>&nbsp;/&nbsp;
+<A HREF="global.html#NxBlt">NxBlt 構造体</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+</BODY>
+</HTML>
+

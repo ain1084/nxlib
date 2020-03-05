@@ -1,0 +1,982 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+	<LINK REV="Made" HREF="mailto:ain@da.airnet.ne.jp">
+	<LINK REL="Contents" HREF="./index.html">
+	<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-2022-jp">
+	<META NAME="Author" CONTENT="Seiji Ainoguchi">
+	<META NAME="Subject" CONTENT="CNxSprite">
+	<TITLE>CNxSprite クラス</TITLE>
+</HEAD>
+<BODY>
+<A NAME="top"><H1>CNxSprite クラス</H1></A>
+
+<A HREF="#summary">概要</A><BR>
+<A HREF="#zorder">Z 値(座標)について</A><BR>
+<A HREF="#toplevelsprite">最上位スプライトについて</A><BR>
+<A HREF="#member">クラスメンバ</A><BR>
+
+<!-- summary -->
+<A NAME="summary"><H2>概要</H2></A>
+<P>　CNxSprite クラスはスプライトの表示に必要な座標等を保持しているクラスです。CNxSprite はデフォルトでは何も描画しませんので、CNxSprite クラス自体のオブジェクトを作成してもあまり意味はありませんが、子スプライトの座標を統轄する(自分自身は何も描画しない)親として使用する事ができます。</P>
+
+<P>　CNxSprite の派生クラスには、<A HREF="CNxSurfaceSprite.html">CNxSurfaceSprite</A>、CNxComplexSprite 等があります。これらの派生クラスは、サーフェスの指定を行なうだけで、その内容を簡単に表示できます。</P>
+
+<P>　CNxSprite では自分の矩形を RECT 構造体で保持しています。左上は通常 (0, 0) です。しかし、スプライトの幅と高さは (right - left, bottom - top) で示される為、常に左上が (0, 0) である必要はありません。幅と高さが結果的に正の値であるならば、矩形の各座標を負にする事も許されます。</P>
+
+<P>　スプライトが描画される時には、<A HREF="#member.Draw">CNxSprite::Draw()</A> 仮想関数が呼び出されます。この関数の中でスプライトは必要な描画を行わなければなりません。引数として渡される矩形は、描画が必要なスプライト内の矩形を示します。例えば、32 x 32 サイズのスプライトにおいて、スプライトの矩形が (-30, -30) - (2, 2) の場合では、Blt 関数等の左上として (-30, -30) を指定すると、スプライトの左上隅へ転送されます。描画先は通常、サーフェスを示しますが、<STRONG>描画先の絶対座標(矩形)とは関係ありません。</STRONG><A HREF="CNxSurfaceSprite.html">CNxSurfaceSprite</A> 等の派生クラスは、この矩形を転送元サーフェスの矩形として扱っています。</P>
+
+<P>　スプライトは子を持つ事ができます。子の X, Y 座標は絶対座標ではなく、親スプライトから相対座標です。Z 値(座標)とは、スプライトが表示される順序を制御する値です。NxDraw では大きなZ 座標を持つスプライトが手前になります。通常、子は親よりも優先(手前に表示)されます。<A HREF="#member.DrawBehindChildren">CNxSprite::DrawBehindChildren()</A> 関数のオーバーライドによって、親を子よりも手前に表示する事も可能です。Z 値の詳細は、<A HREF="#zorder">Z 値について</A>を参照して下さい。</P>
+
+<P>　子スプライトは親スプライトから様々な影響を受けます。親スプライトが移動されると子も自動的に移動し、親が不可視になると子も不可視になります。また、デフォルトでは子スプライトが描画できるのは親スプライトの矩形内だけですが、親スプライトの <A HREF="#member.SetClipChildren">CNxSprite::SetClipChildren()</A> 関数でクリップを無効にする事によって、外側にも描画する事ができる様になります。</P>
+
+<P>　スプライトは自分自身(必要なら子も)の表示に何らかの影響を与える操作(移動やサイズの変更)が行われると、次回の描画時に正しく表示される様に自分自身を無効化します。これは必要な時に自動的に行われます。しかし、スプライト自身とは直接関係の無い操作(例えば CNxSurfaceSprite クラスと関連付けられたサーフェスへの描画)は関知しません。スプライトの内容を強制的に反映させたい場合は <A HREF="#member.SetUpdate">CNxSprite::SetUpdate()</A> 関数を手動で呼び出して下さい。この関数には更新矩形を指定する事もできますので、巨大なスプライトの一部のみを更新させる事が可能です。</P>
+
+<P>　CNxSprite クラスの一部の関数では、矩形の指定に RECT 構造体を用いますが、右下の1ドットは領域に含みません。つまり (32, 32) - (64, 64) という矩形が示す、幅と高さは 32 ドットです。</P>
+
+<P>　スプライトが delete 演算子によって削除されると、同時にそのスプライトが持っている子も全て削除されます。子スプライトを削除したくない場合は、<A HREF="#member.SetParent">CNxSprtie::SetParent()</A> 関数で、別の親へのポインタ又は NULL を指定して下さい。</P>
+
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+<!-- zorder -->
+<A NAME="zorder"><H2>Z 値(座標)について</H2></A>
+<P>　Z 値(座標)はスプライトの優先順位を決定する値です。<A HREF="#member.SetZPos">CNxSprite::SetZPos()</A> 関数によって変更できます。スプライトの描画順序は、親子関係(子は親より優先)、次に同じ親を持つ子スプライト同士の Z 値(大きい方が優先)の順に決定されます。結果として、最後に描画されるスプライトが最前面になります。<STRONG>Z 値の大小は、同じ親を持つ子スプライトの間だけで意味があり、他の親を持つスプライトとは無関係です。</STRONG></P>
+
+<P>　以下の図で A は最上位のスプライト。() はそのスプライトに設定された Z 値です。</P>
+
+<IMG SRC="images/sprite_zorder.png" WIDTH=408 HEIGHT=325>
+
+<P>　描画順は A,B,C,D,E,F,L,I,J,G,H,K となり、K の優先順位が最も高くなります。上の図で Z 値が描画順に関係しているのは、(B,F,K) と (G,I,L) です。それ以外のスプライトは Z 値を操作しても描画順には影響ありません。</P>
+
+<P>　以下は、上の図のスプライトを作成するコード例です。</P>
+
+<PRE>
+    CNxSprite* pSpriteA = <FONT COLOR="BLUE">new</FONT> CNxSprite(NULL);
+    pSpriteA-&gt;SetZPos(3);
+    CNxSprite* pSpriteB = <FONT COLOR="BLUE">new</FONT> CNxSprite(pSpriteA);
+    pSpriteB-&gt;SetZPos(0);
+    CNxSprite* pSpriteC = <FONT COLOR="BLUE">new</FONT> CNxSprite(pSpriteB);
+    pSpriteC-&gt;SetZPos(0);
+    CNxSprite* pSpriteD = <FONT COLOR="BLUE">new</FONT> CNxSprite(pSpriteC);
+    pSpriteD-&gt;SetZPos(0);
+    CNxSprite* pSpriteE = <FONT COLOR="BLUE">new</FONT> CNxSprite(pSpriteD);
+    pSpriteE-&gt;SetZPos(0);
+    CNxSprite* pSpriteF = <FONT COLOR="BLUE">new</FONT> CNxSprite(pSpriteA);
+    pSpriteF-&gt;SetZPos(1);
+    CNxSprite* pSpriteG = <FONT COLOR="BLUE">new</FONT> CNxSprite(pSpriteF);
+    pSpriteG-&gt;SetZPos(4);
+    CNxSprite* pSpriteH = <FONT COLOR="BLUE">new</FONT> CNxSprite(pSpriteG);
+    pSpriteH-&gt;SetZPos(5);
+    CNxSprite* pSpriteI = <FONT COLOR="BLUE">new</FONT> CNxSprite(pSprtieF);
+    pSpriteI-&gt;SetZPos(1);
+    CNxSprite* pSpriteJ = <FONT COLOR="BLUE">new</FONT> CNxSprite(pSpriteI);
+    pSpriteJ-&gt;SetZPos(0);
+    CNxSprite* pSpriteL = <FONT COLOR="BLUE">new</FONT> CNxSprite(pSpriteF);
+    pSpriteL-&gt;SetZPos(-1);
+    CNxSprite* pSpriteK = <FONT COLOR="BLUE">new</FONT> CNxSprite(pSpriteA);
+    pSpriteK-&gt;SetZPos(2);
+</PRE>
+
+<P>　最終的な描画順序は、親スプライトが保持している子スプライト配列の並びによって決定されます。正しい順序でスプライトが描画される為には、この配列が正しく(Z 値順に)ソートされていなければなりませんが、<STRONG>パフォーマンス上の理由により、<A HREF="CNxTrackingSprite.html">CNxTrackingSprite</A> 派生クラスの、<A HREF="CNxTrackingSprite.html#member.Refresh">CNxTrackingSprite::Refresh()</A> 関数が呼び出された時を除き、自動的にソートは行われません</STRONG>。この時ソートの対象となるのは、CNxTrackingSprite 派生クラスを最上位の親とする全ての子スプライトです。<A HREF="#member.SetZPos">CNxSprite::SetZPos()</A> 関数内では「Z 値が変更された」というフラグを立てるだけで、ソート自体は行いません。</P>
+
+<P>　配列が正しくソートされていない場合、影響を受ける可能性がある関数は、<A HREF="#member.DrawSurface">CNxSprite::DrawSurface()</A> および <A HREF="#member.EnumChildren">CNxSprite::EnumChildren()</A> 関数です。Z 値の変更を行った後にこれらの関数が、常に正しい順序で子スプライトを処理する事を保証する為には、<FONT COLOR="RED"><STRONG>親スプライトの</FONT></STRONG> <A HREF="#member.SortChildren">CNxSprite::SortChildren()</A> 関数を明示的に呼び出す必要があります。ただし、前述の通り CNxTrackingSprite::Refresh() 関数(これを呼び出している <A HREF="CNxWindow.html#member.Refresh">CNxWindow::Refresh()</A> も含みます)から <A HREF="#member.Draw">CNxSprite::Draw()</A> 関数が間接的に呼び出された時は、常に全ての子スプライトがソートされています。この為、CNxSprite::Draw() 関数の中からこれらの関数を呼び出す際に、明示的なソートは不要です。</P>
+
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+<!-- toplevelsprite -->
+<A NAME="toplevelsprite"><H2>最上位スプライトについて</H2></A>
+<P>　コンストラクタの親スプライトへ NULL を指定する事で、親スプライトを持たない最上位スプライトを作成できます。例えば、CNxSprite から派生している <A HREF="CNxTrackingSprite.html">CNxTrackingSprite</A> クラス(と、その派生クラスである <A HREF="CNxWindow.html">CNxWindow</A> クラス)は最上位スプライトであり、親を持ちません。親が NULL のスプライトはいくつかの特別な機能を持ち、振る舞いも異なります。</P>
+
+<TABLE BORDER>
+<TR><TH NOWRAP>相違点</TH><TH>最上位スプライト(親 == NULL)</TH><TH NOWRAP>子スプライト(親 != NULL)</TH><TH>参照項目</TH></TR>
+<TR><TD NOWRAP>座標</TD><TD>変更は可能ですが、最上位スプライト自身は移動しません。子スプライトのみ影響を受けます。</TD><TD>自分自身と子スプライトが影響を受けます。</TD><TD NOWRAP><A HREF="#member.SetPos">CNxSprite::SetPos()</A></TR>
+<TR><TD NOWRAP>表示先原点</TD><TD>変更は可能ですが、最上位スプライトの表示先座標は変わりません。子スプライトの表示先座標は影響を受けます</TD><TD>自分自身と子スプライトが影響を受けます。</TD><TD NOWRAP><A HREF="#member.SetDisplayOrg">CNxSprite::SetDisplayOrg()</A></TR>
+<TR><TD NOWRAP>可視/不可視</TD><TD>最上位スプライト自身は不可視にならず、子スプライトのみが影響を受けます。子スプライトでは、不可視の場合 <A HREF="#member.Draw">CNxSprite::Draw()</A> 関数が呼び出されることはありませんが、最上位スプライトでは不可視でも呼び出されます。</TD><TD>自分自身と子スプライトが影響を受けます。</TD><TD NOWRAP><A HREF="#member.SetVisible">CNxSprite::SetVisible()</A></TD></TR>
+<TR><TD NOWRAP>子クリップ</TD><TD>常に有効。子クリップの設定に関らず、全ての子スプライトは最上位スプライトの外側へ描画する事はできません。</TD><TD>有効と無効を任意に切り替え可能。</TD><TD NOWRAP><A HREF="#member.SetClipChildren">CNxSprite::SetClipChildren()</A></TD></TR>
+</TABLE>
+
+<P>　最上位スプライトにおける、座標と表示先原点の意味は全く同じです。<A HREF="#member.SetPos">CNxSprite::SetPos()</A> 関数および <A HREF="#member.SetDisplayOrg">CNxSprite::SetDisplayOrg()</A> 関数によって、最上位スプライトの座標と原点を変更する事は可能ですが、実際には子スプライトのみが影響を受けます。最上位スプライトの座標を変化させる事で、画面全体を揺らした様な効果を表現する事ができます。</P>
+
+<P>　最上位スプライト自身は、非表示でも描画を行う必要があります。通常の子スプライトは非表示の状態で CNxSprite::Draw() 関数が呼び出されることはありません。CNxSprite クラスにおける子スプライトの痕跡の消去は、無効となった(子スプライトの)痕跡へ、それより上位の親スプライトが描画する事で行われています。しかし、最上位スプライトが非表示になってしまうと、当然全ての子スプライトが非表示になり、描画を行うスプライトが無くなってしまいます。この為、最上位スプライトの場合は、自分自身の表示状態に関らず <A HREF="#member.Draw">CNxSprite::Draw()</A> 関数が呼び出される様になっています。</P>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+<!-- member -->
+<A NAME="member"><H2>クラスメンバ</H2></A>
+<A HREF="#construct">構築、消滅</A><BR>
+<A HREF="#rectangle">矩形</A><BR>
+<A HREF="#childhood">親子関係</A><BR>
+<A HREF="#affection">属性</A><BR>
+<A HREF="#position">座標</A><BR>
+<A HREF="#drawupdate">描画、更新</A><BR>
+<A HREF="#override">オーバーライド可能な関数</A><BR>
+
+<A NAME="construct"><P><FONT SIZE=+1>構築、消滅</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD><A HREF="#member.CNxSprite">CNxSprite()</A></TD><TD>　コンストラクタ</TD></TR>
+</TABLE>
+
+<A NAME="rectangle"><P><FONT SIZE=+1>矩形</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetWidth">GetWidth()</A></TD><TD>　幅を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetHeight">GetHeight()</A></TD><TD>　高さを取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetRect">GetRect()</A></TD><TD>　矩形を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetSize">SetSize()</A></TD><TD>　サイズを変更</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetRect">SetRect()</A></TD><TD>　矩形を設定</TD></TR>
+</TABLE>
+
+<A NAME="childhood"><P><FONT SIZE=+1>親子関係</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetParent">SetParent()</A></TD><TD>　スプライトの親を設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetParent">GetParent()</A></TD><TD>　スプライトの親を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetClipChildren">SetClipChildren()</A></TD><TD>　子スプライトのクリップ機能を設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetClipChildren">GetClipChildren()</A></TD><TD>　子スプライトのクリップ機能を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.EnumChildren">EnumChildren()</A></TD><TD>　子スプライトを列挙</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SortChildren">SortChildren()</A></TD><TD>　子スプライトをソート</TD></TR>
+</TABLE>
+
+<A NAME="affection"><P><FONT SIZE=+1>属性</FONT></P></A>
+<TABLE CELLPADDING=4>
+	<TR><TD><A HREF="#member.SetVisible">SetVisible()</A></TD><TD>　スプライトの可視/不可視を設定</TD></TR>
+	<TR><TD><A HREF="#member.IsVisible">IsVisible()</A></TD><TD>　スプライトの表示状態を取得</TD></TR>
+</TABLE>
+
+<A NAME="position"><P><FONT SIZE=+1>座標</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetPos">SetPos()</A></TD><TD>　座標を設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetPos">GetPos()</A></TD><TD>　座標を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetXPos">GetXPos()</A></TD><TD>　X 座標を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetYPos">GetYPos()</A></TD><TD>　Y 座標を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetZPos">SetZPos()</A></TD><TD>　Z 座標を設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetZPos">GetZPos()</A></TD><TD>　Z 座標を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.OffsetPos">OffsetPos()</A></TD><TD>　現在の座標から相対移動</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetDisplayOrg">SetDisplayOrg()</A></TD><TD>　表示先座標の原点を設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetDisplayOrg">GetDisplayOrg()</A></TD><TD>　表示先座標の原点を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.MoveCenter">MoveCenter()</A></TD><TD>　指定されたスプライトの中心へ移動</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SpriteToTop">SpriteToTop()</A></TD><TD>　スプライト座標を、最上の親座標へ変換</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.TopToSprite">TopToSprite()</A></TD><TD>　最上位の親座標を、このスプライト座標へ変換</TD></TR>
+</TABLE>
+
+<A NAME="drawupdate"><P><FONT SIZE=+1>描画、更新</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetUpdate">SetUpdate()</A></TD><TD>　更新フラグをセット</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.DrawSurface">DrawSurface()</A></TD><TD>　スプライトをサーフェスへ描画</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.Refresh">Refresh()</A></TD><TD>　全てのスプライトの更新に必要な矩形を列挙</TD></TR>
+</TABLE>
+
+<A NAME="override"><P><FONT SIZE=+1>オーバーライド可能な関数(protected)</FONT></P></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.PreUpdate">PreUpdate()</A></TD><TD>　更新状態が調べられる直前に呼び出される仮想関数</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.Update">Update()</A></TD><TD>　更新時に一度だけ呼び出される仮想関数</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.Draw">Draw()</A></TD><TD>　描画内容を記述する仮想関数</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.DrawBehindChildren">DrawBehindChildren()</A></TD><TD>　子スプライト表示後に呼び出される仮想関数</TD></TR>
+</TABLE>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxSprite::CNxSprite() -->
+<A NAME="member.CNxSprite"><H3>CNxSprite::CNxSprite()</H3></A>
+<H4>概要</H4>
+<P>　CNxSprite クラスのコンストラクタです。</P>
+<H4>書式</H4>
+CNxSprite::CNxSprite(CNxSprite* <EM>pParent</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>CNxSprite* <EM>pParent</EM></TD><TD>　</TD><TD>親スプライトへのポインタ</TD></TR>
+</TABLE>
+<H4>解説</H4>
+<P>　CNxSprite クラスのコンストラクタです。<EM>pParent</EM> には親とする CNxSprite クラスへのポインタを指定します。NULL を指定すると、構築されるスプライトは最上位スプライトになります。</P>
+<P>　コンストラクタによってスプライトの状態は以下の様になります。</P>
+<DL>
+<LI>可視状態
+<LI>X, Y, Z 座標は全て 0
+<LI>子クリップ(<A HREF="#member.SetClipChildren">CNxSprite::SetClipChildren()</A> 関数を参照)を行なう
+<LI>スプライトの矩形は left = top = right = bottom = 0 (サイズはゼロ)
+</DL>
+<H4>関連項目</H4>
+<A HREF="#member.SetParent">CNxSprite::SetParent()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxSprite::GetWidth() -->
+<A NAME="member.GetWidth"><H3>CNxSprite::GetWidth()</H3></A>
+<H4>概要</H4>
+<P>　スプライトの幅を返します。</P>
+<H4>書式</H4>
+int CNxSprite::GetWidth() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　スプライトの幅を返します。</P>
+<H4>解説</H4>
+<P>　返される幅は、<A HREF="#member.GetRect">CNxSprite::GetRect()</A> 関数で得られる矩形の right から left を引いた値です。</P>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+<!-- CNxSprite::GetHeight -->
+<A NAME="member.GetHeight"><H3>CNxSprite::GetHeight()</H3></A>
+<H4>概要</H4>
+<P>　スプライトの高さを返します。</P>
+<H4>書式</H4>
+int CNxSprite::GetHeight() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　スプライトの高さを返します。</P>
+<H4>解説</H4>
+<P>　返される高さは、<A HREF="#mbmber.GetRect">CNxSprite::GetRect()</A> 関数で得られる矩形の bottom から top を引いた値です。</P>
+<H4>関連項目</H4>
+<A HREF="#member.GetWidth">CNxSprite::GetWidth()</A>&nbsp;/&nbsp;<A HREF="#member.GetRect">CNxSprite::GetRect()</A>&nbsp;/&nbsp;<A HREF="#member.SetSize">CNxSprite::SetSize()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxSprite::GetRect -->
+<A NAME="member.GetRect"><H3>CNxSprite::GetRect()</H3></A>
+<H4>概要</H4>
+<P>　スプライトの矩形を取得します。</P>
+<H4>書式</H4>
+void CNxSprite::GetRect(LPRECT <EM>lpRect</EM>) const<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>LPRECT <EM>lpRect</EM></TD><TD>　スプライト矩形を受けとる RECT 構造体へのポインタ。</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　スプライト自身のサイズを示す矩形を取得します。スプライトのサイズは RECT 構造体の right - left, bottom - top で示されるため、左上は (0, 0) である必要はありません。CNxSprite の派生クラスである、<A HREF="CNxSurfaceSprite.html">CNxSurfaceSprite</A> クラスではこの矩形をサーフェスの転送元矩形として扱っています。</P>
+<H4>関連項目</H4>
+<A HREF="#member.SetRect">CNxSprite::SetRect()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxSprite::SetSize -->
+<A NAME="member.SetSize"><H3>CNxSprite::SetSize()</H3></A>
+<H4>概要</H4>
+<P>　スプライトのサイズを変更します。</P>
+<H4>書式</H4>
+BOOL CNxSprite::SetSize(int <EM>nWidth</EM>, int <EM>nHeight</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>nWidth</EM></TD><TD>　スプライトの幅</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>nHeight</EM></TD><TD>　スプライトの高さ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功なら TRUE</P>
+<H4>解説</H4>
+<P>　現在のスプライト矩形の left へ <EM>nWidth</EM> を、top へ <EM>nHeight</EM> 引数を加えた結果を矩形の右下として設定します。変更後のスプライト矩形は (left, top) - (left + <EM>nWidth</EM>, top + <EM>nHeight</EM>) となります。</P>
+
+<H3>関連項目</H3>
+<A HREF="#member.SetRect">CNxSprite::SetRect()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxSprite::SetRect -->
+<A NAME="member.SetRect"><H3>CNxSprite::SetRect()</H3></A>
+<H4>概要</H4>
+<P>　スプライトの矩形を設定します。</P>
+<H4>書式</H4>
+virtual void CNxSprite::SetRect(const RECT* <EM>lpRect</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>const RECT* <EM>lpRect</EM></TD><TD>　設定する矩形を示す RECT 構造体へのポインタ。</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　スプライト自身のサイズを示す矩形を設定します。スプライトのサイズは RECT 構造体の right - left, bottom - top で示されるため、左上は (0, 0) である必要はありません。CNxSprite の派生クラスである、<A HREF="CNxSurfaceSprite.html">CNxSurfaceSprite</A> ではこの矩形をサーフェスの転送元矩形として扱っています。</P>
+<H4>関連項目</H4>
+<A HREF="#member.GetRect">CNxSprite::GetRect()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxSprite::SetParent() -->
+<A NAME="member.SetParent"><H3>CNxSprite::SetParent()</H3></A>
+<H4>概要</H4>
+<P>　スプライトの親を変更します。</P>
+<H4>書式</H4>
+virtual CNxSprite* CNxSprite::SetParent(CNxSprite* <EM>pParent</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>CNxSprite* <EM>pParent</EM></TD><TD>親スプライトへのポインタ</TD>
+</TABLE>
+<H4>戻値</H4>
+<P>　直前の親スプライトへのポインタ。NULL ならばエラー。</P>
+<H4>解説</H4>
+<P>　現在の親から切り離した後、指定された親へ変更します。自分自身を親に設定する事はできません。</P>
+<H4>関連項目</H4>
+<A HREF="#member.GetParent">CNxSprite::GetParent()</A>&nbsp;/&nbsp;<A HREF="#member.CNxSprite">CNxSprite::CNxSprite()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+<!-- CNxSprite::GetParent() -->
+<A NAME="member.GetParent"><H3>CNxSprite::GetParent()</H3></A>
+<H4>概要</H4>
+<P>　スプライトの親を取得します。</P>
+<H4>書式</H4>
+CNxSprite* CNxSprite::GetParent() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　現在の親スプライトへのポインタ</P>
+<H4>関連項目</H4>
+<A HREF="#member.SetParent">CNxSprite::SetParent()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+<!-- CNxSprite::SetClipChildren() -->
+<A NAME="member.SetClipChildren"><H3>CNxSprite::SetClipChildren()</H3></A>
+<H4>概要</H4>
+<P>　子スプライトのクリップ機能を有効、又は無効にします。</P>
+<H4>書式</H4>
+virtual BOOL CNxSprite::SetClipChildren(BOOL <EM>bClip</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>BOOL <EM>bClip</EM></TD><TD>　子スプライトをクリップするならば TRUE</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　設定前の状態を返します。</P>
+<H4>解説</H4>
+<P>　デフォルトでは、子スプライトは親スプライトの矩形の外側へ描画できません。<EM>bClip</EM> へ FALSE を渡すと、この機能が解除され、子スプライトは親の外側へ描画できる様になります。</P>
+
+<P>　以下の例は、親より子スプライトの方が大きい場合において、クリップ有効と無効の違いを示しています。親と子の表示先座標は同じです。</P>
+
+<CENTER>
+<TABLE BORDER>
+<CAPTION>子スプライトクリップのイメージ図</CAPTION>
+<TR><TD><IMG SRC="images/SetClipChildrenBack.png" WIDTH=64 HEIGHT=64></TD><TD><IMG SRC="images/SetClipChildrenFore.png" WIDTH=64 HEIGHT=64></TD><TD><IMG SRC="images/SetClipChildrenOff.png"></TD><TD><IMG SRC="images/SetClipChildrenOn.png"></TD></TR>
+<TR><TD>親スプライト</TD><TD>子スプライト</TD><TD>クリップ無効</TD><TD>クリップ有効</TD></TR>
+</TABLE>
+</CENTER>
+
+<H4>関連項目</H4>
+<A HREF="#member.GetClipChildren">CNxSprite::GetClipChildren()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+<!-- CNxSprite::GetClipChildren() -->
+<A NAME="member.GetClipChildren"><H3>CNxSprite::GetClipChildren()</H3></A>
+<H4>概要</H4>
+<P>　子クリップ機能の状態を返します。</P>
+<H4>書式</H4>
+BOOL CNxSprite::GetClipChildren() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　子クリップ機能が有効であれば TRUE を返します。</P>
+<H4>解説</H4>
+<P>　子スリップ機能とは、子スプライトを描画する際に親スプライトの矩形から外側へ描画できないよう様にする機能です。</P>
+<H4>関連項目</H4>
+<A HREF="#member.SetClipChildren">CNxSprite::SetClipChildren()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+<!-- CNxSprite::EnumChildren() -->
+<A NAME="member.EnumChildren"><H3>CNxSprite::EnumChildren()</H3></A>
+<H4>概要</H4>
+<P>　子スプライトを列挙します。</P>
+<H4>書式</H4>
+BOOL CNxSprite::EnumChildren(EnumChildrenProc <EM>pfnEnumProc</EM>, LPVOID <EM>lpContext</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD>EnumChildrenProc</TD><TD>pfnEnumProc</TD><TD>　呼び出されるメンバ関数へのポインタ</TD></TR>
+<TR><TD>LPVOID</TD><TD>lpContext</TD><TD>　メンバ関数へ渡されるパラメータ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　列挙が最後まで行われたならば TRUE, <EM>pfnEnumProc</EM> によって列挙が中止されたならば FALSE を返します</P>
+<H4>解説</H4>
+<P>　この関数は直属の子のみを列挙します。全ての子を列挙するには、<EM>pfnEnumProc</EM> の内部から更に EnumChildren() 関数を呼び出して下さい。</P>
+
+<P>　この関数は現在の子スプライト配列の内容に従って、子スプライトを列挙します。正しい Z 順で列挙する為には、この関数の前に <A HREF="#member.SortChildren">CNxSprite::SortChildren()</A> 関数の呼び出しが必要になる場合があります。詳細については、<A HREF="#zorder">Z 値(座標)について</A> を参照して下さい。</P>
+
+<P>　<EM>pfnEnumProc</EM> へ指定する関数のプロトタイプは以下の通りです。</P>
+
+BOOL CNxSprite::EnumChildrenProc(CNxSprite* <EM>pSprite</EM>, LPVOID <EM>lpContext</EM>);<BR>
+
+<P>　また、EnumChildrenProc は CNxSprite の入れ子型として、以下の様に宣言されています。</P>
+
+<FONT COLOR="BLUE">typedef</FONT> BOOL (CNxSprite::*EnumChildrenProc)(CNxSprite* <EM>pSprite</EM>, LPVOID <EM>lpContext</EM>);<BR>
+
+<P>　<EM>pSprite</EM> 引数へは、列挙された子スプライトへのポインタ、<EM>lpContext</EM> へは EnumChildren() 関数呼び出し時の <EM>lpContext</EM> の値が渡されます。関数から FALSE を返すと列挙が中止され、EnumChildren() 関数からは FALSE が返されます。</P>
+
+<P>　以下の例では、子スプライトの座標を (10, 10) に設定します。EnumChildrenProc へのキャストを行っている点に注意して下さい。</P>
+
+<PRE>
+BOOL CNxAAASprite::SetChildrenPos(CNxSprite* pSprite, LPVOID lpContext)
+{
+    LPPOINT lpPoint = <FONT COLOR="BLUE">static_cast</FONT>&lt;LPPOINT&gt;(lpContext);
+    pSprite-&gt;SetPos(lpPoint-&gt;x, lpPoint-&gt;y);
+    <FONT COLOR="BLUE">return</FONT> TRUE;
+}
+
+POINT point;
+point.x = 10;
+point.y = 10;
+EnumChildren(<FONT COLOR="BLUE">static_cast</FONT>&lt;EnumChildrenProc&gt;(SetChildrenPos), &amp;point);
+</PRE>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+<!-- CNxSprite::SortChildren() -->
+<A NAME="member.SortChildren"><H3>CNxSprite::SortChildren()</H3></A>
+<H4>概要</H4>
+<P>　子スプライトをソートします。</P>
+<H4>書式</H4>
+void CNxSprite::SortChildren(BOOL <EM>bDirectOnly</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD>BOOL</TD><TD><EM>bDirectOnly</EM></TD><TD>　直系の子のみのソートならば TRUE、全ての子のソートならば FALSE</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　Z 値に従って子スプライトをソートします。<EM>bDirectOnly</EM> 引数が TRUE ならば直系の子のみのソート、FALSE ならば全ての子がソートされます。例えば、最上位スプライトから <EM>bDirectOnly = FALSE</EM> で関数を呼び出すと、全ての子スプライトがソートされます。しかし、Z 値を変更したスプライトが分かっている場合、必要な親スプライトに対して <EM>bDirectOnly = TRUE</EM> で関数を呼び出す方が効率的です。</P>
+
+<P>　NxDraw ではパフォーマンス上の理由により、<A HREF="#member.SetZPos">CNxSprite::SetZPos()</A> 関数で Z 値の変更を行っても、描画直前までソートを行いません(ここでの&quot;描画&quot; とは、<A HREF="CNxTrackingSprite.html">CNxTrackingSprite</A> 派生クラスを最上位の親として、Refresh() メンバ関数を呼び出す事を示します)。スプライトが正しい順序で描画される為には、親スプライトが保持している子スプライト配列が、Z 順に従って正しくソートされていなければなりません。Z 順が問題になる関数(<A HREF="#member.DrawSurface">CNxSprite::DrawSurface()</A> および <A HREF="#member.EnumChildren">CNxSprite::EnumChildren()</A>)の前に、この関数の呼び出しが必要な場合があります。</P>
+
+<P>　概要の <A HREF="#zorder">Z 値(座標)について</A> も参照して下さい。</P>
+
+<H4>関連項目</H4>
+<A HREF="#member.EnumChildren">CNxSprite::EnumChildren()</A>&nbsp;/&nbsp;
+<A HREF="#member.DrawSurface">CNxSprite::DrawSurface()</A>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<A NAME="member.SetVisible"><H3>CNxSprite::SetVisible()</H3>
+<H4>概要</H4>
+<P>　スプライトの可視/不可視を設定します。</P>
+<H4>書式</H4>
+virtual BOOL CNxSprite::SetVisible(BOOL <EM>bVisible</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>BOOL <EM>bVisible</EM></TD><TD>　可視にするならば TRUE</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　設定前の状態が返されます。</P>
+<H4>解説</H4>
+<P>　スプライトの表示状態を、可視又は不可視に設定します。子を持っている場合は子もその影響を受けます。</P>
+<H4>関連項目</H4>
+<A HREF="#member.IsVisible">CNxSprite::IsVisible()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+<!-- CNxSprite::IsVisible -->
+<A NAME="member.IsVisible"><H3>CNxSprite::IsVisible()</H3></A>
+<H4>概要</H4>
+<P>　スプライトの現在の表示状態を返します。</P>
+<H4>書式</H4>
+BOOL CNxSprite::IsVisible() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　可視状態であれば TRUE を返します。</P>
+<H4>解説</H4>
+<P>　スプライトが現在可視状態であれば TRUE を返します。なお、親を持つ子スプライトは必ずしも実際の表示状態と一致しない場合があります。自分自身が可視状態であれば、親スプライトによって実際の表示状態が不可視になっていても、この関数は TRUE を返します。</P>
+<H4>関連項目</H4>
+<A HREF="#member.SetVisible">CNxSprite::SetVisible()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxSprite::SetPos -->
+<A NAME="member.SetPos"><H3>CNxSprite::SetPos()</H3></A>
+<H4>概要</H4>
+<P>　スプライトの座標を設定します。</P>
+<H4>書式</H4>
+virtual BOOL CNxSprite::SetPos(int <EM>x</EM>, int <EM>y</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>x</EM></TD><TD>　X 座標</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>y</EM></TD><TD>　Y 座標</TD></TR>
+</DL>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功なら TRUE</P>
+<H4>解説</H4>
+<P>　スプライトの X 座標および Y 座標を設定します。</P>
+<H4>関連項目</H4>
+<A HREF="#member.GetPos">CNxSprite::GetPos()</A>&nbsp;/&nbsp;<A HREF="#member.OffsetPos">CNxSprite::OffsetPos()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxSprite::GetPos() -->
+<A NAME="member.GetPos"><H3>CNxSprite::GetPos()</H3></A>
+<H4>概要</H4>
+<P>　スプライトの座標を返します。</P>
+<H4>書式</H4>
+void CNxSprite::GetPos(LPPOINT <EM>lpPoint</EM>) const<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD>LPPOINT <EM>lpPoint</EM></TD><TD>　</TD><TD>　スプライトの座標を受けとる POINT 構造体へのポインタ。</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　スプライトの座標を返します。親を持っている場合は、親スプライトに対する相対座標です。</P>
+<H4>関連項目</H4>
+<A HREF="#member.GetXPos">CNxSprite::GetXPos()</A>&nbsp;/&nbsp;<A HREF="#member.GetYPos">CNxSprite::GetYPos()</A>&nbsp;/&nbsp;<A HREF="#member.GetZPos">CNxSprite::GetZPos()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxSprite::GetXPos() -->
+<A NAME="member.GetXPos"><H3>CNxSprite::GetXPos()</H3></A>
+<H4>概要</H4>
+<P>　スプライトのX 座標を返します。</P>
+<H4>書式</H4>
+int CNxSprite::GetXPos() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　返される値は親スプライトからの相対座標です。</P>
+<H4>関連項目</H4>
+<A HREF="#member.SetPos">CNxSprite::SetPos()</A>&nbsp;/&nbsp;<A HREF="#member.GetPos">CNxSprite::GetPos()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxSprite::GetYPos() -->
+<A NAME="member.GetYPos"><H3>CNxSprite::GetYPos()</H3></A>
+<H4>概要</H4>
+<P>　スプライトの Y 座標を返します。</P>
+<H4>書式</H4>
+int CNxSprite::GetYPos() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　返される値は親スプライトからの相対座標です。</P>
+<H4>関連項目</H4>
+<A HREF="#member.SetPos">CNxSprite::SetPos()</A>&nbsp;/&nbsp;<A HREF="#member.GetPos">CNxSprite::GetPos()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxSprite::SetZPos() -->
+<A NAME="member.SetZPos"><H3>CNxSprite::SetZPos()</H3></A>
+<H4>概要</H4>
+<P>　スプライトの Z 座標を設定します。</P>
+<H4>書式</H4>
+int CNxSprite::SetZPos(int <EM>z</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>z</EM></TD><TD>　スプライトの Z 座標を INT_MIN から INT_MAX の範囲で指定します</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　設定前の Z 座標を返します。</P>
+<H4>解説</H4>
+<P>　Z 座標は INT_MIN から INT_MAX の範囲で、値が大きな Z 座標を持つスプライトが手前に表示されます。値の重複も許されますが、その際の表示順は不定になります。初期値は 0 です。表示順を制御する場合は必ず設定して下さい。重なり合わないスプライト同士では特に設定する必要はありません。</P>
+<P>　親を持たない最上位スプライトでは Z 座標の意味はありません。</P>
+<H4>関連項目</H4>
+<A HREF="#member.GetZPos">CNxSprite::GetZPos()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxSprite::GetZPos() -->
+<A NAME="member.GetZPos"><H3>CNxSprite::GetZPos()</H3></A>
+<H4>概要</H4>
+<P>　スプライトの Z 座標を返します。</P>
+<H4>書式</H4>
+int CNxSprite::GetZPos() const<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　スプライトの Z 座標を返します</P>
+<H4>解説</H4>
+<P>　Z 座標は INT_MIN から INT_MAX の範囲で、値が大きな Z 座標を持つスプライトが手前に表示されます。値の重複も許されますが、その際の表示順は不定になります。初期値は 0 です。表示順を制御する場合は必ず設定して下さい。重なり合わないスプライト同士では特に設定する必要はありません。</P>
+<P>　親を持たない最上位スプライトでは Z 座標の意味はありません。</P>
+<H4>関連項目</H4>
+<A HREF="#member.SetZPos">CNxSprite::SetZPos()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<A NAME="member.OffsetPos"><H3>CNxSprite::OffsetPos()</H3></A>
+<H4>概要</H4>
+<P>　現在の座標へオフセットを加算してスプライトを移動します。</P>
+<H4>書式</H4>
+BOOL CNxSprite::OffsetPos(int <EM>nXOffset</EM>, int <EM>nYOffset</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>nXOffset</EM></TD><TD>　X 方向へ移動する量</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>nYOffset</EM></TD><TD>　Y 方向へ移動する量</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　現在の X 座標および Y 座標へ引数を加算してスプライトを移動させます。</P>
+<H4>関連項目</H4>
+<A HREF="#member.SetPos">CNxSprite::SetPos()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxSprite::SetDisplayOrg -->
+<A NAME="member.SetDisplayOrg"><H3>CNxSprite::SetDisplayOrg()</H3></A>
+<H4>概要</H4>
+<P>　スプライトの表示先原点の座標を設定します。</P>
+<H4>書式</H4>
+virtual BOOL CNxSprite::SetDisplayOrg(int <EM>x</EM>, int <EM>y</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>x</EM></TD><TD>　原点の X 座標</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>y</EM></TD><TD>　原点の Y 座標</TD></TR>
+</DL>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功なら TRUE</P>
+
+<H4>解説</H4>
+<P>　スプライトが実際に表示される座標は、現在の座標と原点を加えた座標です。子スプライトを持つ親へ原点を設定すると、クリップ矩形(<A HREF="#member.SetClipChildren">CNxSprite::SetClipChildren()</A> 関数を参照)と子スプライトも影響を受けます。<A HREF="#member.GetPos">CNxSprite::GetPos()</A> 関数等で得られる、スプライト自身の座標に影響はありません。</P>
+<H4>関連項目</H4>
+<A HREF="#member.GetDisplayOrg">CNxSprite::GetDisplayOrg()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxSprite::GetDisplayOrg -->
+<A NAME="member.GetDisplayOrg"><H3>CNxSprite::GetDisplayOrg()</H3></A>
+<H4>概要</H4>
+<P>　スプライトの表示先原点の座標を返します。</P>
+<H4>書式</H4>
+void CNxSprite::GetDisplayOrg(LPPOINT <EM>lpPoint</EM>) const<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>LPPOINT <EM>lpPoint</EM></TD><TD>　</TD><TD>　原点座標を受けとる POINT 構造体へのポインタ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　スプライトが実際に表示される座標は、現在の座標と原点を加えた座標です。子スプライトを持つ親へ原点を設定すると、クリップ矩形(<A HREF="#member.SetClipChildren">CNxSprite::SetClipChildren()</A> 関数を参照)と子スプライトも影響を受けます。</P>
+<H4>関連項目</H4>
+<A HREF="#member.SetDisplayOrg">CNxSprite::SetDisplayOrg()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxSprite::MoveCenter() -->
+<A NAME="member.MoveCenter"><H3>CNxSprite::MoveCenter()</H3></A>
+<H4>概要</H4>
+<P>　座標を指定されたスプライトの中心へ移動します。</P>
+<H4>書式</H4>
+BOOL CNxSprite::MoveCenter(const CNxSprite* <EM>pParent</EM> = NULL)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>const CNxSprite* <EM>pParent</EM></TD><TD>　基準とするスプライトへのポインタ(NULL ならば現在の親スプライト)</TD>
+</TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功なら TRUE。<EM>pParent</EM> が自分自身と同じか、自分自身が最上位スプライトであると、関数は失敗します。</P>
+<H4>解説</H4>
+<P>　基準スプライトと、自分自身の座標を絶対座標へ変換した後に、基準スプライトの中心へ移動させます。<EM>pParent</EM> 引数へ親スプライト以外を指定した場合は注意が必要です。親スプライトの子クリップが有効になっていると、親矩形の外側へ配置され、見えなくなってしまう場合があります。</P>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxSprite::SpriteToTop() -->
+<A NAME="member.SpriteToTop"><H3>CNxSprite::SpriteToTop()</H3></A>
+<H4>概要</H4>
+<P>　スプライト座標を、最上位スプライトの座標へ変換します。</P>
+<H4>書式</H4>
+void CNxSprite::SpriteToTop(LPPOINT <EM>lpPoint</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>LPPOINT <EM>lpPoint</EM></TD><TD>　変換される座標を示す POINT 構造体へのポインタ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　スプライト座標を最上位スプライトの座標へ変換します。最上位スプライトとは、自分の親を持たないスプライトの事です。親を持たないスプライトでは、関数は何も行ないません。例えば <A HREF="CNxWindow.html">CNxWindow</A> オブジェクトがこのスプライトの最上位の親である場合に、スプライトの現在の座標を変換すると、結果はウィンドウのクライアント座標になります。</P>
+<P>　逆の変換を行なう関数として、<A HREF="#member.TopToSprite">CNxSprite::TopToSprite()</A> 関数があります。</P>
+<H4>関連項目</H4>
+<A HREF="#member.TopToSprite">CNxSprite::TopToSprite()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxSprite::TopToSprite -->
+<A NAME="member.TopToSprite"><H3>CNxSprite::TopToSprite()</H3></A>
+<H4>概要</H4>
+<P>　最上位スプライトの座標を、スプライト座標へ変換します。</P>
+<H4>書式</H4>
+void CNxSprite::TopToSprite(LPPOINT <EM>lpPoint</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>LPPOINT <EM>lpPoint</EM></TD><TD>　変換される座標を示す POINT 構造体へのポインタ。</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　スプライト座標を最上位スプライトの座標へ変換します。最上位スプライトとは、自分の親を持たないスプライトの事です。親を持たないスプライトでは、関数は何も行ないません。例えば <A HREF="CNxWindow.html">CNxWindow</A> オブジェクトがこのスプライトの最上位の親である場合に、ウィンドウのクライアント座標を変換すると、結果はスプライトの座標になります。</P>
+<P>　逆の変換を行なう関数として、<A HREF="#member.SpriteToTop">CNxSprite::SpriteToTop()</A> 関数があります。</P>
+<H4>関連項目</H4>
+<A HREF="#member.SpriteToTop">CNxSprite::SpriteToTop()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxSprite::DrawSurface() -->
+<A NAME="member.DrawSurface"><H3>CNxSprite::DrawSurface()</H3></A>
+<H4>概要</H4>
+<P>　スプライトの指定範囲をサーフェスへ描画します。</P>
+<H4>書式</H4>
+void CNxSprite::DrawSurface(CNxSurface* <EM>pSurface</EM>, int <EM>dx</EM>, int <EM>dy</EM>, const RECT* <EM>lpRect = NULL</EM>) const<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP><A HREF="CNxSurface.html">CNxSurface</A>* <EM>pSurface</EM></TD><TD>　描画先サーフェスへのポインタ</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>dx</EM></TD><TD>　サーフェス上の描画開始 X 座標</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>dy</EM></TD><TD>　サーフェス上の描画開始 Y 座標</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const RECT* <EM>lpRect</EM></TD><TD>　サーフェスへ描画される矩形</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功ならば TRUE</P>
+<H4>解説</H4>
+<P>　自分自身と子を含めたスプライトを指定されたサーフェスへ描画します。この関数を呼び出されたスプライトが実質的な親となります。以後の解説で、「スプライト」という表記は、この関数を呼び出されたスプライト自身の事を意味します。</P>
+
+<P>　この関数は、現在の子スプライト配列の内容に従って、子スプライトを描画します。正しい Z 順で描画する為には、この関数の前に <A HREF="#member.SortChildren">CNxSprite::SortChildren()</A> 関数の呼び出しが必要になる場合があります。詳細については、<A HREF="#zorder">Z 値(座標)について</A> を参照して下さい。</P>
+
+<P>　この関数は、スプライトの<STRONG>現在の状態</STRONG>をサーフェスへ書き出します。<A HREF="#member.Update">CNxSprite::Update()</A> 関数および、<A HREF="#member.PreUpdate">CNxSprite::PreUpdate()</A> 関数は呼び出されません。</P>
+
+<P>　関数は描画前にサーフェスの塗り潰しを行ないません。必要であれば関数を呼び出す前にサーフェスを塗り潰して下さい。</P>
+
+<P>　<EM>x</EM> および <EM>y</EM> 引数へは、描画先サーフェスの左上の座標を指定します。</P>
+
+<P>　<EM>lpRect</EM> 引数へは、描画されるスプライトの矩形を指定します。この矩形の左上へ (0, 0) を指定すると、スプライトはサーフェスの(<EM>dx</EM>, <EM>dy</EM>) から描画されます。しかし、矩形の左上へ (-10, -10) を設定して渡すと、描画先の (0, 0) - (9, 9) までは何も描画されず、(10, 10) からスプライトが描画されます。<EM>lpRect</EM> 引数へ NULL を指定すると、左上は (0, 0)、右下はスプライトのサイズが用いられ、スプライト全体がサーフェスへ描画されます(サーフェスの大きさが十分にある場合)。なお、スプライト自身の座標は無視されます(サーフェスへ描画される範囲には反映されません)。</P>
+
+<P>　最終的に描画される範囲は、描画先サーフェスに設定されているクリッピング矩形の影響を受けます。クリッピング矩形については、<A HREF="CNxSurface.html#member.SetClipRect">CNxSurface::SetClipRect()</A> 関数等を参照して下さい。</P>
+
+<P>　子クリップが無効になっている場合、スプライトの外側に(このスプライトの)子スプライトが描画される事があります。しかし、<EM>lpRect</EM> 引数へ NULL していると、描画矩形はこのスプライトに限定されてしまうため、これらの子(の収まらない部分)は描画されません。この様な場合は、親スプライトの矩形を拡張したものを <EM>lpRect</EM> 引数へ渡して下さい。例えば、スプライトのサイズが (60, 40) の時、周囲 40 ピクセル分を描画するならば、(-40, -40) - (100, 80) を矩形として渡します。Win32API の InflateRect() 関数で、<STRONG>::InflateRect(&rect, 40, 40)</STRONG> などとすると良いでしょう。</P>
+
+<P>　下の例は、<A HREF="CNxScreen.html">CNxScreen</A> クラスのオブジェクトである<STRONG>m_pScreen</STRONG> の全体をサーフェスへ書き出し、更にディスクファイルとして保存します。エラー処理は省略しています。</P>
+
+<PRE>
+	<A HREF="CNxSurface.html">CNxSurface</A>* pTempSurface = new CNxSurface;
+	pTempSurface-&gt;<A HREF="CNxSurface.html#member.Create">Create</A>(m_pScreen-><A HREF="#member.GetWidth">GetWidth()</A>, m_pScreen-><A HREF="#member.GetHeight">GetHeight()</A>);
+	m_pScreen-&gt;<STRONG>DrawSurface(pTempSurface, 0, 0)</STRONG>;
+	pTempSurface-&gt;<A HREF="CNxSurface.html#member.SaveImage">SaveImage</A>(_T("c:/shot.bmp"));
+	delete pTempSurface;
+</PRE>
+
+<P>　下の例は、上の例の <STRONG>m_pScreen</STRONG> の周囲 20 ピクセルを含めてファイルへ書き出します。</P>
+
+<PRE>
+	CNxSurface* pTempSurface = new CNxSurface;
+	RECT rect;
+	::SetRect(&rect, 0, 0, m_pScreen-&gt;<A HREF="#member.GetWidth">GetWidth()</A>, m_pScreen-&gt;<A HREF="#member.GetHeight">GetHeight()</A>);
+	<STRONG>::InflateRect(&rect, 20, 20);</STRONG>
+	pTempSurface-&gt;<A HREF="CNxSurface.html#member.Create">Create</A>(rect.right - rect.left, rect.bottom - rect.top);
+	m_pScreen-&gt;DrawSurface(pTempSurface, 0, 0<STRONG>, &amp;rect</STRONG>);
+	pTempSurface-&gt;<A HREF="CNxSurface.html#member.SaveImage">SaveImage</A>(_T("c:/shot.bmp"));
+	delete pTempSurface;
+</PRE>
+
+
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+
+
+<!-- CNxSprite::SetUpdate() -->
+<A NAME="member.SetUpdate"><H3>CNxSprite::SetUpdate()</H3></A>
+<H4>概要</H4>
+<P>　更新する矩形を追加します。</P>
+<H4>書式</H4>
+void CNxSprite::SetUpdate(const RECT* <EM>lpRect</EM> = NULL)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>const RECT* <EM>lpRect</EM></TD><TD>　更新するスプライト矩形を示す RECT 構造体へのポインタ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　現在のスプライトの更新矩形へ矩形を追加します。CNxSprite クラスでは座標やサイズが変化した場合、自動的に正しい位置へ表示される様な処理を行ないますが、スプライト自身の表示内容の変化については関知しません。例えば、サーフェスの一部を表示する様にしている場合、その参照元のサーフェスの内容が書換えられても CNxSprite クラス自身は何も行いません。正しくスプライトを更新する為には、この関数を呼び出す必要があります。</P>
+
+<P>　<EM>lpRect</EM> 引数へは更新するスプライト矩形を指定します。NULL を指定すると、スプライト全体が更新されます。なお、内部で保持している更新矩形は一つだけです。複数の矩形が追加された場合、それら全てを含む矩形が更新されます。</P>
+
+<P>　<STRONG>サイズや座標の変更による暗黙の更新と、スプライト自身の(この関数による)更新は全く別です。</STRONG>この関数を明示的に呼び出さない限り、スプライトが描画する内容に変化は無いと見なします。デフォルトの CNxSprite クラス自身は何も描画を行わないため、この関数を呼び出している箇所はありません。</P>
+
+<P>　CNxSprite から派生している <A HREF="CNxSurfaceSprite.html">CNxSurfaceSprite</A> クラスでは、転送元サーフェスと転送方法が変更された場合、内部からこの関数を呼び出しています。</P>
+
+<P>　この関数を呼び出すと、スプライトが完全に不可視でない限り、表示直前に <A HREF="#member.Update">CNxSprite::Update()</A> 関数が呼び出されます。</P>
+<BR>
+<H4>関連項目</H4>
+<A HREF="#member.Update">CNxSprite::Update()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxSprite::PreUpdate() -->
+<A NAME="member.PreUpdate"><H3>CNxSprite::PreUpdate()</H3></A>
+<H4>概要</H4>
+<P>　スプライトの更新状態が調べられる直前に呼び出される仮想関数です。</P>
+<H4>書式</H4>
+virtual void CNxSprite::PreUpdate()<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　スプライトの更新状態が調べられる直前に <A HREF="#member.Refresh">CNxSprite::Refresh()</A> 関数内部から呼び出されます。この関数の中で<A HREF="#member.SetUpdate">CNxSprite::SetUpdate()</A> 関数が呼び出される様な操作を行なうと、スプライトは「更新有り」と見なされます。<A HREF="CNxMouseSprite.html">CNxMouseSprite</A> クラスでは、この関数をオーバーライドし、現在のマウスカーソル座標をスプライトの座標へ反映させています。</P>
+<P>　この関数は、表示前に必ず呼び出されるとは限りません(例えば、Refresh() 関数の <EM>bForce</EM> 引数を TRUE にして呼び出した場合)。<A HREF="#member.Draw">CNxSprite::Draw()</A> 関数内では、この関数が呼び出される事を前提とした処理を記述しないで下さい。</P>
+
+<H4>関連項目</H4>
+<A HREF="#member.SetUpdate">CNxSprite::SetUpdate()</A>&nbsp;/&nbsp;<A HREF="#member.Update">CNxSprite::Update()</A>&nbsp;/&nbsp;<A HREF="#member.Draw">CNxSprite::Draw()</A>&nbsp;/&nbsp;<A HREF="#member.Refresh">CNxSprite::Refresh()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxSprite::Update() -->
+<A NAME="member.Update"><H3>CNxSprite::Update()</H3></A>
+<H4>概要</H4>
+<P>　スプライトが描画される前に一度だけ呼び出される仮想関数です。</P>
+<H4>書式</H4>
+virtual void CNxSprite::Update()<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　スプライト自身が、<A HREF="#member.SetUpdate">CNxSprite::SetUpdate()</A> 関数によって明示的に更新されたならば、<A HREF="#member.Refresh">CNxSprite::Refresh()</A> 関数の内部から呼び出されます。ただし、結果としてスプライト自身の描画領域がない場合(例えば、座標が完全に不可視の範囲である等)では、呼び出されません。<A HREF="#member.Draw">CNxSprite::Draw()</A> 関数内では、この関数が呼び出される事を前提とした処理を記述しないで下さい。</P>
+
+<H4>関連項目</H4>
+<A HREF="#member.PreUpdate">CNxSprite::PreUpdate()</A>&nbsp;/&nbsp;
+<A HREF="#member.Draw">CNxSprite::Draw()</A>&nbsp;/&nbsp;
+<A HREF="#member.DrawBehindChildren">CNxSprite::DrawBehindChildren()</A>&nbsp;/&nbsp;
+<A HREF="#member.SetUpdate">CNxSprite::SetUpdate()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxSprite::Draw() -->
+<A NAME="member.Draw"><H3>CNxSprite::Draw()</H3></A>
+<H4>概要</H4>
+<P>　スプライトの描画を行なう仮想関数です。</P>
+<H4>書式</H4>
+virtual BOOL CNxSprite::Draw(CNxSurface* <EM>pSurface</EM>, const RECT* <EM>lpRect</EM>) const<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP><A HREF="CNxSurface.html">CNxSurface</A>* <EM>pSurface</EM></TD><TD>　描画先サーフェスへのポインタ</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const RECT* <EM>lpRect</EM></TD><TD>　描画するスプライト矩形を示す RECT 構造体へのポインタ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　子スプライトの描画を続けるならば TRUE</P>
+<H4>解説</H4>
+<P>　スプライトの描画が必要なタイミングで CNxSprite クラスの内部から呼び出されます。ほとんどの場合、スプライトは分割して描画されます。このため、関数内では、スプライトのどの部分からでも正しく描画できる様に処理を記述しなければなりません。</P>
+
+<P>　<EM>pSurface</EM> 引数は、描画先サーフェスを示すポインタです。関数内ではこのサーフェスに対して描画を行ないます。この描画先サーフェスには、適切なクリッピング矩形が設定されていますので、<EM>lpRect</EM> で示される描画矩形の外側へは描画できません。<STRONG>関数の中で描画先サーフェスのクリッピング矩形と原点座標は変更しないで下さい。</STRONG></P>
+
+<P>　描画先サーフェスに対する転送先(又は描画先)矩形は、スプライト矩形と同じです。つまり、スプライトの左上へサーフェスのイメージを転送する場合は、転送先矩形の左上としてスプライトの左上を指定します。</P>
+
+<P>　<EM>lpRect</EM> 引数は、描画が必要な矩形をスプライト内矩形で示します。例えば、スプライト矩形が (50, 50) - (100, 100) の時、この矩形が (75, 50) - (100, 75) であるならば、右上の 1/4 を描画する必要があります。この矩形は、スプライトの外側を示す事はありません。</P>
+
+<P>　この関数は最上位スプライトを除き、スプライトが非表示の場合は呼び出されません。最上位スプライトでは <A HREF="#member.IsVisible">CNxSprite::IsVisible()</A> 関数を使用し、
+自分自身の表示状態を取得できます。</P>
+
+<P>　この関数の記述例については、<A HREF="CNxSurfaceSprite.html">CNxSurfaceSprite</A> クラスや、Ball サンプルプログラムの CNxRasterSprite クラス等を参照して下さい。</P>
+<H4>関連項目</H4>
+<A HREF="#member.DrawBehindChildren">CNxSprite::DrawBehindChildren()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+
+
+<!-- CNxSprite::DrawBehindChildren() -->
+<A NAME="member.DrawBehindChildren"><H3>CNxSprite::DrawBehindChildren()</H3></A>
+<H4>概要</H4>
+<P>　子スプライトの描画後に呼び出される仮想関数です。</P>
+<H4>書式</H4>
+virtual void CNxSprite::DrawBehindChildren(CNxSurface* <EM>pSurface</EM>, const RECT* <EM>lpRect</EM>) const<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP><A HREF="CNxSurface.html">CNxSurface</A>* <EM>pSurface</EM></TD><TD>　描画先サーフェスへのポインタ</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>const RECT* <EM>lpRect</EM></TD><TD>　描画するスプライト矩形を示す RECT 構造体へのポインタ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　この関数は、呼び出されるタイミングが異なる点を除き、<A HREF="CNxSprite.html#member.Draw">CNxSprite::Draw()</A> 関数と全く同じです。DrawBehindChildren() 関数は、Draw() 関数が呼び出され、更に全ての子スプライトが描画を行った後に呼び出されます。ただし、子スプライトが描画を行っても、Draw() 関数が呼び出されない場合、DrawBehindChildren() 関数も呼び出されません(<A HREF="CNxSprite.html#member.SetClipChildren">CNxSprite::SetClipChildren()</A> 関数によって、子クリップ機能を無効にしている場合に起こり得ます)。最上位スプライト(例えば CNxWindow クラス)では、全てのスプライト(自分自身の Draw() 関数を含む)が描画を行った後に、この関数が呼び出される事になります。</P>
+
+<P>　以下の例は、クライアント領域全体をグレイスケール化します(CNxMyWindow は CNxWindow の派生クラスです)。</P>
+
+<PRE>CNxMyWindow::DrawBehindChildren(CNxSurface* pSurface, const RECT* lpRect) const
+{
+    NxFilter nxf;
+    nxf.dwFlags = NxFilter::grayscale;
+    pSurface-&gt;<A HREF="CNxSurface.html#member.FilterBlt">FilterBlt</A>(lpRect, NULL, NULL, &amp;nxf);
+}</PRE>
+
+<P>　Ball サンプルプログラムの CNxBallScreen (CNxScreen から派生)クラスは、[表示] -> [フィルタ]メニューの実装の為に DrawBhindChildren() 関数をオーバーライドしています。</P>
+<H4>関連項目</H4>
+<A HREF="#member.Draw">CNxSprite::Draw()</A><BR>
+<BR>
+<A HREF="#top">ページの最初</A>&nbsp;/&nbsp;<A HREF="#member">クラスメンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+</BODY>
+</HTML>

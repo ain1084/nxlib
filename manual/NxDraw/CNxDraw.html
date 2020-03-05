@@ -1,0 +1,317 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+	<LINK REV="Made" HREF="mailto:ain@da.airnet.ne.jp">
+	<LINK REL="Contents" HREF="./index.html">
+	<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-2022-jp">
+	<META NAME="Author" CONTENT="Seiji Ainoguchi">
+	<META NAME="Subject" CONTENT="CNxDraw">
+	<TITLE>CNxDraw クラス</TITLE>
+</HEAD>
+<BODY>
+
+<A NAME="top"><H1>CNxDraw クラス</H1></A>
+
+<A HREF="#summary">概要</A><BR>
+<A HREF="#member">メンバ</A><BR>
+
+<A NAME="summary"><H2>概要</H2></A>
+<P>　CNxDraw クラスは、NxDraw ライブラリ全体に係るグローバルな状態及び、複数のクラスから共有される変数を保持しているクラスです。プログラム開始時は CNxDraw クラスのインスタンスは作成されていません。ライブラリによって必要になると自動的に構築されますが、明示的に構築、破棄する事もできます。</P>
+
+<P>　CNxDraw クラスのインスタンスを構築するには、コンストラクタではなく <A HREF="#member.GetInstance">CNxDraw::GetInstance()</A> 関数を呼び出して下さい。この関数は、CNxDraw クラスのインスタンスが無ければ、構築して CNxDraw クラスへのポインタを返します。以後、CNxDraw::DestroyInstance() 関数によって破棄されるまで、何度呼び出しても同じポインタを返します。CNxDraw クラスのインスタンスは一つだけしか構築できません。</P>
+
+<P>　CNxDraw クラスのインスタンスを破棄するには、<A HREF="#member.DestroyInstance">CNxDraw::DestroyInstance()</A> を呼び出します。この関数は、ランタイムライブラリの終了時に自動的に呼び出されますので、特に必要でなければ明示的に呼び出す必要はありません。NxDraw ライブラリ自体は、ランタイムライブラリ終了時を除き、この関数を呼び出しません。</P>
+
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A>
+<HR>
+
+<A NAME="member"><H2>CNxDraw クラスメンバ</H2></A>
+<A HREF="#construct">構築、破棄</A><BR>
+<A HREF="#attribute">属性</A><BR>
+<A HREF="#loadimage">画像の読み込み</A><BR>
+
+<A NAME="construct"><H3>構築、破棄</H3></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetInstance">GetInstance()</A></TD><TD>　CNxDraw クラスのインスタンスを構築</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.DestroyInstance">DestroyInstance()</A></TD><TD>　CNxDraw クラスのインスタンスを破棄</TD></TR>
+</TABLE>
+
+<A NAME="attribute"><H3>属性</H3></A>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.IsMMXEnabled">IsMMXEnabled()</A></TD><TD>　MMX 命令の使用状態を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.EnableMMX">EnableMMX()</A></TD><TD>　MMX 命令の使用状態を設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.IsMMXSupported">IsMMXSupported()</A></TD><TD>　MMX 命令が使用可能であるかを取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.Is3DNowEnabled">Is3DNowEnabled()</A></TD><TD>　3DNow! 命令の使用状態を取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.Enable3DNow">Enable3DNow()</A></TD><TD>　3DNow! 命令の使用状態を設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.Is3DNowSupported">Is3DNowSupported()</A></TD><TD>　3DNow! 命令が使用可能であるかを取得</TD></TR>
+</TABLE>
+
+<A NAME="loadimage"><H3>画像の読み込み</H3>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP"><A HREF="#member.GetSPIDirectory">GetSPIDirectory()</A></TD><TD>　susie plug-in の検索ディレクトリを取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetSPIDirectory">SetSPIDirectory()</A></TD><TD>　susie plug-in の検索ディレクトリを設定</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.LoadImage">LoadImage()</A></TD><TD>　画像を読み込み、CNxDIBImage オブジェクトを返す</TD></TR>
+</TABLE>
+
+<!--
+<TR><TD VALIGN="TOP"><A HREF="#member.GetFrameWnd">GetFrameWnd()</A></TD><TD>　フレームウィンドウのハンドルを取得</TD></TR>
+<TR><TD VALIGN="TOP"><A HREF="#member.SetFrameWnd">SetFrameWnd()</A></TD><TD>　フレームウィンドウのハンドルを設定</TD></TR>
+-->
+</TABLE>
+<BR>
+<A HREF="#member">メンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxDraw::GetInstance() -->
+<A NAME="member.GetInstance"><H3>CNxDraw::GetInstance()</H3></A>
+<H4>概要</H4>
+<P>　CNxDraw クラスのインスタンスを構築します。</P>
+<H4>書式</H4>
+static CNxDraw* CNxDraw::GetInstance()<BR>
+<BR>
+<H4>引数</H4>
+なし</P>
+<H4>戻値</H4>
+<P>　CNxDraw クラスインスタンスへのポインタ</P>
+<H4>解説</H4>
+<P>　この関数は static メンバ関数です。CNxDraw クラスのインスタンスはプログラム開始時には構築されていません。NxDraw ライブラリによって必要になると自動的に構築されますが、この関数によって明示的に構築する事もできます。CNxDraw クラスのインスタンスは常に一つです。既にインスタンスが構築されていれば、この関数は単にそのポインタを返します。</P>
+<P>　いくつかのメンバ変数の初期化(MMX 使用許可、SPI の検索ディレクトリ等)は、インスタンスが存在していなかった場合のみ行われます。</P>
+<P>　以下の例は、MMX 命令を使用不可能にします。</P>
+<BLOCKQUOTE>
+<PRE>CNxDraw::GetInstance()-&gt;<A HREF="#member.EnableMMX">EnableMMX</A>(FALSE);</PRE>
+</BLOCKQUOTE>
+
+<H4>関連項目</H4>
+<A HREF="#member.DestroyInstance">CNxDraw::DestroyInstance()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">メンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxDraw::DestroyInstance() -->
+<A NAME="member.DestroyInstance"><H3>CNxDraw::DestroyInstance()</H3></A>
+<H4>概要</H4>
+<P>　CNxDraw クラスのインスタンスを破棄して、メモリを開放します</P>
+<H4>書式</H4>
+static void CNxDraw::DestroyInstance()<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　インスタンスの破棄はランタイムライブラリの終了時に自動的に行われますので、明示的に行う必要はありませんが、特に必要な場合は、この関数によって破棄する事ができます。再度、インスタンスを構築するには <A HREF="#member.GetInstance">CNxDraw::GetInstance()</A> 関数を呼び出して下さい。</P>
+<H4>関連項目</H4>
+<A HREF="#member.GetInstance">CNxDraw::GetInstance()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">メンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxDraw::IsMMXEnabled() -->
+<A NAME="member.IsMMXEnabled"><H3>CNxDraw::IsMMXEnabled()</H3></A>
+<H4>概要</H4>
+<P>　MMX 命令の使用状態を返します</P>
+<H4>書式</H4>
+BOOL CNxDraw::IsMMXEnabled() const<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　MMX 命令が使用されるならば TRUE を返します</P>
+<H4>解説</H4>
+<P>　ほとんどの描画関数には、MMX 命令を使用している物と、MMX 命令を一切使用していない物の二つがあります。初期化時に MMX 命令が使用可能な CPU であるかを調べ、使用可能であれば以後 MMX 命令を使用している関数が呼び出されます。通常は MMX 命令を使用した方がパフォーマンスが高くなりますので無効にする意味は余りありません。しかし、必要であれば <A HREF="#member.EnableMMX">CNxDraw::EnableMMX()</A> 関数で、MMX 命令を使用しない様に強制できます。</P>
+<P>　MMX 命令が使用できない CPU では常に FALSE が返されます。</P>
+
+<H4>関連項目</H4>
+<A HREF="#member.EnableMMX">CNxDraw::EnableMMX()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">メンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxDraw::EnableMMX() -->
+<A NAME="member.EnableMMX"><H3>CNxDraw::EnableMMX()</H3></A>
+<H4>概要</H4>
+<P>　MMX 命令の使用状態を設定します</P>
+<H4>書式</H4>
+BOOL CNxDraw::EnableMMX(BOOL <EM>bEnable</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>BOOL <EM>bEnable</EM></TD><TD>　MMX 命令を使用するならば TRUE</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　以前の状態</P>
+<H4>解説</H4>
+<P>　引数へ TRUE を渡しても、強制的に MMX 命令が使用される訳ではありません。MMX 命令を使用できない CPU の場合、引数の内容に係らず MMX 命令が使用される事はありません(関数からは常に FALSE が返されます)。</P>
+<H4>関連項目</H4>
+<A HREF="#member.IsMMXEnabled">CNxDraw::IsMMXEnabled()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">メンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxDraw::IsMMXSupported() -->
+<A NAME="member.IsMMXSupported"><H3>CNxDraw::IsMMXSupported()</H3></A>
+<H4>概要</H4>
+<P>　MMX 命令を使用可能な CPU であれば TRUE を返します</P>
+<H4>書式</H4>
+BOOL CNxDraw::IsMMXSupported() const<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　MMX 命令を使用可能な CPU であれば TRUE</P>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">メンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxDraw::Is3DNowEnabled() -->
+<A NAME="member.Is3DNowEnabled"><H3>CNxDraw::Is3DNowEnabled()</H3></A>
+<H4>概要</H4>
+<P>　3DNow! 命令の使用状態を返します</P>
+<H4>書式</H4>
+BOOL CNxDraw::Is3DNowEnabled() const<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　3DNow! 命令が使用されるならば TRUE を返します</P>
+<H4>解説</H4>
+<P>　一部の描画関数は 3DNow! 命令に対応しており、3DNow! 命令が使用可能な CPU では、自動的に 3DNow! 命令を使用します。通常は 3DNow! 命令を使用した方がパフォーマンスが高くなりますので無効にする意味は余りありません。しかし、必要であれば <A HREF="#member.Enable3DNow">CNxDraw::Enable3DNow()</A> 関数で、3DNow! 命令を使用しない様に強制できます。</P>
+<P>　3DNow! 命令が使用できない CPU では常に FALSE が返されます。</P>
+<H4>関連項目</H4>
+<A HREF="#member.Enable3DNow">CNxDraw::Enable3DNow()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">メンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxDraw::Enable3DNow() -->
+<A NAME="member.Enable3DNow"><H3>CNxDraw::Enable3DNow()</H3></A>
+<H4>概要</H4>
+<P>　3DNow! 命令の使用状態を設定します</P>
+<H4>書式</H4>
+BOOL CNxDraw::Enable3DNow(BOOL <EM>bEnable</EM>)<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>BOOL <EM>bEnable</EM></TD><TD>　3DNow! 命令を使用するならば TRUE</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　以前の状態</P>
+<H4>解説</H4>
+<P>　引数へ TRUE を渡しても、強制的に 3DNow! 命令が使用される訳ではありません。3DNow! 命令を使用できない CPU の場合、引数の内容に係らず 3DNow! 命令が使用される事はありません(関数からは常に FALSE が返されます)。</P>
+<FONT COLOR="RED"><P>　3DNow! 命令を使用すると、演算精度の違いにより、描画結果が 3DNow! 命令未使用時と多少異なります。この関数を使用した後には、最上位スプライトの全域再描画(例えば、<A HREF="CNxWindow.html#member.Refresh">CNxWindow::Refresh()</A> 関数の <EM>bForce</EM> 引数を TRUE
+して呼び出す等)を行って下さい</P></FONT>
+
+<H4>関連項目</H4>
+<A HREF="#member.Is3DNowEnabled">CNxDraw::Is3DNowEnabled()</A><BR>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">メンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxDraw::Is3DNowSupported() -->
+<A NAME="member.Is3DNowSupported"><H3>CNxDraw::Is3DNowSupported()</H3></A>
+<H4>概要</H4>
+<P>　3DNow! 命令を使用可能な CPU であれば TRUE を返します</P>
+<H4>書式</H4>
+BOOL CNxDraw::Is3DNowSupported() const<BR>
+<BR>
+<H4>引数</H4>
+<P>　なし</P>
+<H4>戻値</H4>
+<P>　3DNow! 命令を使用可能な CPU であれば TRUE</P>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">メンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+
+<!-- CNxDraw::GetSPIDirectory() -->
+<A NAME="member.GetSPIDirectory"><H3>CNxDraw::GetSPIDirectory()</H3></A>
+<H4>概要</H4>
+<P>　susie plug-in の検索ディレクトリを取得します。</P>
+<H4>書式</H4>
+int CNxDraw::GetSPIDirectory(LPTSTR <EM>lpBuf</EM>, int <EM>nCount</EM>) const<BR>
+<BR>
+void CNxDraw::GetSPIDirectory(std::string&amp; <EM>rString</EM>) const<BR>
+<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>LPTSTR <EM>lpBuf</EM></TD><TD>　ディレクトリを受けとるバッファへのポインタ</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>int <EM>nCount</EM></TD><TD>　文字単位のバッファサイズ(終端のヌル文字も含む)</TD></TR>
+<TR><TD VALIGN="TOP" NOWRAP>std::string&amp; <EM>rString</EM></TD><TD>　ディレクトリを受け取る std::string オブジェクトへの参照</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　バッファへコピーされた文字数を返します(ヌル文字を除く)。nCount が戻値と等しい場合、ヌル文字は追加されません。</P>
+<H4>解説</H4>
+<P>　デフォルトの検索ディレクトリは、アプリケーションの起動ディレクトリです。</P>
+<P>　二番目の書式は、std::string (UNICODE 環境であれば std::wstring) オブジェクトへディレクトリ文字列を返します。</P>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">メンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+
+<!-- CNxDraw::SetSPIDirectory() -->
+<A NAME="member.SetSPIDirectory"><H3>CNxDraw::SetSPIDirectory()</H3></A>
+<H4>概要</H4>
+<P>　susie plug-in の検索ディレクトリを設定します。</P>
+<H4>書式</H4>
+void CNxDraw::SetSPIDirectory(LPCTSTR <EM>lpszDirectory</EM>)<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>LPCTSTR <EM>lpszDirectory</EM></TD><TD>　ヌル文字で終わるディレクトリ文字列へのポインタ</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　なし</P>
+<H4>解説</H4>
+<P>　検索ディレクトリは、ドライブ名を含むルートディレクトリからの絶対パスで指定して下さい。</P>
+<BR>
+<A HREF="#top">このページの最初</A>&nbsp;/&nbsp;
+<A HREF="#member">メンバ</A>&nbsp;/&nbsp;<A HREF="classes.html">NxDraw ライブラリ クラス階層図</A><BR>
+<HR>
+
+<!-- CNxDraw::LoadImage() -->
+<A NAME="member.LoadImage"><H3>CNxDraw::LoadImage()</H3></A>
+<H4>概要</H4>
+<P>　画像を読み込み、<A HREF="CNxDIBImage.html">CNxDIBImage</A> オブジェクトを返します。</P>
+<H4>書式</H4>
+CNxDIBImage* CNxDraw::LoadImage(CNxFile&amp; nxfile) const<BR>
+<H4>引数</H4>
+<TABLE CELLPADDING=4>
+<TR><TD VALIGN="TOP" NOWRAP>CNxFile&amp; <EM>nxfile</EM></TD><TD>　読み込み元 CNxFile オブジェクトへの参照</TD></TR>
+</TABLE>
+<H4>戻値</H4>
+<P>　成功ならば CNxDIBImage オブジェクトへのポインタ。失敗なら NULL。
+<BR>
+<H4>解説</H4>
+<P>　オープン済みの <A HREF="../NxStorage/index.html">CNxFile</A> オブジェクトから画像データを読み込み、無圧縮の DIB (<A HREF="CNxDIBImage.html">CNxDIBImage</A> オブジェクト) として返します。</P>
+
+<P>　<A HREF="CNxDIBImageLoader.html">CNxDIBImageLoader</A> 派生クラスの中から、画像データのフォーマットに合致するクラスを検索し、CreateDIBImage() メンバ関数を呼び出す事で、返される CNxDIBImage オブジェクトを生成します。この時に使用される CNxDIBImageLoader 派生クラスは、<A HREF="CNxBMPImageLoader.html">CNxBMPImageLoader</A>, <A HREF="CNxPNGImageLoader.html">CNxPNGImageLoader</A>, <A HREF="CNxJPEGImageLoader.html">CNxJPEGImageLoader</A>, <A HREF="CNxMAGImageLoader.html">CNxMAGImageLoader</A>, <A HREF="CNxSPIImageLoader.html">CNxSPIImageLoader</A> ですが、マクロを定義してライブラリを再ビルドする事で変更できます。特に、読み込む画像が予め決まってるアプリケーションの場合、不要なクラスを取り除く事によって実行ファイルサイズを大幅に縮小できます。マクロの詳細については、<A HREF="global.html">グローバル関数、構造体等</A> の<STRONG>マクロ一覧</STRONG>を参照して下さい。</P>
+
+<P>　susie 32bit plug-in は、<A HREF="#member.SetSPIDirectory">CNxDraw::SetSPIDirectory()</A> 関数で指定されたディレクトリから検索されます。デフォルトはアプリケーションの起動ディレクトリです。</P>
+
+</BODY>
+</HTML>
